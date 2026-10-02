@@ -63,21 +63,6 @@ medi-bud-app/
    - Proxies OpenStreetMap Overpass API for verified hospitals, clinics, and pharmacies within 5 km.
    - In-memory 15-minute caching and turn-by-turn navigation links.
 
----
-
-## 👥 Domain Ownership Matrix
-
-| Member | Roll Number | Primary Domain | Core Deliverable |
-| :--- | :--- | :--- | :--- |
-| **Shikhar Yadav** | 2401640100930 | **Team Lead, Architecture & Integration** | Monorepo structure, shared contracts, viva flow orchestration. |
-| **Shivaji Rajawat** | 2401640100933 | **Web Frontend & UX** | Next.js 15 App Router, Dexie.js outbox, observation review UI. |
-| **Shaurya Gautam** | 2401640100918 | **Mobile & Native Features** | Expo Router mobile app, SQLite offline outbox, PDF sharing. |
-| **Shaurya Gupta** | 2401640100920 | **Backend & API** | FastAPI modular monolith, transactional worker, ReportLab exporter. |
-| **Shreshth Gupta** | 2401640100967 | **Database, Security & Deployment** | Supabase PostgreSQL schema, RLS 100% enforcement, tenant isolation. |
-| **Shikhar Dubey** | 2401640100928 | **AI, NLP & Evaluation** | TF-IDF + LogisticRegression intent classifier, dense vector RAG. |
-
----
-
 ## ⚡ Quickstart Execution
 
 ```bash
