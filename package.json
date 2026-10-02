@@ -1,49 +1,24 @@
 {
-  "name": "medi-bud",
-  "main": "expo-router/entry",
+  "name": "medi-bud-monorepo",
   "version": "1.0.0",
-  "dependencies": {
-    "@expo/vector-icons": "^14.0.4",
-    "@react-native-async-storage/async-storage": "^2.1.0",
-    "expo": "~57.0.22",
-    "expo-constants": "~57.0.18",
-    "expo-device": "~57.0.2",
-    "expo-document-picker": "~57.0.2",
-    "expo-font": "~57.0.4",
-    "expo-image": "~57.0.5",
-    "expo-image-picker": "~57.0.17",
-    "expo-linear-gradient": "~57.0.2",
-    "expo-linking": "~57.0.10",
-    "expo-location": "~57.0.17",
-    "expo-print": "~57.0.2",
-    "expo-router": "~57.0.21",
-    "expo-sharing": "~57.0.19",
-    "expo-splash-screen": "~57.0.9",
-    "expo-status-bar": "~57.0.1",
-    "expo-symbols": "~57.0.3",
-    "expo-system-ui": "~57.0.4",
-    "expo-web-browser": "~57.0.3",
-    "firebase": "^11.3.1",
-    "react": "19.2.3",
-    "react-dom": "19.2.3",
-    "react-native": "0.86.3",
-    "react-native-gesture-handler": "~2.32.0",
-    "react-native-reanimated": "4.5.1",
-    "react-native-safe-area-context": "~5.7.0",
-    "react-native-screens": "~4.26.0",
-    "react-native-web": "~0.21.0",
-    "react-native-worklets": "0.10.1",
-    "zustand": "^5.0.3"
+  "private": true,
+  "description": "Medi Bud AI Health Companion - Monorepo for Web, Mobile, and Python FastAPI Service",
+  "scripts": {
+    "dev:web": "pnpm --filter @medi-bud/web dev",
+    "dev:mobile": "pnpm --filter @medi-bud/mobile start",
+    "dev:api": "cd services/api && uvicorn main:app --reload --port 8000",
+    "worker": "cd services/api && python3 worker.py",
+    "build": "pnpm --filter @medi-bud/design-tokens build && pnpm --filter @medi-bud/safety-content build && pnpm --filter @medi-bud/contracts build && pnpm --filter @medi-bud/api-client build",
+    "build:web": "pnpm --filter @medi-bud/web build",
+    "build:mobile": "pnpm --filter @medi-bud/mobile exec tsc --noEmit",
+    "test": "pnpm test:contracts && pnpm test:api",
+    "test:contracts": "pnpm --filter @medi-bud/contracts test",
+    "test:api": "python3 -m pytest tests/integration -v",
+    "ml:train": "python3 ml/train_intent.py",
+    "ml:evaluate": "python3 ml/evaluate.py"
   },
   "devDependencies": {
-    "@types/react": "~19.2.2",
-    "typescript": "~6.0.3"
-  },
-  "scripts": {
-    "start": "expo start",
-    "android": "expo start --android",
-    "ios": "expo start --ios",
-    "web": "expo start --web"
-  },
-  "private": true
+    "prettier": "^3.5.0",
+    "typescript": "^5.7.3"
+  }
 }

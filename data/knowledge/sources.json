@@ -1,0 +1,42 @@
+[
+  {
+    "id": "src_who_diet",
+    "title": "Healthy Diet Factsheet",
+    "publisher": "World Health Organization (WHO)",
+    "url": "https://www.who.int/news-room/fact-sheets/detail/healthy-diet",
+    "access_date": "2026-10-01",
+    "version": "2024.1",
+    "review_status": "approved",
+    "permitted_use": "Public health educational guidance, non-clinical reference"
+  },
+  {
+    "id": "src_icmr_diet",
+    "title": "Dietary Guidelines for Indians",
+    "publisher": "Indian Council of Medical Research - National Institute of Nutrition (ICMR-NIN)",
+    "url": "https://www.nin.res.in/dietaryguidelines/",
+    "access_date": "2026-10-01",
+    "version": "2024-Edition",
+    "review_status": "approved",
+    "permitted_use": "Public educational excerpts on Indian balanced dietary practices"
+  },
+  {
+    "id": "src_who_activity",
+    "title": "Physical Activity and Health Guidelines",
+    "publisher": "World Health Organization (WHO)",
+    "url": "https://www.who.int/news-room/fact-sheets/detail/physical-activity",
+    "access_date": "2026-10-01",
+    "version": "2023.2",
+    "review_status": "approved",
+    "permitted_use": "General adult aerobic and muscle strengthening guidance"
+  },
+  {
+    "id": "src_medibud_guide",
+    "title": "Medi Bud User Companion & Lab Report Guide",
+    "publisher": "Medi Bud Project Team",
+    "url": "https://github.com/Shikharyadav25/medi-bud-app/docs",
+    "access_date": "2026-10-02",
+    "version": "1.0.0",
+    "review_status": "approved",
+    "permitted_use": "Medi Bud application instructions, habit tracking help, and report review workflow"
+  }
+]

@@ -1,0 +1,2306 @@
+[
+  {
+    "id": "utt_0001",
+    "text": "What was my hemoglobin level in my latest blood test?",
+    "intent": "report_question",
+    "paraphrase_group_id": "rq_hemoglobin",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0002",
+    "text": "Can you check my hemoglobin from the recent report?",
+    "intent": "report_question",
+    "paraphrase_group_id": "rq_hemoglobin",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0003",
+    "text": "How much is my hemoglobin according to my CBC?",
+    "intent": "report_question",
+    "paraphrase_group_id": "rq_hemoglobin",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0004",
+    "text": "Tell me my latest hemoglobin count in my report.",
+    "intent": "report_question",
+    "paraphrase_group_id": "rq_hemoglobin",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0005",
+    "text": "Is my total cholesterol within the normal reference range?",
+    "intent": "report_question",
+    "paraphrase_group_id": "rq_cholesterol",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0006",
+    "text": "Did my lipid panel show high cholesterol?",
+    "intent": "report_question",
+    "paraphrase_group_id": "rq_cholesterol",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0007",
+    "text": "What is the reported reference interval for my cholesterol in the report?",
+    "intent": "report_question",
+    "paraphrase_group_id": "rq_cholesterol",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0008",
+    "text": "Check if my cholesterol is elevated in my last test result.",
+    "intent": "report_question",
+    "paraphrase_group_id": "rq_cholesterol",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0009",
+    "text": "What was my platelet count on my CBC report?",
+    "intent": "report_question",
+    "paraphrase_group_id": "rq_platelets",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0010",
+    "text": "How many platelets were reported in my blood work?",
+    "intent": "report_question",
+    "paraphrase_group_id": "rq_platelets",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0011",
+    "text": "Is my platelet count above 150000 on my lab sheet?",
+    "intent": "report_question",
+    "paraphrase_group_id": "rq_platelets",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0012",
+    "text": "Check my platelet result from my CBC document.",
+    "intent": "report_question",
+    "paraphrase_group_id": "rq_platelets",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0013",
+    "text": "What was my fasting glucose in the report?",
+    "intent": "report_question",
+    "paraphrase_group_id": "rq_blood_sugar",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0014",
+    "text": "How high was my fasting blood sugar on my latest test?",
+    "intent": "report_question",
+    "paraphrase_group_id": "rq_blood_sugar",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0015",
+    "text": "Did my report show high fasting glucose?",
+    "intent": "report_question",
+    "paraphrase_group_id": "rq_blood_sugar",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0016",
+    "text": "What was the observed value for blood glucose fasting in my report?",
+    "intent": "report_question",
+    "paraphrase_group_id": "rq_blood_sugar",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0017",
+    "text": "What is my LDL bad cholesterol value in my lab report?",
+    "intent": "report_question",
+    "paraphrase_group_id": "rq_ldl",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0018",
+    "text": "Check my LDL cholesterol reading from the lab report.",
+    "intent": "report_question",
+    "paraphrase_group_id": "rq_ldl",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0019",
+    "text": "Was my LDL reported outside the desirable range on my blood test?",
+    "intent": "report_question",
+    "paraphrase_group_id": "rq_ldl",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0020",
+    "text": "How much LDL cholesterol was observed in my test result?",
+    "intent": "report_question",
+    "paraphrase_group_id": "rq_ldl",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0021",
+    "text": "What was my HbA1c percentage in the report?",
+    "intent": "report_question",
+    "paraphrase_group_id": "rq_hba1c",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0022",
+    "text": "Show me my glycated hemoglobin level from the report.",
+    "intent": "report_question",
+    "paraphrase_group_id": "rq_hba1c",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0023",
+    "text": "What did the lab report say about my HbA1c result?",
+    "intent": "report_question",
+    "paraphrase_group_id": "rq_hba1c",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0024",
+    "text": "Is my HbA1c listed in my uploaded documents?",
+    "intent": "report_question",
+    "paraphrase_group_id": "rq_hba1c",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0025",
+    "text": "What was my total WBC count on the test?",
+    "intent": "report_question",
+    "paraphrase_group_id": "rq_wbc",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0026",
+    "text": "How many white blood cells were recorded in my CBC report?",
+    "intent": "report_question",
+    "paraphrase_group_id": "rq_wbc",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0027",
+    "text": "Check if my leukocyte count is normal in the lab results.",
+    "intent": "report_question",
+    "paraphrase_group_id": "rq_wbc",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0028",
+    "text": "What is my total white blood cell count in the blood report?",
+    "intent": "report_question",
+    "paraphrase_group_id": "rq_wbc",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0029",
+    "text": "What were my triglycerides in the lipid profile report?",
+    "intent": "report_question",
+    "paraphrase_group_id": "rq_triglycerides",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0030",
+    "text": "How high are my triglyceride levels according to the test?",
+    "intent": "report_question",
+    "paraphrase_group_id": "rq_triglycerides",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0031",
+    "text": "Did my lab report show normal triglycerides?",
+    "intent": "report_question",
+    "paraphrase_group_id": "rq_triglycerides",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0032",
+    "text": "Tell me the triglyceride reading from my uploaded test.",
+    "intent": "report_question",
+    "paraphrase_group_id": "rq_triglycerides",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0033",
+    "text": "What was my packed cell volume or PCV in the CBC?",
+    "intent": "report_question",
+    "paraphrase_group_id": "rq_pcv",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0034",
+    "text": "Check my hematocrit PCV reading from the lab test.",
+    "intent": "report_question",
+    "paraphrase_group_id": "rq_pcv",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0035",
+    "text": "What did my blood report say for PCV percentage?",
+    "intent": "report_question",
+    "paraphrase_group_id": "rq_pcv",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0036",
+    "text": "Is my PCV value within the stated interval in my report?",
+    "intent": "report_question",
+    "paraphrase_group_id": "rq_pcv",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0037",
+    "text": "What was my HDL good cholesterol level on the lipid test?",
+    "intent": "report_question",
+    "paraphrase_group_id": "rq_hdl",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0038",
+    "text": "Did my lipid panel report HDL above 40?",
+    "intent": "report_question",
+    "paraphrase_group_id": "rq_hdl",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0039",
+    "text": "Check my HDL reading from my recent report.",
+    "intent": "report_question",
+    "paraphrase_group_id": "rq_hdl",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0040",
+    "text": "Is my HDL cholesterol in the healthy range in my lab results?",
+    "intent": "report_question",
+    "paraphrase_group_id": "rq_hdl",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0041",
+    "text": "What was the collection date on my uploaded blood report?",
+    "intent": "report_question",
+    "paraphrase_group_id": "rq_report_date",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0042",
+    "text": "When was my latest CBC report taken?",
+    "intent": "report_question",
+    "paraphrase_group_id": "rq_report_date",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0043",
+    "text": "What date is printed on my lipid profile test?",
+    "intent": "report_question",
+    "paraphrase_group_id": "rq_report_date",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0044",
+    "text": "Check the report date of my most recent document.",
+    "intent": "report_question",
+    "paraphrase_group_id": "rq_report_date",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0045",
+    "text": "Which diagnostic laboratory processed my uploaded report?",
+    "intent": "report_question",
+    "paraphrase_group_id": "rq_lab_name",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0046",
+    "text": "What lab name is shown on my blood test document?",
+    "intent": "report_question",
+    "paraphrase_group_id": "rq_lab_name",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0047",
+    "text": "Who was the service provider on my recent pathology test?",
+    "intent": "report_question",
+    "paraphrase_group_id": "rq_lab_name",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0048",
+    "text": "What laboratory generated my CBC report?",
+    "intent": "report_question",
+    "paraphrase_group_id": "rq_lab_name",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0049",
+    "text": "What are good vegetarian sources of protein in Indian food?",
+    "intent": "nutrition_question",
+    "paraphrase_group_id": "nq_protein_veg",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0050",
+    "text": "How can I get more protein as a vegetarian in India?",
+    "intent": "nutrition_question",
+    "paraphrase_group_id": "nq_protein_veg",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0051",
+    "text": "Which Indian vegetarian foods have the highest protein content?",
+    "intent": "nutrition_question",
+    "paraphrase_group_id": "nq_protein_veg",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0052",
+    "text": "Suggest high protein veg foods like dal, sprouts, or paneer.",
+    "intent": "nutrition_question",
+    "paraphrase_group_id": "nq_protein_veg",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0053",
+    "text": "What foods can help increase dietary iron intake?",
+    "intent": "nutrition_question",
+    "paraphrase_group_id": "nq_iron_diet",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0054",
+    "text": "Which Indian ingredients are rich in dietary iron?",
+    "intent": "nutrition_question",
+    "paraphrase_group_id": "nq_iron_diet",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0055",
+    "text": "Can eating palak or methi boost dietary iron?",
+    "intent": "nutrition_question",
+    "paraphrase_group_id": "nq_iron_diet",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0056",
+    "text": "What everyday foods contain good nutritional iron?",
+    "intent": "nutrition_question",
+    "paraphrase_group_id": "nq_iron_diet",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0057",
+    "text": "How many calories are in a bowl of poha?",
+    "intent": "nutrition_question",
+    "paraphrase_group_id": "nq_poha_calories",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0058",
+    "text": "What is the nutritional value of poha with peanuts?",
+    "intent": "nutrition_question",
+    "paraphrase_group_id": "nq_poha_calories",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0059",
+    "text": "Is poha a nutritious breakfast option?",
+    "intent": "nutrition_question",
+    "paraphrase_group_id": "nq_poha_calories",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0060",
+    "text": "Tell me the approximate macros for a plate of poha.",
+    "intent": "nutrition_question",
+    "paraphrase_group_id": "nq_poha_calories",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0061",
+    "text": "How much protein and fat is in 100g of paneer?",
+    "intent": "nutrition_question",
+    "paraphrase_group_id": "nq_paneer_macros",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0062",
+    "text": "What are the nutritional facts for cottage cheese or paneer?",
+    "intent": "nutrition_question",
+    "paraphrase_group_id": "nq_paneer_macros",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0063",
+    "text": "What are the approximate macros for palak paneer?",
+    "intent": "nutrition_question",
+    "paraphrase_group_id": "nq_paneer_macros",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0064",
+    "text": "How many calories and grams of protein are in paneer?",
+    "intent": "nutrition_question",
+    "paraphrase_group_id": "nq_paneer_macros",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0065",
+    "text": "Which Indian foods provide the most dietary fiber?",
+    "intent": "nutrition_question",
+    "paraphrase_group_id": "nq_fiber_intake",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0066",
+    "text": "How can I increase fiber in my daily meals?",
+    "intent": "nutrition_question",
+    "paraphrase_group_id": "nq_fiber_intake",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0067",
+    "text": "Are whole wheat rotis and millets high in dietary fiber?",
+    "intent": "nutrition_question",
+    "paraphrase_group_id": "nq_fiber_intake",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0068",
+    "text": "Tell me high fiber vegetarian food options in India.",
+    "intent": "nutrition_question",
+    "paraphrase_group_id": "nq_fiber_intake",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0069",
+    "text": "How much protein is in two boiled eggs?",
+    "intent": "nutrition_question",
+    "paraphrase_group_id": "nq_egg_nutrition",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0070",
+    "text": "What are the calories and fat content in egg bhurji?",
+    "intent": "nutrition_question",
+    "paraphrase_group_id": "nq_egg_nutrition",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0071",
+    "text": "What is the nutrient breakdown of boiled eggs?",
+    "intent": "nutrition_question",
+    "paraphrase_group_id": "nq_egg_nutrition",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0072",
+    "text": "How many grams of protein do whole eggs provide?",
+    "intent": "nutrition_question",
+    "paraphrase_group_id": "nq_egg_nutrition",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0073",
+    "text": "What dietary foods help support healthy cholesterol levels?",
+    "intent": "nutrition_question",
+    "paraphrase_group_id": "nq_cholesterol_diet",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0074",
+    "text": "Should I reduce fried foods and trans fats for better cholesterol?",
+    "intent": "nutrition_question",
+    "paraphrase_group_id": "nq_cholesterol_diet",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0075",
+    "text": "Can oats, apples, and soluble fiber help cholesterol nutrition?",
+    "intent": "nutrition_question",
+    "paraphrase_group_id": "nq_cholesterol_diet",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0076",
+    "text": "What dietary adjustments help manage lipid intake?",
+    "intent": "nutrition_question",
+    "paraphrase_group_id": "nq_cholesterol_diet",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0077",
+    "text": "What are the nutritional benefits of dahi or curd?",
+    "intent": "nutrition_question",
+    "paraphrase_group_id": "nq_curd_benefits",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0078",
+    "text": "How much protein is in a cup of plain low-fat curd?",
+    "intent": "nutrition_question",
+    "paraphrase_group_id": "nq_curd_benefits",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0079",
+    "text": "What nutrients does traditional buttermilk or chaas supply?",
+    "intent": "nutrition_question",
+    "paraphrase_group_id": "nq_curd_benefits",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0080",
+    "text": "Is plain curd high in protein and calcium?",
+    "intent": "nutrition_question",
+    "paraphrase_group_id": "nq_curd_benefits",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0081",
+    "text": "What is the calorie and carb content of roasted makhana?",
+    "intent": "nutrition_question",
+    "paraphrase_group_id": "nq_makhana_snack",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0082",
+    "text": "Is fox nut or makhana a healthy low calorie snack?",
+    "intent": "nutrition_question",
+    "paraphrase_group_id": "nq_makhana_snack",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0083",
+    "text": "Tell me the nutritional facts of roasted phool makhana.",
+    "intent": "nutrition_question",
+    "paraphrase_group_id": "nq_makhana_snack",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0084",
+    "text": "How much fiber and protein is in a bowl of makhana?",
+    "intent": "nutrition_question",
+    "paraphrase_group_id": "nq_makhana_snack",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0085",
+    "text": "How many calories are in a bowl of moong dal khichdi?",
+    "intent": "nutrition_question",
+    "paraphrase_group_id": "nq_khichdi_nutrition",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0086",
+    "text": "Is moong dal khichdi an easily digestible balanced meal?",
+    "intent": "nutrition_question",
+    "paraphrase_group_id": "nq_khichdi_nutrition",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0087",
+    "text": "What is the macronutrient breakdown of dal khichdi with ghee?",
+    "intent": "nutrition_question",
+    "paraphrase_group_id": "nq_khichdi_nutrition",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0088",
+    "text": "Tell me the carbs and protein in khichdi.",
+    "intent": "nutrition_question",
+    "paraphrase_group_id": "nq_khichdi_nutrition",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0089",
+    "text": "How much protein is in boiled kala chana or black chickpeas?",
+    "intent": "nutrition_question",
+    "paraphrase_group_id": "nq_chana_sprouts",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0090",
+    "text": "What are the nutritional benefits of sprouted green moong salad?",
+    "intent": "nutrition_question",
+    "paraphrase_group_id": "nq_chana_sprouts",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0091",
+    "text": "Are sprouted pulses higher in micronutrients and fiber?",
+    "intent": "nutrition_question",
+    "paraphrase_group_id": "nq_chana_sprouts",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0092",
+    "text": "Tell me the protein and fiber content of sprouted moong.",
+    "intent": "nutrition_question",
+    "paraphrase_group_id": "nq_chana_sprouts",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0093",
+    "text": "What is the nutritional difference between jowar, bajra, and wheat?",
+    "intent": "nutrition_question",
+    "paraphrase_group_id": "nq_millet_benefits",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0094",
+    "text": "Are millet rotis like bajra or jowar higher in dietary fiber?",
+    "intent": "nutrition_question",
+    "paraphrase_group_id": "nq_millet_benefits",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0095",
+    "text": "What are the nutritional benefits of including millets in meals?",
+    "intent": "nutrition_question",
+    "paraphrase_group_id": "nq_millet_benefits",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0096",
+    "text": "How many calories and fiber are in one jowar bhakri?",
+    "intent": "nutrition_question",
+    "paraphrase_group_id": "nq_millet_benefits",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0097",
+    "text": "Generate a 7-day vegetarian Indian meal plan for me.",
+    "intent": "plan_request",
+    "paraphrase_group_id": "pr_7day_veg",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0098",
+    "text": "Create a weekly vegetarian diet plan with breakfast, lunch, and dinner.",
+    "intent": "plan_request",
+    "paraphrase_group_id": "pr_7day_veg",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0099",
+    "text": "I need a 7-day Indian veg meal plan.",
+    "intent": "plan_request",
+    "paraphrase_group_id": "pr_7day_veg",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0100",
+    "text": "Can you build a one-week vegetarian meal plan?",
+    "intent": "plan_request",
+    "paraphrase_group_id": "pr_7day_veg",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0101",
+    "text": "Build a meal plan excluding dairy because I am lactose intolerant.",
+    "intent": "plan_request",
+    "paraphrase_group_id": "pr_allergy_dairy",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0102",
+    "text": "Create a weekly diet plan with no milk, paneer, or curd.",
+    "intent": "plan_request",
+    "paraphrase_group_id": "pr_allergy_dairy",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0103",
+    "text": "I need an Indian meal plan with zero dairy products.",
+    "intent": "plan_request",
+    "paraphrase_group_id": "pr_allergy_dairy",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0104",
+    "text": "Generate a dairy-free meal plan for the week.",
+    "intent": "plan_request",
+    "paraphrase_group_id": "pr_allergy_dairy",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0105",
+    "text": "Make a weekly meal plan including chicken and fish options.",
+    "intent": "plan_request",
+    "paraphrase_group_id": "pr_nonveg_plan",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0106",
+    "text": "Generate a 7-day non-vegetarian Indian diet plan.",
+    "intent": "plan_request",
+    "paraphrase_group_id": "pr_nonveg_plan",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0107",
+    "text": "Create a meal plan with eggs and chicken for lunch and dinner.",
+    "intent": "plan_request",
+    "paraphrase_group_id": "pr_nonveg_plan",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0108",
+    "text": "Can you give me a weekly meal plan with non-veg dishes?",
+    "intent": "plan_request",
+    "paraphrase_group_id": "pr_nonveg_plan",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0109",
+    "text": "Generate a high-protein 7-day meal plan for active habits.",
+    "intent": "plan_request",
+    "paraphrase_group_id": "pr_high_protein_plan",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0110",
+    "text": "Create a balanced weekly plan focused on protein foods.",
+    "intent": "plan_request",
+    "paraphrase_group_id": "pr_high_protein_plan",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0111",
+    "text": "I want a 7-day Indian meal plan with maximum protein.",
+    "intent": "plan_request",
+    "paraphrase_group_id": "pr_high_protein_plan",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0112",
+    "text": "Build a meal schedule emphasizing lentils, eggs, and paneer.",
+    "intent": "plan_request",
+    "paraphrase_group_id": "pr_high_protein_plan",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0113",
+    "text": "Create a weekly meal plan with South Indian recipes like idli and sambar.",
+    "intent": "plan_request",
+    "paraphrase_group_id": "pr_south_indian",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0114",
+    "text": "Can you generate a 7-day South Indian style meal plan?",
+    "intent": "plan_request",
+    "paraphrase_group_id": "pr_south_indian",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0115",
+    "text": "I want my 7-day plan to focus on South Indian foods.",
+    "intent": "plan_request",
+    "paraphrase_group_id": "pr_south_indian",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0116",
+    "text": "Build a weekly plan featuring dosa, idli, and rasam.",
+    "intent": "plan_request",
+    "paraphrase_group_id": "pr_south_indian",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0117",
+    "text": "Build a 7-day meal plan without wheat or gluten.",
+    "intent": "plan_request",
+    "paraphrase_group_id": "pr_gluten_free",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0118",
+    "text": "Generate a gluten-free Indian diet plan using rice and millets.",
+    "intent": "plan_request",
+    "paraphrase_group_id": "pr_gluten_free",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0119",
+    "text": "Create a weekly plan avoiding roti, maida, and suji.",
+    "intent": "plan_request",
+    "paraphrase_group_id": "pr_gluten_free",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0120",
+    "text": "I need a 7-day Indian meal plan with no gluten.",
+    "intent": "plan_request",
+    "paraphrase_group_id": "pr_gluten_free",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0121",
+    "text": "How do I export my 7-day meal plan to a PDF document?",
+    "intent": "plan_request",
+    "paraphrase_group_id": "pr_export_pdf",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0122",
+    "text": "Can I download a PDF copy of my current meal plan?",
+    "intent": "plan_request",
+    "paraphrase_group_id": "pr_export_pdf",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0123",
+    "text": "Where is the button to download my diet plan as PDF?",
+    "intent": "plan_request",
+    "paraphrase_group_id": "pr_export_pdf",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0124",
+    "text": "Export my saved meal plan into a PDF file format.",
+    "intent": "plan_request",
+    "paraphrase_group_id": "pr_export_pdf",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0125",
+    "text": "How can I regenerate or update my 7-day meal plan?",
+    "intent": "plan_request",
+    "paraphrase_group_id": "pr_modify_plan",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0126",
+    "text": "I want to change my dietary preference and re-create my plan.",
+    "intent": "plan_request",
+    "paraphrase_group_id": "pr_modify_plan",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0127",
+    "text": "Can I reset my weekly meal plan with new allergen filters?",
+    "intent": "plan_request",
+    "paraphrase_group_id": "pr_modify_plan",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0128",
+    "text": "Regenerate my 7-day meal plan with updated choices.",
+    "intent": "plan_request",
+    "paraphrase_group_id": "pr_modify_plan",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0129",
+    "text": "Can you generate a meal plan focused on quick morning breakfasts?",
+    "intent": "plan_request",
+    "paraphrase_group_id": "pr_quick_breakfast_plan",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0130",
+    "text": "Create a 7-day meal plan with fast healthy breakfast options.",
+    "intent": "plan_request",
+    "paraphrase_group_id": "pr_quick_breakfast_plan",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0131",
+    "text": "Build a weekly diet plan with convenient Indian breakfasts.",
+    "intent": "plan_request",
+    "paraphrase_group_id": "pr_quick_breakfast_plan",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0132",
+    "text": "Generate a 7-day meal plan featuring poha, upma, and chilla.",
+    "intent": "plan_request",
+    "paraphrase_group_id": "pr_quick_breakfast_plan",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0133",
+    "text": "Create a 7-day meal plan without peanuts or tree nuts.",
+    "intent": "plan_request",
+    "paraphrase_group_id": "pr_nut_free_plan",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0134",
+    "text": "Generate a weekly diet plan excluding peanut and nut allergens.",
+    "intent": "plan_request",
+    "paraphrase_group_id": "pr_nut_free_plan",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0135",
+    "text": "I need an Indian meal plan safe for peanut allergies.",
+    "intent": "plan_request",
+    "paraphrase_group_id": "pr_nut_free_plan",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0136",
+    "text": "Build a 7-day meal plan with zero nuts.",
+    "intent": "plan_request",
+    "paraphrase_group_id": "pr_nut_free_plan",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0137",
+    "text": "Build a simple homestyle 7-day Indian meal plan with dal and roti.",
+    "intent": "plan_request",
+    "paraphrase_group_id": "pr_simple_home_plan",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0138",
+    "text": "Generate an easy homestyle weekly diet plan using basic pantry items.",
+    "intent": "plan_request",
+    "paraphrase_group_id": "pr_simple_home_plan",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0139",
+    "text": "Create a realistic 7-day Indian meal plan with dal, sabzi, and rice.",
+    "intent": "plan_request",
+    "paraphrase_group_id": "pr_simple_home_plan",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0140",
+    "text": "Make a week-long meal plan with everyday Indian dishes.",
+    "intent": "plan_request",
+    "paraphrase_group_id": "pr_simple_home_plan",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0141",
+    "text": "How do I save my generated 7-day meal plan to my profile?",
+    "intent": "plan_request",
+    "paraphrase_group_id": "pr_save_plan",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0142",
+    "text": "Can I save this weekly meal plan for later access?",
+    "intent": "plan_request",
+    "paraphrase_group_id": "pr_save_plan",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0143",
+    "text": "Where is the save button for my newly created meal plan?",
+    "intent": "plan_request",
+    "paraphrase_group_id": "pr_save_plan",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0144",
+    "text": "Save this 7-day diet plan so I can see it on mobile.",
+    "intent": "plan_request",
+    "paraphrase_group_id": "pr_save_plan",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0145",
+    "text": "How do I log my daily water intake in the tracker?",
+    "intent": "tracker_help",
+    "paraphrase_group_id": "th_water_log",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0146",
+    "text": "Where do I record how much water I drank today in the app?",
+    "intent": "tracker_help",
+    "paraphrase_group_id": "th_water_log",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0147",
+    "text": "Can I add 500ml of water to my daily tracking record?",
+    "intent": "tracker_help",
+    "paraphrase_group_id": "th_water_log",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0148",
+    "text": "How does water tracking work in the Medi Bud tracker?",
+    "intent": "tracker_help",
+    "paraphrase_group_id": "th_water_log",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0149",
+    "text": "How do I record my sleep hours for last night in the log?",
+    "intent": "tracker_help",
+    "paraphrase_group_id": "th_sleep_log",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0150",
+    "text": "Where can I enter that I slept for 7.5 hours in the tracker?",
+    "intent": "tracker_help",
+    "paraphrase_group_id": "th_sleep_log",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0151",
+    "text": "How to log sleep duration in the habit tracker?",
+    "intent": "tracker_help",
+    "paraphrase_group_id": "th_sleep_log",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0152",
+    "text": "Can I update my sleep hours log for today?",
+    "intent": "tracker_help",
+    "paraphrase_group_id": "th_sleep_log",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0153",
+    "text": "How do I log a 30-minute brisk walk in the tracker?",
+    "intent": "tracker_help",
+    "paraphrase_group_id": "th_activity_log",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0154",
+    "text": "Where do I track my daily exercise minutes in the app log?",
+    "intent": "tracker_help",
+    "paraphrase_group_id": "th_activity_log",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0155",
+    "text": "How to record physical activity duration in the tracker?",
+    "intent": "tracker_help",
+    "paraphrase_group_id": "th_activity_log",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0156",
+    "text": "Can I log running or workout activity minutes today?",
+    "intent": "tracker_help",
+    "paraphrase_group_id": "th_activity_log",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0157",
+    "text": "How do I add a new reminder for drinking water or walking?",
+    "intent": "tracker_help",
+    "paraphrase_group_id": "th_reminders",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0158",
+    "text": "Where can I create a daily medication or habit reminder in the app?",
+    "intent": "tracker_help",
+    "paraphrase_group_id": "th_reminders",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0159",
+    "text": "How do I set a reminder schedule at 8:00 AM?",
+    "intent": "tracker_help",
+    "paraphrase_group_id": "th_reminders",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0160",
+    "text": "Can I schedule user-entered reminder alerts in the app?",
+    "intent": "tracker_help",
+    "paraphrase_group_id": "th_reminders",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0161",
+    "text": "Can I log habits when I don't have internet connection?",
+    "intent": "tracker_help",
+    "paraphrase_group_id": "th_offline_sync",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0162",
+    "text": "Will my water and sleep logs save in the offline outbox?",
+    "intent": "tracker_help",
+    "paraphrase_group_id": "th_offline_sync",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0163",
+    "text": "How does offline log synchronization work when reconnecting?",
+    "intent": "tracker_help",
+    "paraphrase_group_id": "th_offline_sync",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0164",
+    "text": "What happens to my habit tracker logs if my device is offline?",
+    "intent": "tracker_help",
+    "paraphrase_group_id": "th_offline_sync",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0165",
+    "text": "How is the daily habit completion count calculated on the dashboard?",
+    "intent": "tracker_help",
+    "paraphrase_group_id": "th_habit_score",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0166",
+    "text": "Why does my habit counter display 2 of 4 tasks completed today?",
+    "intent": "tracker_help",
+    "paraphrase_group_id": "th_habit_score",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0167",
+    "text": "Does having health conditions decrease my habit count?",
+    "intent": "tracker_help",
+    "paraphrase_group_id": "th_habit_score",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0168",
+    "text": "What logging actions count towards completing daily habits?",
+    "intent": "tracker_help",
+    "paraphrase_group_id": "th_habit_score",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0169",
+    "text": "How do I mark a reminder as completed in the due list?",
+    "intent": "tracker_help",
+    "paraphrase_group_id": "th_complete_reminder",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0170",
+    "text": "Where do I click to check off a reminder that is due today?",
+    "intent": "tracker_help",
+    "paraphrase_group_id": "th_complete_reminder",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0171",
+    "text": "Can I mark my scheduled reminder done from the dashboard?",
+    "intent": "tracker_help",
+    "paraphrase_group_id": "th_complete_reminder",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0172",
+    "text": "How to check off my morning reminder completion?",
+    "intent": "tracker_help",
+    "paraphrase_group_id": "th_complete_reminder",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0173",
+    "text": "Where can I see my past logs from earlier this week in the tracker?",
+    "intent": "tracker_help",
+    "paraphrase_group_id": "th_view_history",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0174",
+    "text": "How do I view my historical water and sleep records in the app?",
+    "intent": "tracker_help",
+    "paraphrase_group_id": "th_view_history",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0175",
+    "text": "Can I inspect my tracker history from yesterday?",
+    "intent": "tracker_help",
+    "paraphrase_group_id": "th_view_history",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0176",
+    "text": "Show me where past activity and habit logs are listed.",
+    "intent": "tracker_help",
+    "paraphrase_group_id": "th_view_history",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0177",
+    "text": "How do I delete or remove an existing reminder schedule?",
+    "intent": "tracker_help",
+    "paraphrase_group_id": "th_delete_reminder",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0178",
+    "text": "Where is the delete icon for an unwanted reminder?",
+    "intent": "tracker_help",
+    "paraphrase_group_id": "th_delete_reminder",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0179",
+    "text": "Can I remove a reminder schedule that I no longer need?",
+    "intent": "tracker_help",
+    "paraphrase_group_id": "th_delete_reminder",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0180",
+    "text": "How to clear an old reminder from my schedule list?",
+    "intent": "tracker_help",
+    "paraphrase_group_id": "th_delete_reminder",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0181",
+    "text": "Where is the manual Sync Now button for offline items?",
+    "intent": "tracker_help",
+    "paraphrase_group_id": "th_sync_button",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0182",
+    "text": "How do I trigger an immediate sync of my pending outbox logs?",
+    "intent": "tracker_help",
+    "paraphrase_group_id": "th_sync_button",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0183",
+    "text": "Can I manually press sync to upload my offline habit entries?",
+    "intent": "tracker_help",
+    "paraphrase_group_id": "th_sync_button",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0184",
+    "text": "How to force sync my offline water and sleep logs?",
+    "intent": "tracker_help",
+    "paraphrase_group_id": "th_sync_button",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0185",
+    "text": "How do I manually log a food portion in my meal tracker?",
+    "intent": "tracker_help",
+    "paraphrase_group_id": "th_log_meal",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0186",
+    "text": "Where do I log that I ate 2 rotis and a bowl of dal?",
+    "intent": "tracker_help",
+    "paraphrase_group_id": "th_log_meal",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0187",
+    "text": "Can I record my lunch meal intake in the app tracker?",
+    "intent": "tracker_help",
+    "paraphrase_group_id": "th_log_meal",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0188",
+    "text": "How to log manual meals with portion sizes?",
+    "intent": "tracker_help",
+    "paraphrase_group_id": "th_log_meal",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0189",
+    "text": "Can I customize my daily water target from 2000ml to 2500ml?",
+    "intent": "tracker_help",
+    "paraphrase_group_id": "th_edit_goal",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0190",
+    "text": "How do I adjust my daily water intake target in the tracker?",
+    "intent": "tracker_help",
+    "paraphrase_group_id": "th_edit_goal",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0191",
+    "text": "Where do I change my daily sleep or hydration goals?",
+    "intent": "tracker_help",
+    "paraphrase_group_id": "th_edit_goal",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0192",
+    "text": "How to modify habit tracking targets in my settings?",
+    "intent": "tracker_help",
+    "paraphrase_group_id": "th_edit_goal",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0193",
+    "text": "How do I upload a new lab report into Medi Bud?",
+    "intent": "app_help",
+    "paraphrase_group_id": "ah_upload_report",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0194",
+    "text": "Where is the upload button for PDF or image medical reports?",
+    "intent": "app_help",
+    "paraphrase_group_id": "ah_upload_report",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0195",
+    "text": "What file formats can I upload for my blood test in the app?",
+    "intent": "app_help",
+    "paraphrase_group_id": "ah_upload_report",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0196",
+    "text": "How do I scan or pick a report file from my phone in the app?",
+    "intent": "app_help",
+    "paraphrase_group_id": "ah_upload_report",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0197",
+    "text": "How do I confirm or edit extracted values from my uploaded report?",
+    "intent": "app_help",
+    "paraphrase_group_id": "ah_review_observations",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0198",
+    "text": "Why does my report status indicate review needed in the app?",
+    "intent": "app_help",
+    "paraphrase_group_id": "ah_review_observations",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0199",
+    "text": "Where do I approve the test results extracted by OCR?",
+    "intent": "app_help",
+    "paraphrase_group_id": "ah_review_observations",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0200",
+    "text": "Can I edit an observation value if the parser misread it?",
+    "intent": "app_help",
+    "paraphrase_group_id": "ah_review_observations",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0201",
+    "text": "How can I delete my Medi Bud account and all data?",
+    "intent": "app_help",
+    "paraphrase_group_id": "ah_delete_account",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0202",
+    "text": "Where is the settings option to delete my profile and reports?",
+    "intent": "app_help",
+    "paraphrase_group_id": "ah_delete_account",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0203",
+    "text": "Can I completely erase my uploaded documents and user history?",
+    "intent": "app_help",
+    "paraphrase_group_id": "ah_delete_account",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0204",
+    "text": "How to perform account deletion in profile settings?",
+    "intent": "app_help",
+    "paraphrase_group_id": "ah_delete_account",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0205",
+    "text": "How do I switch the application language to Hindi in settings?",
+    "intent": "app_help",
+    "paraphrase_group_id": "ah_language_hindi",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0206",
+    "text": "Can I view the user interface in Hindi (\u0939\u093f\u0902\u0926\u0940) in Medi Bud?",
+    "intent": "app_help",
+    "paraphrase_group_id": "ah_language_hindi",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0207",
+    "text": "Where is the language selector toggle for English and Hindi?",
+    "intent": "app_help",
+    "paraphrase_group_id": "ah_language_hindi",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0208",
+    "text": "How to change app interface language to Hindi in my profile?",
+    "intent": "app_help",
+    "paraphrase_group_id": "ah_language_hindi",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0209",
+    "text": "Are my medical documents private and isolated in the database?",
+    "intent": "app_help",
+    "paraphrase_group_id": "ah_privacy_security",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0210",
+    "text": "Can another user access or view my uploaded blood test records?",
+    "intent": "app_help",
+    "paraphrase_group_id": "ah_privacy_security",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0211",
+    "text": "How does row level security protect my personal report data?",
+    "intent": "app_help",
+    "paraphrase_group_id": "ah_privacy_security",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0212",
+    "text": "Is user data strictly isolated by database authentication?",
+    "intent": "app_help",
+    "paraphrase_group_id": "ah_privacy_security",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0213",
+    "text": "How do I find nearby hospitals or clinics in the care tab?",
+    "intent": "app_help",
+    "paraphrase_group_id": "ah_nearby_care",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0214",
+    "text": "Where does the nearby care feature get its clinic listings?",
+    "intent": "app_help",
+    "paraphrase_group_id": "ah_nearby_care",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0215",
+    "text": "Can I search for healthcare facilities without giving GPS permission?",
+    "intent": "app_help",
+    "paraphrase_group_id": "ah_nearby_care",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0216",
+    "text": "How to open directions to a nearby hospital on map apps?",
+    "intent": "app_help",
+    "paraphrase_group_id": "ah_nearby_care",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0217",
+    "text": "Does Medi Bud provide certified clinical medical diagnoses?",
+    "intent": "app_help",
+    "paraphrase_group_id": "ah_disclaimer_scope",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0218",
+    "text": "Is Medi Bud an official replacement for consulting my doctor?",
+    "intent": "app_help",
+    "paraphrase_group_id": "ah_disclaimer_scope",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0219",
+    "text": "What is the medical disclaimer for this college companion prototype?",
+    "intent": "app_help",
+    "paraphrase_group_id": "ah_disclaimer_scope",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0220",
+    "text": "Can this software prescribe medications for health conditions?",
+    "intent": "app_help",
+    "paraphrase_group_id": "ah_disclaimer_scope",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0221",
+    "text": "Which types of lab reports does the Medi Bud parser support?",
+    "intent": "app_help",
+    "paraphrase_group_id": "ah_supported_tests",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0222",
+    "text": "Can the app parse CBC, blood glucose, and lipid panels?",
+    "intent": "app_help",
+    "paraphrase_group_id": "ah_supported_tests",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0223",
+    "text": "Does the prototype extract reports other than demonstrated pathology tests?",
+    "intent": "app_help",
+    "paraphrase_group_id": "ah_supported_tests",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0224",
+    "text": "What lab tests can the extractor recognize right now?",
+    "intent": "app_help",
+    "paraphrase_group_id": "ah_supported_tests",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0225",
+    "text": "How do I download the original PDF file of my uploaded report?",
+    "intent": "app_help",
+    "paraphrase_group_id": "ah_download_report",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0226",
+    "text": "Where is the download link to view my uploaded lab document?",
+    "intent": "app_help",
+    "paraphrase_group_id": "ah_download_report",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0227",
+    "text": "Can I retrieve my original uploaded PDF from the report screen?",
+    "intent": "app_help",
+    "paraphrase_group_id": "ah_download_report",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0228",
+    "text": "How to download my stored lab report file?",
+    "intent": "app_help",
+    "paraphrase_group_id": "ah_download_report",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0229",
+    "text": "How does the symptom guidance questionnaire work in the app?",
+    "intent": "app_help",
+    "paraphrase_group_id": "ah_symptom_guide",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0230",
+    "text": "Where do I find the emergency red-flag symptom questionnaire?",
+    "intent": "app_help",
+    "paraphrase_group_id": "ah_symptom_guide",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0231",
+    "text": "Is the symptom guidance tool a diagnostic decision system?",
+    "intent": "app_help",
+    "paraphrase_group_id": "ah_symptom_guide",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0232",
+    "text": "How to use the symptom guide feature in Medi Bud?",
+    "intent": "app_help",
+    "paraphrase_group_id": "ah_symptom_guide",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0233",
+    "text": "How do I sign in or create an account with email and password?",
+    "intent": "app_help",
+    "paraphrase_group_id": "ah_login_signup",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0234",
+    "text": "Where do I enter my email to sign up for Medi Bud?",
+    "intent": "app_help",
+    "paraphrase_group_id": "ah_login_signup",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0235",
+    "text": "How does Supabase authentication work in Medi Bud?",
+    "intent": "app_help",
+    "paraphrase_group_id": "ah_login_signup",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0236",
+    "text": "Can I reset my password if I forget my login credentials?",
+    "intent": "app_help",
+    "paraphrase_group_id": "ah_login_signup",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0237",
+    "text": "What features work while Medi Bud is in offline mode?",
+    "intent": "app_help",
+    "paraphrase_group_id": "ah_offline_mode",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0238",
+    "text": "Can I browse my cached profile and saved meal plan offline?",
+    "intent": "app_help",
+    "paraphrase_group_id": "ah_offline_mode",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0239",
+    "text": "Why does AI chat state that it requires an active internet connection?",
+    "intent": "app_help",
+    "paraphrase_group_id": "ah_offline_mode",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0240",
+    "text": "Which app screens are accessible without an internet connection?",
+    "intent": "app_help",
+    "paraphrase_group_id": "ah_offline_mode",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0241",
+    "text": "What are recommended tips for healthy sleep hygiene?",
+    "intent": "general_health",
+    "paraphrase_group_id": "gh_sleep_hygiene",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0242",
+    "text": "How many hours of sleep should a healthy adult get on average?",
+    "intent": "general_health",
+    "paraphrase_group_id": "gh_sleep_hygiene",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0243",
+    "text": "How can someone improve their sleep quality naturally at night?",
+    "intent": "general_health",
+    "paraphrase_group_id": "gh_sleep_hygiene",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0244",
+    "text": "What bedtime habits promote restorative sleep for adults?",
+    "intent": "general_health",
+    "paraphrase_group_id": "gh_sleep_hygiene",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0245",
+    "text": "Why is staying adequately hydrated important for human physiology?",
+    "intent": "general_health",
+    "paraphrase_group_id": "gh_hydration_science",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0246",
+    "text": "How does drinking sufficient fluids support kidney waste clearance?",
+    "intent": "general_health",
+    "paraphrase_group_id": "gh_hydration_science",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0247",
+    "text": "What are general wellness guidelines for daily water intake?",
+    "intent": "general_health",
+    "paraphrase_group_id": "gh_hydration_science",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0248",
+    "text": "What physiological roles does water play in human health?",
+    "intent": "general_health",
+    "paraphrase_group_id": "gh_hydration_science",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0249",
+    "text": "How many minutes of brisk walking are recommended per week by WHO?",
+    "intent": "general_health",
+    "paraphrase_group_id": "gh_walking_exercise",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0250",
+    "text": "Is 150 minutes of moderate aerobic exercise beneficial for heart health?",
+    "intent": "general_health",
+    "paraphrase_group_id": "gh_walking_exercise",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0251",
+    "text": "What are the general health benefits of regular moderate exercise?",
+    "intent": "general_health",
+    "paraphrase_group_id": "gh_walking_exercise",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0252",
+    "text": "How does daily physical activity benefit cardiovascular wellness?",
+    "intent": "general_health",
+    "paraphrase_group_id": "gh_walking_exercise",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0253",
+    "text": "What does a biological reference interval mean on clinical lab tests?",
+    "intent": "general_health",
+    "paraphrase_group_id": "gh_lab_reference",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0254",
+    "text": "Why do reference ranges differ between different diagnostic laboratories?",
+    "intent": "general_health",
+    "paraphrase_group_id": "gh_lab_reference",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0255",
+    "text": "Does an observed value outside reference range automatically indicate disease?",
+    "intent": "general_health",
+    "paraphrase_group_id": "gh_lab_reference",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0256",
+    "text": "How should one generally understand reference intervals on medical tests?",
+    "intent": "general_health",
+    "paraphrase_group_id": "gh_lab_reference",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0257",
+    "text": "What are evidence-informed techniques to manage everyday mental stress?",
+    "intent": "general_health",
+    "paraphrase_group_id": "gh_stress_reduction",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0258",
+    "text": "How does regular aerobic activity help reduce everyday stress?",
+    "intent": "general_health",
+    "paraphrase_group_id": "gh_stress_reduction",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0259",
+    "text": "Can deep breathing and regular sleep lower stress hormone levels?",
+    "intent": "general_health",
+    "paraphrase_group_id": "gh_stress_reduction",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0260",
+    "text": "What everyday habits support mental well-being and stress relief?",
+    "intent": "general_health",
+    "paraphrase_group_id": "gh_stress_reduction",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0261",
+    "text": "What constitutes a balanced daily meal according to ICMR guidelines?",
+    "intent": "general_health",
+    "paraphrase_group_id": "gh_balanced_plate",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0262",
+    "text": "How should an everyday Indian plate be proportioned for general wellness?",
+    "intent": "general_health",
+    "paraphrase_group_id": "gh_balanced_plate",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0263",
+    "text": "Why is dietary diversity important across whole grains, pulses, and vegetables?",
+    "intent": "general_health",
+    "paraphrase_group_id": "gh_balanced_plate",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0264",
+    "text": "What are the core components of a healthy balanced diet?",
+    "intent": "general_health",
+    "paraphrase_group_id": "gh_balanced_plate",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0265",
+    "text": "What are the health risks of prolonged sedentary sitting throughout the day?",
+    "intent": "general_health",
+    "paraphrase_group_id": "gh_sedentary_habits",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0266",
+    "text": "How often should an office worker stand up and move during long desk hours?",
+    "intent": "general_health",
+    "paraphrase_group_id": "gh_sedentary_habits",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0267",
+    "text": "Why is breaking up prolonged sitting beneficial for metabolic health?",
+    "intent": "general_health",
+    "paraphrase_group_id": "gh_sedentary_habits",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0268",
+    "text": "What simple strategies can reduce sedentary behavior during desk work?",
+    "intent": "general_health",
+    "paraphrase_group_id": "gh_sedentary_habits",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0269",
+    "text": "What everyday lifestyle habits help maintain long-term cardiovascular health?",
+    "intent": "general_health",
+    "paraphrase_group_id": "gh_heart_wellness",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0270",
+    "text": "How do aerobic exercise and soluble fiber support heart health?",
+    "intent": "general_health",
+    "paraphrase_group_id": "gh_heart_wellness",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0271",
+    "text": "Why is avoiding trans-fats and tobacco important for vascular wellness?",
+    "intent": "general_health",
+    "paraphrase_group_id": "gh_heart_wellness",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0272",
+    "text": "What lifestyle habits promote general cardiovascular vitality?",
+    "intent": "general_health",
+    "paraphrase_group_id": "gh_heart_wellness",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0273",
+    "text": "What are WHO guidelines regarding daily dietary sodium and salt intake?",
+    "intent": "general_health",
+    "paraphrase_group_id": "gh_salt_intake",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0274",
+    "text": "Why is moderating excess sodium intake recommended for blood pressure?",
+    "intent": "general_health",
+    "paraphrase_group_id": "gh_salt_intake",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0275",
+    "text": "How much table salt should an adult consume per day at maximum?",
+    "intent": "general_health",
+    "paraphrase_group_id": "gh_salt_intake",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0276",
+    "text": "What are the health benefits of moderating dietary salt?",
+    "intent": "general_health",
+    "paraphrase_group_id": "gh_salt_intake",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0277",
+    "text": "How does safe sunlight exposure support natural Vitamin D synthesis?",
+    "intent": "general_health",
+    "paraphrase_group_id": "gh_sunlight_vitd",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0278",
+    "text": "What role does Vitamin D play in bone density and immune wellness?",
+    "intent": "general_health",
+    "paraphrase_group_id": "gh_sunlight_vitd",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0279",
+    "text": "Why is morning sunlight exposure beneficial for circadian rhythm?",
+    "intent": "general_health",
+    "paraphrase_group_id": "gh_sunlight_vitd",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0280",
+    "text": "What are general wellness recommendations for Vitamin D and sunlight?",
+    "intent": "general_health",
+    "paraphrase_group_id": "gh_sunlight_vitd",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0281",
+    "text": "What are good ergonomic tips for maintaining healthy spinal posture?",
+    "intent": "general_health",
+    "paraphrase_group_id": "gh_posture_ergonomics",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0282",
+    "text": "How can someone avoid neck and back strain while working on computers?",
+    "intent": "general_health",
+    "paraphrase_group_id": "gh_posture_ergonomics",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0283",
+    "text": "What simple stretches relieve neck stiffness from prolonged screen time?",
+    "intent": "general_health",
+    "paraphrase_group_id": "gh_posture_ergonomics",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0284",
+    "text": "How does ergonomic desk setup benefit long-term musculoskeletal health?",
+    "intent": "general_health",
+    "paraphrase_group_id": "gh_posture_ergonomics",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0285",
+    "text": "What is the 20-20-20 rule for reducing digital eye fatigue?",
+    "intent": "general_health",
+    "paraphrase_group_id": "gh_screen_time_eyes",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0286",
+    "text": "How can someone protect their eyes during extended digital screen time?",
+    "intent": "general_health",
+    "paraphrase_group_id": "gh_screen_time_eyes",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0287",
+    "text": "Why does blue light exposure before bed affect melatonin and sleep?",
+    "intent": "general_health",
+    "paraphrase_group_id": "gh_screen_time_eyes",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  },
+  {
+    "id": "utt_0288",
+    "text": "What habits help reduce digital eye strain during computer work?",
+    "intent": "general_health",
+    "paraphrase_group_id": "gh_screen_time_eyes",
+    "is_synthetic": true,
+    "provenance": "Reviewed synthetic utterances for non-clinical intent routing"
+  }
+]

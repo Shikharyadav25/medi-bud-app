@@ -49,3 +49,9 @@ example
 # generated native folders
 /ios
 /android
+
+# Next.js & Python cache
+.next/
+__pycache__/
+*.pyc
+.pytest_cache/

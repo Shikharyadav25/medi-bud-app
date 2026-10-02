@@ -1,0 +1,58 @@
+[
+  {
+    "id": "chk_who_01",
+    "source_id": "src_who_diet",
+    "section": "Energy Balance & Macronutrients",
+    "text": "A healthy diet helps protect against malnutrition in all its forms, as well as noncommunicable diseases such as diabetes, heart disease, stroke and cancer. Energy intake (calories) should be in balance with energy expenditure. To avoid unhealthy weight gain, total fat should not exceed 30% of total energy intake, and intake of saturated fats should be less than 10% of total energy intake.",
+    "version": "2024.1"
+  },
+  {
+    "id": "chk_who_02",
+    "source_id": "src_who_diet",
+    "section": "Fruits, Vegetables & Dietary Fiber",
+    "text": "Eating at least 400 grams, or five portions, of fruit and vegetables per day reduces the risk of noncommunicable diseases and helps ensure an adequate daily intake of dietary fiber. Unrefined whole grains, legumes such as lentils and beans, and diverse vegetables should form the staple basis of balanced daily meals.",
+    "version": "2024.1"
+  },
+  {
+    "id": "chk_icmr_01",
+    "source_id": "src_icmr_diet",
+    "section": "Indian Plate Composition",
+    "text": "The My Plate for the Day model proposed by ICMR-NIN recommends that an adult Indian's daily plate should source roughly 50-60% of total energy from carbohydrates, with preference for whole grains and millets rather than refined flours. Daily protein should supply roughly 10-15% of energy, derived from diverse pulses, legumes, dairy, eggs, and lean meats.",
+    "version": "2024-Edition"
+  },
+  {
+    "id": "chk_icmr_02",
+    "source_id": "src_icmr_diet",
+    "section": "Hydration and Water Intake in India",
+    "text": "Adequate daily water intake is essential for cellular metabolism, body temperature regulation, and renal waste clearance. Healthy adults living in temperate to subtropical climates should consume approximately 2.0 to 2.5 liters of clean water daily, increasing fluid intake moderately during vigorous physical exertion or warm seasons.",
+    "version": "2024-Edition"
+  },
+  {
+    "id": "chk_who_act_01",
+    "source_id": "src_who_activity",
+    "section": "Recommended Adult Physical Activity",
+    "text": "Adults aged 18 to 64 years should do at least 150 to 300 minutes of moderate-intensity aerobic physical activity (such as brisk walking, cycling, or swimming), or at least 75 to 150 minutes of vigorous-intensity aerobic physical activity throughout the week. Muscle-strengthening activities should be done involving major muscle groups on 2 or more days a week.",
+    "version": "2023.2"
+  },
+  {
+    "id": "chk_medibud_01",
+    "source_id": "src_medibud_guide",
+    "section": "Understanding Lab Report Ranges Responsibly",
+    "text": "Lab test reference intervals reflect values observed in approximately 95% of a healthy reference population tested by a specific instrument and reagent set. An observed value outside the stated interval is an indication to consult a physician for clinical correlation, not a definitive diagnosis. Reference ranges can differ between laboratories and demographic groups.",
+    "version": "1.0.0"
+  },
+  {
+    "id": "chk_medibud_02",
+    "source_id": "src_medibud_guide",
+    "section": "Confirming Extracted Observations",
+    "text": "When you upload a lab report to Medi Bud, our OCR pipeline proposes extracted values for CBC, blood sugar, and lipid tests. You must review and confirm these values before they become part of your personal grounded Q&A. Unconfirmed values remain in a review-needed state and will not be cited as verified health facts.",
+    "version": "1.0.0"
+  },
+  {
+    "id": "chk_medibud_03",
+    "source_id": "src_medibud_guide",
+    "section": "Offline Logging and Habit Tracking",
+    "text": "Medi Bud allows you to log water intake, sleep hours, and physical activity even when offline. Logs are saved to a durable local outbox on your device and automatically replayed to the server once internet connectivity is restored. Duplicate sync requests are safely deduplicated using unique mutation IDs.",
+    "version": "1.0.0"
+  }
+]
