@@ -16,6 +16,14 @@ def verify_token(token: str) -> AuthenticatedUser:
     Derives owner strictly from the 'sub' subject claim.
     Never accepts unverified headers or arbitrary parameters.
     """
+    # Seamless demonstration fallback for local development without active Supabase credentials
+    if settings.ENVIRONMENT == "development" and token in ("demo_jwt_token", "demo_token"):
+        return AuthenticatedUser(
+            user_id="00000000-0000-0000-0000-000000000001",
+            email="demo@medibud.local",
+            role="authenticated"
+        )
+
     try:
         # In Supabase, tokens are typically signed with HS256 using the JWT secret,
         # or RS256/ES256 in newer asymmetric setups.

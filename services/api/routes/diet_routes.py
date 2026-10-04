@@ -1,8 +1,8 @@
 import uuid
 from typing import List, Dict, Any, Optional
-from fastapi import APIRouter, Depends, HTTPException, status, Response
+from fastapi import APIRouter, Depends, HTTPException, status, Response, Query, Header
 from pydantic import BaseModel
-from auth import get_current_user, AuthenticatedUser
+from auth import get_current_user, AuthenticatedUser, verify_token
 from services.plan_service import load_food_catalog, generate_7day_indian_plan
 from services.pdf_service import generate_meal_plan_pdf
 
@@ -60,8 +60,22 @@ async def get_saved_plan(current_user: AuthenticatedUser = Depends(get_current_u
 @diet_router.get("/plans/{plan_id}/pdf")
 async def export_plan_pdf(
     plan_id: str,
-    current_user: AuthenticatedUser = Depends(get_current_user)
+    token: Optional[str] = Query(None),
+    authorization: Optional[str] = Header(None)
 ):
+    auth_token = None
+    if authorization and authorization.startswith("Bearer "):
+        auth_token = authorization.split("Bearer ")[1].strip()
+    elif token:
+        auth_token = token
+
+    if not auth_token:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail={"code": "UNAUTHORIZED", "message": "Missing Authorization header or token query parameter"}
+        )
+
+    current_user = verify_token(auth_token)
     user_id = current_user.user_id
     plan = _USER_SAVED_PLANS.get(user_id)
     if not plan:

@@ -40,7 +40,7 @@ export default function LoginPage() {
   const handleDemoSignIn = () => {
     // Generate/store demo session token for offline or local preview
     localStorage.setItem('medi_bud_demo_token', 'demo_jwt_token');
-    localStorage.setItem('medi_bud_demo_user', 'demo_user_a');
+    localStorage.setItem('medi_bud_demo_user', '00000000-0000-0000-0000-000000000001');
     router.push('/dashboard');
   };
 

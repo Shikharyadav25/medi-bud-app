@@ -33,6 +33,34 @@ export default function MealScanScreen() {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysisResult, setAnalysisResult] = useState<MealAnalysisResult | null>(null);
 
+  const extractBase64FromAsset = async (asset: ImagePicker.ImagePickerAsset): Promise<string> => {
+    if (asset.base64 && asset.base64.length > 20) {
+      return asset.base64;
+    }
+    const uri = asset.uri;
+    if (!uri) return '';
+    if (uri.startsWith('data:image')) {
+      const parts = uri.split(';base64,');
+      return parts.length > 1 ? parts[1] : uri;
+    }
+    try {
+      const resp = await fetch(uri);
+      const blob = await resp.blob();
+      return new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          const resStr = (reader.result as string) || '';
+          const b64 = resStr.includes(';base64,') ? resStr.split(';base64,')[1] : resStr;
+          resolve(b64);
+        };
+        reader.onerror = () => resolve('');
+        reader.readAsDataURL(blob);
+      });
+    } catch {
+      return '';
+    }
+  };
+
   const handlePickImage = async (useCamera = false) => {
     try {
       let result;
@@ -51,23 +79,46 @@ export default function MealScanScreen() {
       }
 
       if (!result.canceled && result.assets && result.assets.length > 0) {
-        setImageUri(result.assets[0].uri);
-        runMealAnalysis(result.assets[0].base64 || '');
+        const asset = result.assets[0];
+        setImageUri(asset.uri);
+        const base64Data = await extractBase64FromAsset(asset);
+        runMealAnalysis(base64Data);
       }
-    } catch {
-      // Demo preview image fallback
-      setImageUri('demo_meal');
-      runMealAnalysis('');
+    } catch (err: any) {
+      Alert.alert('Image Picker Error', err?.message || 'Could not access camera or library.');
     }
   };
 
   const runMealAnalysis = async (base64: string) => {
     setIsAnalyzing(true);
+    setAnalysisResult(null);
     try {
+      if (!base64 || base64.trim().length < 50) {
+        Alert.alert(
+          'Image Error',
+          'Could not read image data. Please select a valid photo.',
+          [{ text: 'OK' }]
+        );
+        return;
+      }
+
       const result = await AIService.analyzeMealPhoto(base64, profile);
-      setAnalysisResult(result);
-    } catch {
-      Alert.alert('Analysis Notice', 'Analyzing sample Indian vegetarian thali in demo mode.');
+      if (result.isFood === false) {
+        Alert.alert(
+          'No Food Detected',
+          result.error || 'The image does not contain recognizable food. Please upload a clear photo of your meal.',
+          [{ text: 'OK' }]
+        );
+        setAnalysisResult(null);
+      } else {
+        setAnalysisResult(result);
+      }
+    } catch (err: any) {
+      Alert.alert(
+        'Analysis Unavailable',
+        'Could not complete meal analysis. Please ensure your backend is reachable and try again.'
+      );
+      setAnalysisResult(null);
     } finally {
       setIsAnalyzing(false);
     }
@@ -127,8 +178,7 @@ export default function MealScanScreen() {
         <View style={styles.cameraBox}>
           {imageUri ? (
             <View style={styles.imagePlaceholderBox}>
-              <MaterialCommunityIcons name="food-fork-drink" size={48} color={COLORS.primaryAccent} />
-              <Text style={styles.imageBoxText}>Meal photo captured</Text>
+              <Image source={{ uri: imageUri }} style={styles.previewImage} resizeMode="cover" />
               <TouchableOpacity
                 activeOpacity={0.7}
                 onPress={() => handlePickImage(false)}
@@ -312,12 +362,13 @@ const styles = StyleSheet.create({
   imagePlaceholderBox: {
     alignItems: 'center',
     paddingVertical: 12,
+    width: '100%',
   },
-  imageBoxText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: COLORS.primaryAccent,
-    marginTop: 8,
+  previewImage: {
+    width: '100%',
+    height: 180,
+    borderRadius: RADIUS.md,
+    backgroundColor: COLORS.backgroundSubtle,
   },
   retakeBtn: {
     marginTop: 10,

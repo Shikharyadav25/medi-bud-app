@@ -31,13 +31,24 @@ export default function DashboardPage() {
     async function loadData() {
       try {
         const repList = await apiClient.getReports();
-        setReports(repList);
+        if (repList && repList.length > 0) {
+          setReports(repList);
+        }
       } catch {
         // Fallback default demonstration reports
         setReports([
           { id: 'rep-demo-1', filename: 'CBC_Metabolic_Panel.pdf', report_date: '2026-09-20', status: 'ready' },
           { id: 'rep-demo-2', filename: 'Lipid_Profile_Sept.pdf', report_date: '2026-09-28', status: 'review_needed' }
         ]);
+      }
+
+      try {
+        const remList = await apiClient.getReminders();
+        if (remList && remList.length > 0) {
+          setReminders(remList.map(r => ({ ...r, completed: false })));
+        }
+      } catch {
+        // Keep default initial reminders
       }
     }
     loadData();
@@ -55,9 +66,13 @@ export default function DashboardPage() {
     const nextWater = waterMl + amount;
     setWaterMl(nextWater);
 
+    const demoUserId = typeof window !== 'undefined'
+      ? (localStorage.getItem('medi_bud_demo_user') || '00000000-0000-0000-0000-000000000001')
+      : '00000000-0000-0000-0000-000000000001';
+
     const mutation = {
       mutation_id: crypto.randomUUID(),
-      user_id: 'current_user',
+      user_id: demoUserId,
       device_id: 'web_browser',
       entity_type: 'health_log' as const,
       payload: { kind: 'water', value: nextWater, unit: 'ml' },
@@ -85,8 +100,22 @@ export default function DashboardPage() {
     await queueOfflineMutation(mutation);
   };
 
-  const handleToggleReminder = (id: string) => {
-    setReminders(prev => prev.map(r => r.id === id ? { ...r, completed: !r.completed } : r));
+  const handleToggleReminder = async (id: string) => {
+    const target = reminders.find(r => r.id === id);
+    const nextCompleted = !target?.completed;
+    setReminders(prev => prev.map(r => r.id === id ? { ...r, completed: nextCompleted } : r));
+
+    if (nextCompleted) {
+      try {
+        await apiClient.completeReminder(id, {
+          due_at: new Date().toISOString(),
+          completed_at: new Date().toISOString(),
+          mutation_id: crypto.randomUUID()
+        });
+      } catch {
+        // Local state preserved
+      }
+    }
   };
 
   return (

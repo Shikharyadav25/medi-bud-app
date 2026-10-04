@@ -25,15 +25,15 @@ This document formalizes individual domain ownership, deliverables, peer review 
 
 ```mermaid
 flowchart LR
-    SR[Shivaji: Web UX] <-->|UI/UX Parity & Design Tokens| SGau[Shaurya G: Mobile Native]
-    SGu[Shaurya G: Backend API] <-->|RLS & Schemas| SG[Shreshth: Database & Security]
-    SD[Shikhar D: AI & NLP] <-->|Contracts & Grounding| SY[Shikhar Y: Arch & Lead]
+    SG[Shreshth: Web UX] <-->|UI/UX Parity & Design Tokens| SGau[Shaurya G: Mobile Native]
+    SGu[Shaurya G: Backend API] <-->|RLS & Schemas| SD[Shikhar D: Database & Security]
+    SR[Shivaji: AI & NLP] <-->|Contracts & Grounding| SY[Shikhar Y: Arch & Lead]
 ```
 
 ### Handoff Protocol
 1. **Frontend ↔ Backend:**  
-   Shaurya Gupta (Backend) publishes the OpenAPI schema `/v1/openapi.json`. Shikhar Yadav generates the typed client in `packages/api-client`. Shivaji Rajawat (Web) and Shaurya Gautam (Mobile) consume this client; no hand-typed raw URLs or untyped fetch calls are permitted.
+   Shaurya Gupta (Backend) publishes the OpenAPI schema `/v1/openapi.json`. Shikhar Yadav generates the typed client in `packages/api-client`. Shreshth Gupta and Shaurya Gautam consume this client; no hand-typed raw URLs or untyped fetch calls are permitted.
 2. **Database ↔ Backend:**  
-   Shreshth Gupta (Database) defines table schemas, constraints, and RLS policies in `supabase/migrations/`. Shaurya Gupta enforces that all routine queries pass user tokens so RLS applies, and the worker process verifies ownership before executing background updates.
+   Shikhar Dubey defines table schemas, constraints, and RLS policies in `supabase/migrations/`. Shaurya Gupta enforces that all routine queries pass user tokens so RLS applies, and the worker process verifies ownership before executing background updates.
 3. **AI ↔ Frontend:**  
-   Shikhar Dubey (AI/NLP) defines the observation review schema (with original test label, canonical test, numeric value, comparator, unit, reference interval, and review state). Both Web and Mobile present these exact fields for user confirmation before facts can be used in cited Q&A.
+   Shivaji Rajawat defines the observation review schema (with original test label, canonical test, numeric value, comparator, unit, reference interval, and review state). Both Web and Mobile present these exact fields for user confirmation before facts can be used in cited Q&A.

@@ -37,29 +37,12 @@ export class AIService {
   }
 
   public static async analyzeMealPhoto(imageBase64: string, profile: UserProfile): Promise<MealAnalysisResult> {
-    const fallback: MealAnalysisResult = {
-      foodItems: [
-        { name: 'Multigrain Roti', quantity: '2 pieces', calories: 160, proteinG: 6, carbsG: 32, fatG: 2 },
-        { name: 'Paneer Bhurji', quantity: '1 bowl (150g)', calories: 240, proteinG: 14, carbsG: 6, fatG: 18 },
-        { name: 'Tadkewali Moong Dal', quantity: '1 katori', calories: 120, proteinG: 7, carbsG: 18, fatG: 3 },
-      ],
-      totalCalories: 520,
-      totalProteinG: 27,
-      totalCarbsG: 56,
-      totalFatG: 23,
-      healthAssessment: 'Nutritionally dense Indian vegetarian meal with adequate protein and complex carbs.',
-      isEstimated: true,
-      suggestions: ['Great protein distribution.', 'Pair with lemon or fresh salad for micronutrient absorption.'],
-      disclaimer: 'AI can make mistakes, so always double check important health information with a qualified healthcare professional.',
-    };
-
-    return apiClient(
+    return apiClient<MealAnalysisResult>(
       '/api/ai/analyze-meal',
       {
         method: 'POST',
         body: JSON.stringify({ imageBase64, profile }),
-      },
-      fallback
+      }
     );
   }
 

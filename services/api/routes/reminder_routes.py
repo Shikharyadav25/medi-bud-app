@@ -6,7 +6,24 @@ from auth import get_current_user, AuthenticatedUser
 
 reminder_router = APIRouter(prefix="/v1/reminders", tags=["Reminders"])
 
-_USER_REMINDERS: List[Dict[str, Any]] = []
+_USER_REMINDERS: List[Dict[str, Any]] = [
+    {
+        "id": "rem-1",
+        "user_id": "00000000-0000-0000-0000-000000000001",
+        "label": "Morning hydration (2 glasses of water)",
+        "user_entered_schedule": "08:00 AM",
+        "timezone": "Asia/Kolkata",
+        "enabled": True
+    },
+    {
+        "id": "rem-2",
+        "user_id": "00000000-0000-0000-0000-000000000001",
+        "label": "Evening brisk walk (30 mins)",
+        "user_entered_schedule": "06:00 PM",
+        "timezone": "Asia/Kolkata",
+        "enabled": True
+    }
+]
 _USER_COMPLETIONS: List[Dict[str, Any]] = []
 
 class ReminderCreate(BaseModel):

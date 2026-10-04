@@ -13,6 +13,7 @@ from routes.chat_routes import chat_router
 from routes.diet_routes import diet_router
 from routes.care_routes import care_router
 from routes.symptom_routes import symptom_router
+from routes.mobile_ai_routes import mobile_ai_router
 from services.embedding_service import get_embedding_model
 
 app = FastAPI(
@@ -73,6 +74,7 @@ app.include_router(chat_router)
 app.include_router(diet_router)
 app.include_router(care_router)
 app.include_router(symptom_router)
+app.include_router(mobile_ai_router)
 
 if __name__ == "__main__":
     import uvicorn

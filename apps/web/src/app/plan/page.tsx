@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import type { MealPlanDTO } from '@medi-bud/contracts';
 import { apiClient } from '@/lib/api';
+import { getCurrentAccessToken } from '@/lib/supabase';
 import { MealDayCard } from '@/components/MealDayCard';
 import { 
   Utensils, 
@@ -77,6 +78,19 @@ export default function MealPlanPage() {
     );
   };
 
+  const handleDownloadPdf = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (!plan?.id) return;
+    try {
+      const token = await getCurrentAccessToken();
+      const base = apiClient.getPlanPdfUrl(plan.id);
+      const url = token ? `${base}?token=${encodeURIComponent(token)}` : base;
+      window.open(url, '_blank');
+    } catch {
+      window.open(apiClient.getPlanPdfUrl(plan.id), '_blank');
+    }
+  };
+
   const selectedDay = plan?.days.find((d) => d.day === selectedDayNum) || plan?.days[0];
 
   return (
@@ -94,15 +108,14 @@ export default function MealPlanPage() {
 
         {plan && (
           <div className="flex items-center gap-2">
-            <a
-              href={apiClient.getPlanPdfUrl(plan.id)}
-              target="_blank"
-              rel="noreferrer"
-              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-(--primary) text-white text-xs font-medium hover:bg-(--primary-hover) transition-colors shadow-sm"
+            <button
+              onClick={handleDownloadPdf}
+              type="button"
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-(--primary) text-white text-xs font-medium hover:bg-(--primary-hover) transition-colors shadow-sm cursor-pointer"
             >
               <Download className="w-3.5 h-3.5" />
               Download Plan PDF
-            </a>
+            </button>
           </div>
         )}
       </div>

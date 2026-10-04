@@ -16,14 +16,16 @@ class Settings(BaseSettings):
     
     # Optional Gemini Provider (Graceful degradation when None)
     GEMINI_API_KEY: Optional[str] = os.getenv("GEMINI_API_KEY", None)
-    GEMINI_MODEL: str = os.getenv("GEMINI_MODEL", "gemini-1.5-flash")
+    GEMINI_MODEL: str = os.getenv("GEMINI_MODEL", "gemini-3.8-flash")
     
     # CORS & Limits
     ALLOWED_ORIGINS: List[str] = [
         "http://localhost:3000",
+        "http://localhost:3001",
         "http://localhost:8081",
         "http://localhost:19006",
         "http://127.0.0.1:3000",
+        "http://127.0.0.1:3001",
         "http://127.0.0.1:8081"
     ]
     MAX_UPLOAD_SIZE_BYTES: int = 10 * 1024 * 1024 # 10 MB limit

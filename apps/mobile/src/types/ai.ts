@@ -40,6 +40,8 @@ export interface SevenDayDietPlan {
 }
 
 export interface MealAnalysisResult {
+  isFood?: boolean;
+  error?: string;
   foodItems: Array<{ name: string; quantity: string; calories: number; proteinG: number; carbsG: number; fatG: number }>;
   totalCalories: number;
   totalProteinG: number;
