@@ -9,6 +9,9 @@ interface HealthScoreProps {
   maxScore?: number;
   showPremiumLock?: boolean;
   onPressGoal?: () => void;
+  hydrationPercent?: number;
+  dietPercent?: number;
+  habitsPercent?: number;
 }
 
 export const HealthScore: React.FC<HealthScoreProps> = ({
@@ -16,6 +19,9 @@ export const HealthScore: React.FC<HealthScoreProps> = ({
   maxScore = 100,
   showPremiumLock = true,
   onPressGoal,
+  hydrationPercent = 85,
+  dietPercent = 80,
+  habitsPercent = 82,
 }) => {
   const percentage = Math.min(100, Math.max(0, (score / maxScore) * 100));
 
@@ -64,15 +70,15 @@ export const HealthScore: React.FC<HealthScoreProps> = ({
       <View style={styles.factorsRow}>
         <View style={[styles.factorPill, { backgroundColor: '#E1F5FE' }]}>
           <Feather name="droplet" size={12} color={COLORS.appleBlue} />
-          <Text style={[styles.factorLabel, { color: COLORS.appleBlue }]}>Hydration 85%</Text>
+          <Text style={[styles.factorLabel, { color: COLORS.appleBlue }]}>Hydration {hydrationPercent}%</Text>
         </View>
         <View style={[styles.factorPill, { backgroundColor: '#E8F5E9' }]}>
           <MaterialCommunityIcons name="silverware-fork-knife" size={12} color={COLORS.appleGreen} />
-          <Text style={[styles.factorLabel, { color: COLORS.appleGreen }]}>Diet 80%</Text>
+          <Text style={[styles.factorLabel, { color: COLORS.appleGreen }]}>Diet {dietPercent}%</Text>
         </View>
         <View style={[styles.factorPill, { backgroundColor: '#FFF3E0' }]}>
           <Feather name="activity" size={12} color={COLORS.appleOrange} />
-          <Text style={[styles.factorLabel, { color: COLORS.appleOrange }]}>Habits 82%</Text>
+          <Text style={[styles.factorLabel, { color: COLORS.appleOrange }]}>Habits {habitsPercent}%</Text>
         </View>
       </View>
 

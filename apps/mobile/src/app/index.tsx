@@ -6,19 +6,22 @@ import { useAuthStore } from '../store/useAuthStore';
 
 export default function IndexScreen() {
   const router = useRouter();
-  const { isOnboardingCompleted, isAuthenticated } = useAuthStore();
+  const { isOnboardingCompleted, isAuthenticated, hasHydrated } = useAuthStore();
 
   useEffect(() => {
+    if (!hasHydrated) return;
     const timer = setTimeout(() => {
       if (isOnboardingCompleted && isAuthenticated) {
         router.replace('/(tabs)');
+      } else if (isAuthenticated) {
+        router.replace('/(onboarding)/health-data');
       } else {
         router.replace('/(onboarding)/splash');
       }
     }, 150);
 
     return () => clearTimeout(timer);
-  }, [isOnboardingCompleted, isAuthenticated, router]);
+  }, [isOnboardingCompleted, isAuthenticated, hasHydrated, router]);
 
   return (
     <View style={styles.container}>

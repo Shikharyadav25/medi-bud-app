@@ -13,6 +13,8 @@ export default function OnboardingLayout() {
       <Stack.Screen name="health-data" />
       <Stack.Screen name="goals" />
       <Stack.Screen name="preferences" />
+      <Stack.Screen name="family" />
+      <Stack.Screen name="daily-goals" />
       <Stack.Screen name="assistant-preview" />
     </Stack>
   );

@@ -102,7 +102,7 @@ export default function PreferencesScreen() {
         preferred: chosenNames.length > 0 ? chosenNames : ['Dal + Roti', 'Paneer Rice', 'Vegetable Poha'],
         spiciness: 'medium',
       });
-      router.push('/(onboarding)/assistant-preview');
+      router.push('/(onboarding)/family');
     }
   };
 

@@ -25,6 +25,7 @@ export default function ReportUploadScreen() {
   const { addReport } = useHealthStore();
 
   const [selectedFileName, setSelectedFileName] = useState<string | null>(null);
+  const [selectedFile, setSelectedFile] = useState<{ uri: string; mimeType: string; base64?: string } | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
 
   const handlePickDocument = async () => {
@@ -35,11 +36,12 @@ export default function ReportUploadScreen() {
       });
 
       if (!res.canceled && res.assets && res.assets.length > 0) {
-        setSelectedFileName(res.assets[0].name);
+        const asset = res.assets[0];
+        setSelectedFileName(asset.name);
+        setSelectedFile({ uri: asset.uri, mimeType: asset.mimeType || 'application/pdf' });
       }
     } catch {
-      // Fallback for simulation
-      setSelectedFileName('CBC_Lipid_Profile_March2026.pdf');
+      Alert.alert('File Picker Error', 'Could not open the document picker. Please try again.');
     }
   };
 
@@ -48,23 +50,40 @@ export default function ReportUploadScreen() {
       const res = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ['images'],
         quality: 0.8,
+        base64: true,
       });
 
       if (!res.canceled && res.assets && res.assets.length > 0) {
-        setSelectedFileName(res.assets[0].fileName || 'Lab_Report_Scan.jpg');
+        const asset = res.assets[0];
+        setSelectedFileName(asset.fileName || 'Lab_Report_Scan.jpg');
+        setSelectedFile({ uri: asset.uri, mimeType: asset.mimeType || 'image/jpeg', base64: asset.base64 || undefined });
       }
     } catch {
-      setSelectedFileName('Lab_Report_Scan.jpg');
+      Alert.alert('Gallery Error', 'Could not open your photo library. Please try again.');
     }
   };
 
   const handleProcessReport = async () => {
+    if (!selectedFile || !selectedFileName) return;
     setIsProcessing(true);
     try {
-      const report = await AIService.analyzeMedicalReport(
-        '',
-        selectedFileName || 'Annual Health Check: CBC & Metabolic Profile'
-      );
+      let base64 = selectedFile.base64 || '';
+      if (!base64) {
+        const response = await fetch(selectedFile.uri);
+        const blob = await response.blob();
+        base64 = await new Promise<string>((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onloadend = () => resolve(String(reader.result || '').split('base64,').pop() || '');
+          reader.onerror = () => reject(new Error('Could not read selected file'));
+          reader.readAsDataURL(blob);
+        });
+      }
+      const analysis = await AIService.analyzeMedicalReport(base64, selectedFile.mimeType, selectedFileName);
+      if (!analysis.isMedicalReport || !analysis.report) {
+        Alert.alert('Not a Medical Report', analysis.error || 'Choose a clear lab report, prescription, or diagnostic document.');
+        return;
+      }
+      const report = analysis.report;
       addReport(report);
       Alert.alert(
         'Report Processed & Indexed',
@@ -77,8 +96,7 @@ export default function ReportUploadScreen() {
         ]
       );
     } catch {
-      Alert.alert('Processing Notice', 'Using saved laboratory profile in demo mode.');
-      router.back();
+      Alert.alert('Analysis Unavailable', 'The report could not be validated. Check that the backend and Gemini service are reachable, then try again.');
     } finally {
       setIsProcessing(false);
     }
@@ -135,7 +153,7 @@ export default function ReportUploadScreen() {
               <Feather name="check-circle" size={18} color="#2E7D32" />
               <View style={styles.fileInfo}>
                 <Text style={styles.fileName}>{selectedFileName}</Text>
-                <Text style={styles.fileStatus}>Ready for AI extraction & RAG indexing</Text>
+                <Text style={styles.fileStatus}>Selected • identity and contents will be validated before saving</Text>
               </View>
             </View>
           </Card>
@@ -162,7 +180,7 @@ export default function ReportUploadScreen() {
           title={isProcessing ? 'Analyzing & Indexing...' : 'Extract & Index Report'}
           variant="cta"
           loading={isProcessing}
-          disabled={!selectedFileName || isProcessing}
+          disabled={!selectedFile || isProcessing}
           onPress={handleProcessReport}
           style={styles.processBtn}
         />

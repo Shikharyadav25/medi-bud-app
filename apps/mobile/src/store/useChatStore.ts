@@ -26,7 +26,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
     {
       id: 'msg-init-1',
       sender: 'ai',
-      text: 'Hey, Aarav! Looking for something that helps you feel your best? Ask me about your nutrition, reports, workouts, or daily habits.',
+      text: 'Hi! Ask me about your nutrition, reports, workouts, or daily habits. I’ll use only the health context available in your account.',
       timestamp: 'Just now',
       disclaimer: 'AI can make mistakes, so always double check important health information with a qualified healthcare professional.',
     },

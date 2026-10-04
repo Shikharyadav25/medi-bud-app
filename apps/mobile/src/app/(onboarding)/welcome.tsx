@@ -67,7 +67,7 @@ export default function WelcomeScreen() {
           <Button
             title="Start your journey"
             variant="cta"
-            onPress={() => router.push('/(onboarding)/health-data')}
+            onPress={() => router.push('/(auth)/login')}
             style={styles.ctaButton}
           />
         </View>

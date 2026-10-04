@@ -1,24 +1,29 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, SafeAreaView, TouchableOpacity, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, SafeAreaView, TouchableOpacity, ScrollView, Alert } from 'react-native';
 import { Feather, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { COLORS, TYPOGRAPHY } from '../../constants/theme';
 import { Input } from '../../components/ui/Input';
 import { Button } from '../../components/ui/Button';
 import { useAuthStore } from '../../store/useAuthStore';
+import { useHealthStore } from '../../store/useHealthStore';
 
 export default function SignupScreen() {
   const router = useRouter();
-  const { setProfile } = useAuthStore();
+  const { createAccount } = useAuthStore();
+  const { resetForNewUser } = useHealthStore();
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
 
   const handleSignup = () => {
-    if (name.trim()) {
-      setProfile({ name: name.trim(), phone: phone.trim() });
+    if (name.trim().length < 2 || !/^\+?[0-9\s-]{10,15}$/.test(phone.trim()) || password.length < 6) {
+      Alert.alert('Check your details', 'Enter your full name, a valid phone number, and a password of at least 6 characters.');
+      return;
     }
-    router.push('/(onboarding)/goals');
+    createAccount(name.trim(), phone.trim());
+    resetForNewUser();
+    router.replace('/(onboarding)/health-data');
   };
 
   return (
@@ -29,7 +34,7 @@ export default function SignupScreen() {
             <MaterialCommunityIcons name="heart-pulse" size={28} color="#FFFFFF" />
           </View>
           <Text style={styles.title}>Create your account</Text>
-          <Text style={styles.subtitle}>Join thousands of Indian users taking charge of their health</Text>
+          <Text style={styles.subtitle}>Build a private health profile tailored to your everyday goals</Text>
         </View>
 
         <View style={styles.form}>

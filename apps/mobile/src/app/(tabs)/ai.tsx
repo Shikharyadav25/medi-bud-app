@@ -22,7 +22,7 @@ import { AIService } from '../../services/api/aiService';
 
 export default function AIChatScreen() {
   const { profile } = useAuthStore();
-  const { vitals, waterIntakeMl, recentMeals } = useHealthStore();
+  const { vitals, waterIntakeMl, recentMeals, reports } = useHealthStore();
   const { messages, isLoading, isListening, suggestions, addMessage, setLoading, setListening, clearMessages } =
     useChatStore();
 
@@ -53,7 +53,8 @@ export default function AIChatScreen() {
         profile,
         vitals,
         waterIntakeMl,
-        mealsSummary
+        mealsSummary,
+        reports
       );
 
       addMessage({

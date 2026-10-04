@@ -4,12 +4,15 @@ import { StatusBar } from 'expo-status-bar';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { StyleSheet } from 'react-native';
 import { useAuthStore } from '../store/useAuthStore';
+import { useHealthStore } from '../store/useHealthStore';
 
 export default function RootLayout() {
   const { loadStoredProfile } = useAuthStore();
+  const { loadStoredHealth } = useHealthStore();
 
   useEffect(() => {
     loadStoredProfile();
+    loadStoredHealth();
   }, []);
 
   return (

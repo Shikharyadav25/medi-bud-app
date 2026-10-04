@@ -19,50 +19,124 @@ import { Card } from '../../components/ui/Card';
 import { Chip } from '../../components/ui/Chip';
 import { Button } from '../../components/ui/Button';
 import { DisclaimerBadge } from '../../components/ai/DisclaimerBadge';
-import { CareService, HealthcareFacility } from '../../services/api/careService';
+import { CareService, CareType, HealthcareFacility } from '../../services/api/careService';
 import { AIService } from '../../services/api/aiService';
 import { SymptomTriageResult } from '../../types/ai';
 
 export default function NearbyCareScreen() {
   const router = useRouter();
-  const [activeType, setActiveType] = useState<'all' | 'hospital' | 'clinic' | 'pharmacy'>('all');
+  const [activeType, setActiveType] = useState<CareType>('all');
+  const [radiusMeters, setRadiusMeters] = useState(5000);
   const [facilities, setFacilities] = useState<HealthcareFacility[]>([]);
   const [loadingCare, setLoadingCare] = useState(false);
+  const [coordinates, setCoordinates] = useState<{ lat: number; lng: number } | null>(null);
+  const [locationAccuracy, setLocationAccuracy] = useState<number | null>(null);
+  const [locationLabel, setLocationLabel] = useState('Waiting for location permission');
+  const [locationState, setLocationState] = useState<
+    'requesting' | 'ready' | 'denied' | 'services-disabled' | 'error'
+  >('requesting');
+  const [careError, setCareError] = useState<string | null>(null);
 
   // Symptom Triage State
   const [symptomInput, setSymptomInput] = useState('');
   const [triageLoading, setTriageLoading] = useState(false);
   const [triageResult, setTriageResult] = useState<SymptomTriageResult | null>(null);
 
-  useEffect(() => {
-    loadNearbyFacilities();
-  }, [activeType]);
-
-  const loadNearbyFacilities = async () => {
-    setLoadingCare(true);
-    let lat = 28.6139; // Delhi NCR center
-    let lng = 77.2090;
-
+  const requestLiveLocation = async () => {
+    setLocationState('requesting');
+    setLocationLabel('Getting your current location...');
+    setCareError(null);
     try {
-      const { status } = await Location.getForegroundPermissionsAsync();
-      if (status === 'granted') {
-        const loc = await Location.getCurrentPositionAsync({});
-        lat = loc.coords.latitude;
-        lng = loc.coords.longitude;
+      const servicesEnabled = await Location.hasServicesEnabledAsync();
+      if (!servicesEnabled) {
+        setCoordinates(null);
+        setFacilities([]);
+        setLocationState('services-disabled');
+        setLocationLabel('Location services are turned off');
+        return;
       }
-    } catch {
-      // Keep default coordinates
-    }
 
-    try {
-      const data = await CareService.getNearbyCare(lat, lng, activeType);
-      setFacilities(data);
-    } catch {
-      // Fallback handled in service
-    } finally {
-      setLoadingCare(false);
+      const permission = await Location.requestForegroundPermissionsAsync();
+      if (permission.status !== 'granted') {
+        setCoordinates(null);
+        setFacilities([]);
+        setLocationState('denied');
+        setLocationLabel('Location permission is required for nearby results');
+        return;
+      }
+
+      const current = await Location.getCurrentPositionAsync({
+        accuracy: Location.Accuracy.Balanced,
+        mayShowUserSettingsDialog: true,
+      });
+      const nextCoordinates = {
+        lat: current.coords.latitude,
+        lng: current.coords.longitude,
+      };
+      setCoordinates(nextCoordinates);
+      setLocationAccuracy(current.coords.accuracy);
+      setLocationState('ready');
+      setLocationLabel(
+        `${nextCoordinates.lat.toFixed(4)}, ${nextCoordinates.lng.toFixed(4)}`
+      );
+
+      try {
+        const places = await Location.reverseGeocodeAsync({
+          latitude: nextCoordinates.lat,
+          longitude: nextCoordinates.lng,
+        });
+        const place = places[0];
+        const readablePlace = [place?.district, place?.city, place?.region]
+          .filter((value, index, values) => Boolean(value) && values.indexOf(value) === index)
+          .join(', ');
+        if (readablePlace) setLocationLabel(readablePlace);
+      } catch {
+        // Coordinates remain visible if reverse geocoding is unavailable.
+      }
+    } catch (error) {
+      console.warn('[Nearby Care] Unable to get current location.', error);
+      setCoordinates(null);
+      setFacilities([]);
+      setLocationState('error');
+      setLocationLabel('Could not determine your current location');
     }
   };
+
+  useEffect(() => {
+    void requestLiveLocation();
+  }, []);
+
+  useEffect(() => {
+    if (!coordinates) return;
+    let cancelled = false;
+
+    const loadNearbyFacilities = async () => {
+      setLoadingCare(true);
+      setCareError(null);
+      try {
+        const data = await CareService.getNearbyCare(
+          coordinates.lat,
+          coordinates.lng,
+          activeType,
+          radiusMeters
+        );
+        if (!cancelled) setFacilities(data);
+      } catch (error) {
+        console.warn('[Nearby Care] Facility search failed.', error);
+        if (!cancelled) {
+          setFacilities([]);
+          setCareError('Could not load live care results. Check your connection and try again.');
+        }
+      } finally {
+        if (!cancelled) setLoadingCare(false);
+      }
+    };
+
+    void loadNearbyFacilities();
+    return () => {
+      cancelled = true;
+    };
+  }, [coordinates, activeType, radiusMeters]);
 
   const handleRunTriage = async () => {
     if (!symptomInput.trim() || triageLoading) return;
@@ -85,9 +159,16 @@ export default function NearbyCareScreen() {
     }
   };
 
-  const handleDirections = (lat: number, lng: number, name: string) => {
-    const url = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(name + ' ' + lat + ',' + lng)}`;
-    Linking.openURL(url);
+  const handleDirections = (facility: HealthcareFacility) => {
+    Linking.openURL(facility.mapUrl);
+  };
+
+  const handleOpenSettings = async () => {
+    try {
+      await Linking.openSettings();
+    } catch {
+      Alert.alert('Location settings', 'Enable location permission for Medi Bud in device settings.');
+    }
   };
 
   return (
@@ -100,7 +181,7 @@ export default function NearbyCareScreen() {
           </TouchableOpacity>
           <View>
             <Text style={styles.headerTitle}>Nearby Healthcare</Text>
-            <Text style={styles.headerSub}>OpenStreetMap Facilities & Symptom Guidance</Text>
+            <Text style={styles.headerSub}>Live GPS results & symptom guidance</Text>
           </View>
         </View>
 
@@ -163,7 +244,75 @@ export default function NearbyCareScreen() {
         <DisclaimerBadge />
 
         {/* 2. Facility Type Filters */}
-        <Text style={styles.sectionHeader}>OpenStreetMap Care Centers</Text>
+        <Text style={styles.sectionHeader}>Care near your live location</Text>
+        <Card style={styles.locationCard}>
+          <View style={styles.locationTopRow}>
+            <View style={styles.locationIcon}>
+              {locationState === 'requesting' ? (
+                <ActivityIndicator size="small" color={COLORS.primaryAccent} />
+              ) : (
+                <Feather
+                  name={locationState === 'ready' ? 'map-pin' : 'alert-circle'}
+                  size={18}
+                  color={locationState === 'ready' ? COLORS.appleGreen : COLORS.appleOrange}
+                />
+              )}
+            </View>
+            <View style={styles.locationCopy}>
+              <Text style={styles.locationStatus}>
+                {locationState === 'ready' ? 'Using your current location' : 'Location needed'}
+              </Text>
+              <Text style={styles.locationLabel}>{locationLabel}</Text>
+              {locationState === 'ready' && locationAccuracy != null && (
+                <Text style={styles.accuracyText}>GPS accuracy ±{Math.round(locationAccuracy)} m</Text>
+              )}
+            </View>
+            <TouchableOpacity
+              accessibilityRole="button"
+              accessibilityLabel="Refresh current location"
+              onPress={() => void requestLiveLocation()}
+              style={styles.refreshButton}
+              disabled={locationState === 'requesting'}
+            >
+              <Feather name="refresh-cw" size={17} color={COLORS.primaryAccent} />
+            </TouchableOpacity>
+          </View>
+
+          {(locationState === 'denied' || locationState === 'services-disabled') && (
+            <Button
+              title="Open Location Settings"
+              variant="outline"
+              onPress={() => void handleOpenSettings()}
+              style={styles.settingsButton}
+            />
+          )}
+          {locationState === 'error' && (
+            <Button
+              title="Try Location Again"
+              variant="outline"
+              onPress={() => void requestLiveLocation()}
+              style={styles.settingsButton}
+            />
+          )}
+        </Card>
+
+        {locationState === 'ready' && (
+          <>
+            <Text style={styles.filterLabel}>Search distance</Text>
+            <View style={styles.filterRow}>
+              {[2000, 5000, 10000].map((radius) => (
+                <Chip
+                  key={radius}
+                  label={`${radius / 1000} km`}
+                  selected={radiusMeters === radius}
+                  onPress={() => setRadiusMeters(radius)}
+                />
+              ))}
+            </View>
+          </>
+        )}
+
+        <Text style={styles.filterLabel}>Facility type</Text>
         <View style={styles.filterRow}>
           {[
             { key: 'all', label: 'All Centers' },
@@ -175,7 +324,7 @@ export default function NearbyCareScreen() {
               key={item.key}
               label={item.label}
               selected={activeType === item.key}
-              onPress={() => setActiveType(item.key as any)}
+              onPress={() => setActiveType(item.key as CareType)}
             />
           ))}
         </View>
@@ -185,6 +334,30 @@ export default function NearbyCareScreen() {
             <ActivityIndicator size="small" color={COLORS.primaryAccent} />
             <Text style={styles.loadingText}>Locating nearest medical centers...</Text>
           </View>
+        )}
+
+        {careError && !loadingCare && (
+          <Card style={styles.messageCard}>
+            <Feather name="wifi-off" size={20} color={COLORS.appleOrange} />
+            <Text style={styles.messageTitle}>Live results unavailable</Text>
+            <Text style={styles.messageText}>{careError}</Text>
+            <Button
+              title="Retry Search"
+              variant="outline"
+              onPress={() => void requestLiveLocation()}
+              style={styles.retryButton}
+            />
+          </Card>
+        )}
+
+        {locationState === 'ready' && !loadingCare && !careError && facilities.length === 0 && (
+          <Card style={styles.messageCard}>
+            <Feather name="search" size={20} color={COLORS.textSecondary} />
+            <Text style={styles.messageTitle}>No matching places found</Text>
+            <Text style={styles.messageText}>
+              Try All Centers or increase the search distance.
+            </Text>
+          </Card>
         )}
 
         {/* 3. Facilities List */}
@@ -211,6 +384,13 @@ export default function NearbyCareScreen() {
             <Text style={styles.facilityName}>{fac.name}</Text>
             <Text style={styles.facilityAddress}>{fac.address}</Text>
 
+            {fac.openingHours && (
+              <View style={styles.detailRow}>
+                <Feather name="clock" size={12} color={COLORS.textSecondary} />
+                <Text style={styles.detailText}>{fac.openingHours}</Text>
+              </View>
+            )}
+
             {fac.emergencyAvailable && (
               <View style={styles.emergencyAvailBadge}>
                 <Feather name="zap" size={12} color="#C62828" />
@@ -230,7 +410,7 @@ export default function NearbyCareScreen() {
 
               <TouchableOpacity
                 activeOpacity={0.8}
-                onPress={() => handleDirections(fac.latitude, fac.longitude, fac.name)}
+                onPress={() => handleDirections(fac)}
                 style={styles.directionsBtn}
               >
                 <Feather name="navigation" size={14} color="#FFFFFF" />
@@ -239,6 +419,10 @@ export default function NearbyCareScreen() {
             </View>
           </Card>
         ))}
+
+        {facilities.length > 0 && (
+          <Text style={styles.attribution}>Place data © OpenStreetMap contributors</Text>
+        )}
       </ScrollView>
     </SafeAreaView>
   );
@@ -357,6 +541,57 @@ const styles = StyleSheet.create({
     marginBottom: 8,
     fontFamily: TYPOGRAPHY.serifHeading,
   },
+  locationCard: {
+    padding: 14,
+    marginBottom: 14,
+  },
+  locationTopRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  locationIcon: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: COLORS.backgroundSubtle,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 10,
+  },
+  locationCopy: {
+    flex: 1,
+  },
+  locationStatus: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: COLORS.textPrimary,
+  },
+  locationLabel: {
+    fontSize: 12,
+    color: COLORS.textSecondary,
+    marginTop: 2,
+  },
+  accuracyText: {
+    fontSize: 10.5,
+    color: COLORS.textMuted,
+    marginTop: 2,
+  },
+  refreshButton: {
+    width: 36,
+    height: 36,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  settingsButton: {
+    height: 42,
+    marginTop: 12,
+  },
+  filterLabel: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: COLORS.textSecondary,
+    marginBottom: 6,
+  },
   filterRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',
@@ -372,6 +607,29 @@ const styles = StyleSheet.create({
   loadingText: {
     fontSize: 12.5,
     color: COLORS.textSecondary,
+  },
+  messageCard: {
+    padding: 18,
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  messageTitle: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: COLORS.textPrimary,
+    marginTop: 8,
+  },
+  messageText: {
+    fontSize: 12,
+    color: COLORS.textSecondary,
+    textAlign: 'center',
+    lineHeight: 17,
+    marginTop: 4,
+  },
+  retryButton: {
+    height: 40,
+    marginTop: 12,
+    alignSelf: 'stretch',
   },
   facilityCard: {
     padding: 16,
@@ -412,6 +670,17 @@ const styles = StyleSheet.create({
     fontSize: 12.5,
     color: COLORS.textSecondary,
     marginBottom: 10,
+  },
+  detailRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    marginBottom: 9,
+  },
+  detailText: {
+    flex: 1,
+    fontSize: 11.5,
+    color: COLORS.textSecondary,
   },
   emergencyAvailBadge: {
     flexDirection: 'row',
@@ -462,5 +731,11 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: '600',
     color: '#FFFFFF',
+  },
+  attribution: {
+    fontSize: 10.5,
+    color: COLORS.textMuted,
+    textAlign: 'center',
+    marginTop: 4,
   },
 });

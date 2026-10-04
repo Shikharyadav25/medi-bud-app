@@ -1,20 +1,39 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, SafeAreaView, TouchableOpacity, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, SafeAreaView, TouchableOpacity, ScrollView, Alert } from 'react-native';
 import { Feather, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { COLORS, TYPOGRAPHY } from '../../constants/theme';
 import { Input } from '../../components/ui/Input';
 import { Button } from '../../components/ui/Button';
 import { useAuthStore } from '../../store/useAuthStore';
+import { useHealthStore } from '../../store/useHealthStore';
 
 export default function LoginScreen() {
   const router = useRouter();
-  const { setProfile, resetToDemoUser } = useAuthStore();
-  const [identifier, setIdentifier] = useState('+919876543210');
-  const [password, setPassword] = useState('password123');
+  const { profile, authenticate, resetToDemoUser } = useAuthStore();
+  const resetDemoHealth = useHealthStore((state) => state.resetToDemoUser);
+  const [identifier, setIdentifier] = useState('');
+  const [password, setPassword] = useState('');
 
   const handleLogin = () => {
+    if (!identifier.trim() || password.length < 6) {
+      Alert.alert('Unable to sign in', 'Enter your phone number or Health ID and a password of at least 6 characters.');
+      return;
+    }
+    const normalized = identifier.replace(/\s|-/g, '').toLowerCase();
+    const phoneMatches = profile.phone.replace(/\s|-/g, '').toLowerCase() === normalized;
+    const idMatches = !!profile.healthId && profile.healthId.replace(/\s|-/g, '').toLowerCase() === normalized;
+    if (!profile.id || (!phoneMatches && !idMatches)) {
+      Alert.alert('Account not found', 'No account on this device matches that phone number or Health ID. Sign up first or use the demo account.');
+      return;
+    }
+    authenticate();
+    router.replace(profile.onboardingCompleted ? '/(tabs)' : '/(onboarding)/health-data');
+  };
+
+  const handleDemoLogin = () => {
     resetToDemoUser();
+    resetDemoHealth();
     router.replace('/(tabs)');
   };
 
@@ -57,7 +76,7 @@ export default function LoginScreen() {
           <Button
             title="Explore Demo Account (Aarav, 21)"
             variant="outline"
-            onPress={handleLogin}
+            onPress={handleDemoLogin}
             style={styles.demoBtn}
           />
         </View>

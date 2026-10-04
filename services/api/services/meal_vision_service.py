@@ -79,7 +79,7 @@ def analyze_meal_image(image_base64: str, profile: Optional[Dict[str, Any]] = No
     }
 
     primary_model = settings.GEMINI_MODEL or "gemini-3.8-flash"
-    models_to_try = [primary_model]
+    models_to_try = [primary_model, "gemini-2.5-flash"]
     if "gemini-flash-latest" not in models_to_try:
         models_to_try.append("gemini-flash-latest")
 

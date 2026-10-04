@@ -88,7 +88,7 @@ export default function GoalsScreen() {
         </View>
 
         <View style={styles.bmiCard}>
-          <Text style={styles.bmiTitle}>Baseline Profile for Aarav</Text>
+          <Text style={styles.bmiTitle}>Your baseline profile</Text>
           <Text style={styles.bmiStats}>
             Age: {profile.age} • Height: {profile.heightCm} cm • Weight: {profile.weightKg} kg (BMI: {profile.bmi})
           </Text>

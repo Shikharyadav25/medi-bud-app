@@ -1,17 +1,34 @@
-from fastapi import APIRouter, Query
-from services.care_service import query_nearby_healthcare
+from typing import Literal
+
+from fastapi import APIRouter, HTTPException, Query, status
+
+from services.care_service import CareProviderUnavailable, query_nearby_healthcare
+
 
 care_router = APIRouter(prefix="/v1", tags=["Nearby Healthcare Discovery"])
 
+
 @care_router.get("/care")
 async def get_nearby_care(
-    lat: float = Query(28.6139, description="Latitude (default: New Delhi)"),
-    lon: float = Query(77.2090, description="Longitude (default: New Delhi)"),
-    radius: int = Query(5000, description="Search radius in meters")
+    lat: float = Query(..., ge=-90, le=90, description="Device latitude"),
+    lon: float = Query(..., ge=-180, le=180, description="Device longitude"),
+    radius: int = Query(5000, ge=500, le=15000, description="Search radius in meters"),
+    type: Literal["all", "hospital", "clinic", "pharmacy"] = Query("all"),
 ):
-    """
-    Proxies bounded OpenStreetMap Overpass queries for hospitals, clinics,
-    pharmacies, and doctors without requiring proprietary map API keys.
-    """
-    facilities = await query_nearby_healthcare(lat=lat, lon=lon, radius_meters=min(15000, radius))
+    """Find actual OpenStreetMap care facilities around the user's location."""
+    try:
+        facilities = await query_nearby_healthcare(
+            lat=lat,
+            lon=lon,
+            radius_meters=radius,
+            facility_type=type,
+        )
+    except CareProviderUnavailable as exc:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Nearby care search is temporarily unavailable. Please try again.",
+        ) from exc
+
+    if type != "all":
+        facilities = [facility for facility in facilities if facility["type"] == type]
     return facilities

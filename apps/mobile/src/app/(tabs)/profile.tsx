@@ -15,13 +15,22 @@ import { COLORS, RADIUS, TYPOGRAPHY } from '../../constants/theme';
 import { Card } from '../../components/ui/Card';
 import { SectionHeader } from '../../components/ui/SectionHeader';
 import { Button } from '../../components/ui/Button';
+import { Input } from '../../components/ui/Input';
+import { Chip } from '../../components/ui/Chip';
 import { SUPPORTED_LANGUAGES, SupportedLanguage } from '../../constants/i18n';
 import { useAuthStore } from '../../store/useAuthStore';
+import { useHealthStore } from '../../store/useHealthStore';
+import type { FamilyMember } from '../../types/user';
 
 export default function ProfileScreen() {
   const router = useRouter();
-  const { profile, setProfile, setLanguage, logout, resetToDemoUser } = useAuthStore();
+  const { profile, setProfile, setLanguage, logout, resetToDemoUser, addFamilyMember } = useAuthStore();
+  const resetDemoHealth = useHealthStore((state) => state.resetToDemoUser);
   const [seniorMode, setSeniorMode] = useState(profile.isSeniorMode || false);
+  const [showFamilyForm, setShowFamilyForm] = useState(false);
+  const [familyName, setFamilyName] = useState('');
+  const [familyAge, setFamilyAge] = useState('');
+  const [familyRelation, setFamilyRelation] = useState<FamilyMember['relation']>('Parent');
 
   const toggleSeniorMode = (val: boolean) => {
     setSeniorMode(val);
@@ -34,19 +43,23 @@ export default function ProfileScreen() {
   };
 
   const handleAddFamilyMember = () => {
-    Alert.alert(
-      'Connect Family Member',
-      'Share your unique Health ID with your family member or enter their Medi Bud ID to grant secure permission-based access.',
-      [
-        {
-          text: 'Add Member',
-          onPress: () => {
-            Alert.alert('Family Connected', 'New member linked with permission controls.');
-          },
-        },
-        { text: 'Cancel', style: 'cancel' },
-      ]
-    );
+    setShowFamilyForm(true);
+  };
+
+  const saveFamilyMember = () => {
+    const age = Number(familyAge);
+    if (!familyName.trim() || age < 1 || age > 120) {
+      Alert.alert('Check family details', 'Enter a name and an age between 1 and 120.');
+      return;
+    }
+    addFamilyMember({
+      id: `family-${Date.now()}`, name: familyName.trim(), relation: familyRelation, age,
+      uniqueFamilyId: `MB-${Math.random().toString(36).slice(2, 8).toUpperCase()}`,
+      permissions: { profile: true, reports: false, medications: false, vitals: true, plans: true },
+    });
+    setFamilyName('');
+    setFamilyAge('');
+    setShowFamilyForm(false);
   };
 
   return (
@@ -112,6 +125,22 @@ export default function ProfileScreen() {
           actionText="+ Add Member"
           onActionPress={handleAddFamilyMember}
         />
+
+        {showFamilyForm && (
+          <Card style={styles.familyForm}>
+            <Text style={styles.familyFormTitle}>Connect a trusted person</Text>
+            <Input label="Name" placeholder="Family member name" value={familyName} onChangeText={setFamilyName} />
+            <Input label="Age" placeholder="Age" keyboardType="number-pad" value={familyAge} onChangeText={setFamilyAge} />
+            <View style={styles.relationChips}>
+              {(['Parent', 'Spouse', 'Child', 'Sibling', 'Other'] as FamilyMember['relation'][]).map((relation) => (
+                <Chip key={relation} label={relation} selected={familyRelation === relation} onPress={() => setFamilyRelation(relation)} />
+              ))}
+            </View>
+            <Text style={styles.permissionNote}>Default access: profile, vitals, and plans. Reports and medications remain private.</Text>
+            <Button title="Save Connection" variant="secondary" onPress={saveFamilyMember} />
+            <Button title="Cancel" variant="ghost" onPress={() => setShowFamilyForm(false)} />
+          </Card>
+        )}
 
         {profile.familyMembers.map((fam) => (
           <Card key={fam.id} style={styles.familyCard}>
@@ -190,6 +219,7 @@ export default function ProfileScreen() {
             variant="outline"
             onPress={() => {
               resetToDemoUser();
+              resetDemoHealth();
               Alert.alert('Reset', 'Profile restored to demo state.');
             }}
             style={styles.actionBtn}
@@ -319,6 +349,10 @@ const styles = StyleSheet.create({
     padding: 16,
     marginBottom: 12,
   },
+  familyForm: { padding: 16, marginBottom: 12 },
+  familyFormTitle: { fontSize: 16, fontWeight: '700', color: COLORS.textPrimary, marginBottom: 14 },
+  relationChips: { flexDirection: 'row', flexWrap: 'wrap', marginBottom: 8 },
+  permissionNote: { fontSize: 11.5, color: COLORS.textSecondary, lineHeight: 16, marginBottom: 12 },
   familyHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',

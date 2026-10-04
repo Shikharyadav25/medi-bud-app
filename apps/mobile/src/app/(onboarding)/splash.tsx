@@ -37,9 +37,9 @@ export default function SplashScreen() {
       <View style={styles.footer}>
         <View style={styles.securityRow}>
           <Feather name="shield" size={16} color="#4FC3F7" />
-          <Text style={styles.securityText}>Your data is 100% secure</Text>
+          <Text style={styles.securityText}>Private by design</Text>
         </View>
-        <Text style={styles.trustedText}>Trusted by 50,000+ users</Text>
+        <Text style={styles.trustedText}>Educational wellness prototype</Text>
       </View>
     </TouchableOpacity>
   );

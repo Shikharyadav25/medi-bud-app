@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, SafeAreaView, ScrollView, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, SafeAreaView, ScrollView, TouchableOpacity, Alert } from 'react-native';
 import { Feather, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { COLORS, RADIUS, TYPOGRAPHY } from '../../constants/theme';
@@ -9,6 +9,7 @@ import { WorkoutChecklist } from '../../components/fitness/WorkoutChecklist';
 import { SectionHeader } from '../../components/ui/SectionHeader';
 import { Card } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
+import { Input } from '../../components/ui/Input';
 import { useHealthStore } from '../../store/useHealthStore';
 
 export default function TrackScreen() {
@@ -16,17 +17,42 @@ export default function TrackScreen() {
   const {
     waterIntakeMl,
     waterGoalMl,
+    calorieGoal,
     waterStreakDays,
     addWater,
     recentMeals,
     workouts,
     toggleWorkout,
+    vitals,
+    updateVitals,
   } = useHealthStore();
 
   const [selectedMood, setSelectedMood] = useState<number>(4);
+  const [bloodPressure, setBloodPressure] = useState(vitals.bloodPressure === '—' ? '' : vitals.bloodPressure);
+  const [heartRate, setHeartRate] = useState(vitals.heartRate ? String(vitals.heartRate) : '');
+  const [bloodGlucose, setBloodGlucose] = useState(vitals.bloodGlucose === '—' ? '' : vitals.bloodGlucose.replace(/\s*mg\/dL/i, ''));
+  const [spo2, setSpo2] = useState(vitals.spo2 ? String(vitals.spo2) : '');
 
   const totalCaloriesToday = recentMeals.reduce((acc, m) => acc + m.calories, 0);
   const totalProteinToday = recentMeals.reduce((acc, m) => acc + m.proteinG, 0);
+
+  const saveVitals = () => {
+    const heart = Number(heartRate);
+    const oxygen = Number(spo2);
+    if (bloodPressure && !/^\d{2,3}\/\d{2,3}$/.test(bloodPressure)) {
+      Alert.alert('Check blood pressure', 'Use systolic/diastolic format, for example 120/80.');
+      return;
+    }
+    if ((heartRate && (heart < 30 || heart > 220)) || (spo2 && (oxygen < 70 || oxygen > 100))) {
+      Alert.alert('Check vital values', 'Heart rate must be 30–220 bpm and SpO₂ must be 70–100%.');
+      return;
+    }
+    updateVitals({
+      bloodPressure: bloodPressure || '—', heartRate: heart || 0,
+      bloodGlucose: bloodGlucose ? `${bloodGlucose} mg/dL` : '—', spo2: oxygen || 0,
+    });
+    Alert.alert('Vitals Saved', 'These user-entered readings are now available as context to your Health AI.');
+  };
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -44,10 +70,21 @@ export default function TrackScreen() {
           onAddWater={addWater}
         />
 
+        <Card style={styles.vitalsEntryCard}>
+          <SectionHeader title="Log Today’s Vitals" subtitle="User-entered readings—not device verified" />
+          <View style={styles.vitalsGrid}>
+            <View style={styles.vitalInput}><Input label="Blood pressure" placeholder="120/80" value={bloodPressure} onChangeText={setBloodPressure} /></View>
+            <View style={styles.vitalInput}><Input label="Heart rate (bpm)" placeholder="72" keyboardType="number-pad" value={heartRate} onChangeText={setHeartRate} /></View>
+            <View style={styles.vitalInput}><Input label="Glucose (mg/dL)" placeholder="94" keyboardType="decimal-pad" value={bloodGlucose} onChangeText={setBloodGlucose} /></View>
+            <View style={styles.vitalInput}><Input label="SpO₂ (%)" placeholder="98" keyboardType="number-pad" value={spo2} onChangeText={setSpo2} /></View>
+          </View>
+          <Button title="Save Vitals" variant="secondary" onPress={saveVitals} />
+        </Card>
+
         {/* 2. Nutrition Summary & Meals */}
         <SectionHeader
           title="Nutrition & Meals"
-          subtitle={`Logged today: ${totalCaloriesToday} kcal • ${totalProteinToday}g protein`}
+          subtitle={`Logged: ${totalCaloriesToday} / ${calorieGoal} kcal • ${totalProteinToday}g protein`}
           actionText="+ Scan Meal"
           onActionPress={() => router.push('/meal/scan')}
         />
@@ -148,6 +185,9 @@ const styles = StyleSheet.create({
     paddingTop: 16,
     paddingBottom: 40,
   },
+  vitalsEntryCard: { padding: 18, marginBottom: 16 },
+  vitalsGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
+  vitalInput: { flexBasis: '48%', flexGrow: 1 },
   topHeader: {
     marginBottom: 16,
   },

@@ -82,7 +82,8 @@ export default function MealScanScreen() {
         const asset = result.assets[0];
         setImageUri(asset.uri);
         const base64Data = await extractBase64FromAsset(asset);
-        runMealAnalysis(base64Data);
+        const encoded = base64Data ? `data:${asset.mimeType || 'image/jpeg'};base64,${base64Data}` : '';
+        runMealAnalysis(encoded);
       }
     } catch (err: any) {
       Alert.alert('Image Picker Error', err?.message || 'Could not access camera or library.');
@@ -104,8 +105,9 @@ export default function MealScanScreen() {
 
       const result = await AIService.analyzeMealPhoto(base64, profile);
       if (result.isFood === false) {
+        const serviceError = /unavailable|api key|quota|network/i.test(result.error || '');
         Alert.alert(
-          'No Food Detected',
+          serviceError ? 'Analysis Unavailable' : 'No Food Detected',
           result.error || 'The image does not contain recognizable food. Please upload a clear photo of your meal.',
           [{ text: 'OK' }]
         );

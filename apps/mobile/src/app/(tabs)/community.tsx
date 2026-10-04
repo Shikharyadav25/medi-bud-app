@@ -14,6 +14,7 @@ import { COLORS, RADIUS, TYPOGRAPHY } from '../../constants/theme';
 import { Card } from '../../components/ui/Card';
 import { Chip } from '../../components/ui/Chip';
 import { Button } from '../../components/ui/Button';
+import { useAuthStore } from '../../store/useAuthStore';
 
 interface CommunityPost {
   id: string;
@@ -81,6 +82,7 @@ const INITIAL_POSTS: CommunityPost[] = [
 ];
 
 export default function CommunityScreen() {
+  const profile = useAuthStore((state) => state.profile);
   const [selectedCommunity, setSelectedCommunity] = useState('All');
   const [posts, setPosts] = useState<CommunityPost[]>(INITIAL_POSTS);
   const [newPostText, setNewPostText] = useState('');
@@ -111,7 +113,7 @@ export default function CommunityScreen() {
     if (!newPostText.trim()) return;
     const newPost: CommunityPost = {
       id: `post-${Date.now()}`,
-      authorName: 'Aarav (You)',
+      authorName: `${profile.name || 'You'} (You)`,
       community: selectedCommunity === 'All' ? 'General Wellness' : selectedCommunity,
       text: newPostText.trim(),
       likes: 1,
@@ -138,7 +140,7 @@ export default function CommunityScreen() {
         <View style={styles.header}>
           <Text style={styles.headerTitle}>Wellness Communities</Text>
           <Text style={styles.headerSubtitle}>
-            Share progress, gain peer inspiration, and connect with health groups.
+            Demo community feed stored locally. Share progress without posting private medical information.
           </Text>
         </View>
 

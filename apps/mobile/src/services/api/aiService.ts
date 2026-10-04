@@ -2,8 +2,8 @@ import { apiClient } from './client';
 import { ChatMessage, DietPlanMeal, MealAnalysisResult, SevenDayDietPlan, SymptomTriageResult } from '../../types/ai';
 import { UserProfile } from '../../types/user';
 import { DailyVitals } from '../../types/health';
-import { MedicalReport } from '../../types/report';
-import { DEMO_DIET_PLAN, DEMO_SAMPLE_REPORT } from '../demo/demoData';
+import { MedicalReport, MedicalReportAnalysis } from '../../types/report';
+import { DEMO_DIET_PLAN } from '../demo/demoData';
 
 export class AIService {
   public static async sendHealthChat(
@@ -11,13 +11,14 @@ export class AIService {
     profile: UserProfile,
     vitals: DailyVitals,
     waterIntakeMl: number,
-    recentMealsSummary: string
+    recentMealsSummary: string,
+    reports: MedicalReport[] = []
   ): Promise<{ response: string; citations: string[]; disclaimer: string; action?: string }> {
     const fallback = {
-      response: `Based on your profile (${profile.name}, Goal: ${profile.healthGoals[0] || 'Fitness'}), your water intake of ${waterIntakeMl}ml and recent meals support healthy energy levels. Remember to keep balanced portions and stay active!`,
+      response: `I can see ${waterIntakeMl} ml logged today, but the grounded AI service is offline, so I won’t invent a health interpretation. Reconnect the backend and try again.`,
       citations: [],
-      disclaimer: 'AI can make mistakes, so always double check important health information with a qualified healthcare professional.',
-      action: 'SELF_CARE',
+      disclaimer: 'No AI inference was generated while the backend was unavailable.',
+      action: 'MONITOR',
     };
 
     return apiClient(
@@ -30,6 +31,7 @@ export class AIService {
           vitals,
           activity: { waterIntakeMl, waterGoalMl: 2500, recentMeals: [] },
           activePlanSummary: recentMealsSummary,
+          reports,
         }),
       },
       fallback
@@ -57,14 +59,13 @@ export class AIService {
     );
   }
 
-  public static async analyzeMedicalReport(documentText: string, title?: string): Promise<MedicalReport> {
-    return apiClient(
+  public static async analyzeMedicalReport(dataBase64: string, mimeType: string, title: string, documentText = ''): Promise<MedicalReportAnalysis> {
+    return apiClient<MedicalReportAnalysis>(
       '/api/reports/analyze',
       {
         method: 'POST',
-        body: JSON.stringify({ documentText, title }),
-      },
-      DEMO_SAMPLE_REPORT
+        body: JSON.stringify({ documentText, dataBase64, mimeType, title }),
+      }
     );
   }
 

@@ -21,3 +21,9 @@ export interface MedicalReport {
   rawTextPreview?: string;
   chunksIndexed: number;
 }
+
+export interface MedicalReportAnalysis {
+  isMedicalReport: boolean;
+  error?: string;
+  report?: MedicalReport;
+}

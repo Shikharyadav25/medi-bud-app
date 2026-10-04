@@ -16,9 +16,18 @@ import { useHealthStore } from '../../store/useHealthStore';
 export default function HomeScreen() {
   const router = useRouter();
   const { profile } = useAuthStore();
-  const { vitals, waterIntakeMl, waterGoalMl, waterStreakDays, addWater, reports, workouts } = useHealthStore();
+  const { vitals, waterIntakeMl, waterGoalMl, waterStreakDays, addWater, reports, workouts, recentMeals } = useHealthStore();
 
   const completedWorkouts = workouts.filter((w) => w.completed).length;
+  const healthScore = Math.round(
+    Math.min(35, (waterIntakeMl / Math.max(waterGoalMl, 1)) * 35) +
+    (recentMeals.length ? 25 : 0) +
+    (workouts.length ? (completedWorkouts / workouts.length) * 25 : 0) +
+    (reports.length ? 15 : 0)
+  );
+  const hydrationPercent = Math.min(100, Math.round((waterIntakeMl / Math.max(waterGoalMl, 1)) * 100));
+  const dietPercent = recentMeals.length ? Math.min(100, recentMeals.length * 25) : 0;
+  const habitsPercent = workouts.length ? Math.round((completedWorkouts / workouts.length) * 100) : 0;
 
   const todayString = new Date().toLocaleDateString('en-IN', {
     weekday: 'long',
@@ -56,9 +65,12 @@ export default function HomeScreen() {
 
         {/* Medi Bud Health Score Gauge (Apple Health Inset Style) */}
         <HealthScore
-          score={82}
+          score={healthScore}
           maxScore={100}
-          showPremiumLock={true}
+          showPremiumLock={false}
+          hydrationPercent={hydrationPercent}
+          dietPercent={dietPercent}
+          habitsPercent={habitsPercent}
           onPressGoal={() => router.push('/(tabs)/track')}
         />
 
@@ -130,14 +142,19 @@ export default function HomeScreen() {
             onActionPress={() => router.push('/(tabs)/track')}
           />
           <View style={styles.habitsSummaryRow}>
-            <View style={styles.habitBadge}>
-              <Feather name="check" size={13} color={COLORS.appleGreen} />
-              <Text style={styles.habitBadgeText}>Morning Brisk Walk (35m)</Text>
-            </View>
-            <View style={styles.habitBadge}>
-              <Feather name="check" size={13} color={COLORS.appleGreen} />
-              <Text style={styles.habitBadgeText}>Hydration Goal on Track</Text>
-            </View>
+            {workouts.filter((workout) => workout.completed).map((workout) => (
+              <View key={workout.id} style={styles.habitBadge}>
+                <Feather name="check" size={13} color={COLORS.appleGreen} />
+                <Text style={styles.habitBadgeText}>{workout.title} ({workout.durationMinutes}m)</Text>
+              </View>
+            ))}
+            {hydrationPercent >= 75 && (
+              <View style={styles.habitBadge}>
+                <Feather name="check" size={13} color={COLORS.appleGreen} />
+                <Text style={styles.habitBadgeText}>Hydration goal on track</Text>
+              </View>
+            )}
+            {!completedWorkouts && hydrationPercent < 75 && <Text style={styles.emptyHabitText}>Complete a workout or reach 75% hydration to build today’s activity summary.</Text>}
           </View>
         </Card>
 
@@ -295,4 +312,5 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     letterSpacing: 0.1,
   },
+  emptyHabitText: { fontSize: 12.5, color: COLORS.textSecondary, lineHeight: 18 },
 });

@@ -10,6 +10,10 @@ interface VitalsCardProps {
 }
 
 export const VitalsCard: React.FC<VitalsCardProps> = ({ vitals }) => {
+  const hasBloodPressure = !!vitals.bloodPressure && vitals.bloodPressure !== '—';
+  const hasHeartRate = vitals.heartRate > 0;
+  const hasGlucose = !!vitals.bloodGlucose && vitals.bloodGlucose !== '—';
+  const hasSpo2 = vitals.spo2 > 0;
   return (
     <Card style={styles.card}>
       <View style={styles.headerRow}>
@@ -29,8 +33,8 @@ export const VitalsCard: React.FC<VitalsCardProps> = ({ vitals }) => {
             </View>
             <Text style={styles.vitalLabel}>Blood Pressure</Text>
           </View>
-          <Text style={styles.vitalValue}>{vitals.bloodPressure || '120/80'}</Text>
-          <Text style={styles.vitalUnit}>mmHg • Optimal</Text>
+          <Text style={styles.vitalValue}>{hasBloodPressure ? vitals.bloodPressure : '—'}</Text>
+          <Text style={styles.vitalUnit}>{hasBloodPressure ? 'mmHg • Logged' : 'Not logged'}</Text>
         </View>
 
         {/* Heart Rate */}
@@ -41,8 +45,8 @@ export const VitalsCard: React.FC<VitalsCardProps> = ({ vitals }) => {
             </View>
             <Text style={styles.vitalLabel}>Resting Heart</Text>
           </View>
-          <Text style={styles.vitalValue}>{vitals.heartRate || 72}</Text>
-          <Text style={styles.vitalUnit}>bpm • Normal</Text>
+          <Text style={styles.vitalValue}>{hasHeartRate ? vitals.heartRate : '—'}</Text>
+          <Text style={styles.vitalUnit}>{hasHeartRate ? 'bpm • Logged' : 'Not logged'}</Text>
         </View>
 
         {/* Blood Glucose */}
@@ -53,8 +57,8 @@ export const VitalsCard: React.FC<VitalsCardProps> = ({ vitals }) => {
             </View>
             <Text style={styles.vitalLabel}>Fasting Glucose</Text>
           </View>
-          <Text style={styles.vitalValue}>{vitals.bloodGlucose || '94'}</Text>
-          <Text style={styles.vitalUnit}>mg/dL • Normal</Text>
+          <Text style={styles.vitalValue}>{hasGlucose ? vitals.bloodGlucose : '—'}</Text>
+          <Text style={styles.vitalUnit}>{hasGlucose ? 'User-entered reading' : 'Not logged'}</Text>
         </View>
 
         {/* SpO2 */}
@@ -65,8 +69,8 @@ export const VitalsCard: React.FC<VitalsCardProps> = ({ vitals }) => {
             </View>
             <Text style={styles.vitalLabel}>Oxygen SpO2</Text>
           </View>
-          <Text style={styles.vitalValue}>{vitals.spo2 || 98}%</Text>
-          <Text style={styles.vitalUnit}>Normal saturation</Text>
+          <Text style={styles.vitalValue}>{hasSpo2 ? `${vitals.spo2}%` : '—'}</Text>
+          <Text style={styles.vitalUnit}>{hasSpo2 ? 'Logged saturation' : 'Not logged'}</Text>
         </View>
       </View>
     </Card>
