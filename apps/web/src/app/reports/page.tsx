@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import type { ReportDTO } from '@medi-bud/contracts';
 import { apiClient } from '@/lib/api';
+import { getCurrentAccessToken } from '@/lib/supabase';
 import { ReportUploadZone } from '@/components/ReportUploadZone';
 import { ObservationTable } from '@/components/ObservationTable';
 import { 
@@ -72,6 +73,30 @@ export default function ReportsPage() {
       await fetchReports();
     } catch {
       setErrorMsg('Changes were not saved. Your report has not been updated on the server.');
+    }
+  };
+
+  const handleDownload = async (reportId: string, filename: string) => {
+    setErrorMsg(null);
+    try {
+      const token = await getCurrentAccessToken();
+      if (!token) throw new Error('Please sign in before downloading.');
+      const url = apiClient.getDownloadUrl(reportId).replace(/\/download$/, '/file');
+      const response = await fetch(url, {
+        headers: { Authorization: `Bearer ${token}` },
+        cache: 'no-store',
+      });
+      if (!response.ok) throw new Error('The report could not be downloaded.');
+      const objectUrl = URL.createObjectURL(await response.blob());
+      const anchor = document.createElement('a');
+      anchor.href = objectUrl;
+      anchor.download = filename.replace(/[\\/]/g, '_');
+      document.body.appendChild(anchor);
+      anchor.click();
+      anchor.remove();
+      window.setTimeout(() => URL.revokeObjectURL(objectUrl), 1000);
+    } catch (error) {
+      setErrorMsg(error instanceof Error ? error.message : 'Download failed.');
     }
   };
 
@@ -157,15 +182,14 @@ export default function ReportsPage() {
                   </p>
                 </div>
                 <div className="flex items-center gap-2">
-                  <a
-                    href={apiClient.getDownloadUrl(selectedReport.id)}
-                    target="_blank"
-                    rel="noreferrer"
+                  <button
+                    type="button"
+                    onClick={() => handleDownload(selectedReport.id, selectedReport.filename)}
                     className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-(--border-subtle) text-xs font-medium text-(--text-secondary) hover:bg-(--surface-subtle) transition-colors"
                   >
                     <Download className="w-3.5 h-3.5" />
                     Download File
-                  </a>
+                  </button>
                   <Link
                     href={`/chat?report_id=${selectedReport.id}`}
                     className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-(--primary) text-white text-xs font-medium hover:bg-(--primary-hover) transition-colors shadow-sm"
