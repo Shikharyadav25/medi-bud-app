@@ -81,13 +81,27 @@ export default function MealPlanPage() {
   const handleDownloadPdf = async (e: React.MouseEvent) => {
     e.preventDefault();
     if (!plan?.id) return;
+    setErrorMsg(null);
     try {
       const token = await getCurrentAccessToken();
-      const base = apiClient.getPlanPdfUrl(plan.id);
-      const url = token ? `${base}?token=${encodeURIComponent(token)}` : base;
-      window.open(url, '_blank');
-    } catch {
-      window.open(apiClient.getPlanPdfUrl(plan.id), '_blank');
+      if (!token) throw new Error('Please sign in to download your plan.');
+      const url = apiClient.getPlanPdfUrl(plan.id);
+      const res = await fetch(url, {
+        headers: { Authorization: `Bearer ${token}` },
+        cache: 'no-store',
+      });
+      if (!res.ok) throw new Error('Unable to download your plan.');
+      const blob = await res.blob();
+      const downloadUrl = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = downloadUrl;
+      link.download = 'medi-bud-meal-plan.pdf';
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.setTimeout(() => URL.revokeObjectURL(downloadUrl), 1000);
+    } catch (err) {
+      setErrorMsg(err instanceof Error ? err.message : 'PDF download failed.');
     }
   };
 
