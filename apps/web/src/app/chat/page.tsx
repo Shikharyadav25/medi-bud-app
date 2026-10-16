@@ -81,40 +81,12 @@ function ChatContent() {
       };
       setMessages((prev) => [...prev, assistantMsg]);
     } catch {
-      // Fallback demonstration response for offline viva showcase
-      const fallbackResponse: ChatResponseDTO = {
-        answer: `Regarding your query: LDL cholesterol of 148 mg/dL is categorized as borderline high according to the standard lipid guidelines. Lifestyle adjustments such as increasing soluble dietary fiber and daily physical activity can support healthy lipid balance.`,
-        intent: 'report_question',
-        mode: 'grounded_generation',
-        citations: [
-          {
-            source_id: 'src-rep-1',
-            title: 'Lipid Panel September 2026',
-            date: '2026-09-28',
-            page: 1,
-            excerpt: 'Total Cholesterol: 228 mg/dL (< 200). LDL Cholesterol: 148 mg/dL (< 100). HDL Cholesterol: 44 mg/dL (> 40).',
-          },
-          {
-            source_id: 'src-icmr-1',
-            title: 'ICMR Dietary Guidelines for Indians',
-            date: '2024-05',
-            page: 14,
-            excerpt: 'Adopting high soluble fiber foods (oats, methi seeds, pulses) supports healthy blood lipid profiles in Indian adults.',
-          }
-        ],
-        limitations: 'Medi Bud provides educational health comprehension, not medical diagnosis or treatment.',
-        safety_action: null,
-        request_id: 'demo-req-1234'
-      };
-
-      const assistantMsg: ChatMessage = {
+      setMessages((prev) => [...prev, {
         id: crypto.randomUUID(),
         sender: 'assistant',
-        text: fallbackResponse.answer,
+        text: 'The health service is unavailable, so I cannot verify an answer. No medical interpretation was generated. Please reconnect and try again.',
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        responseMeta: fallbackResponse,
-      };
-      setMessages((prev) => [...prev, assistantMsg]);
+      }]);
     } finally {
       setLoading(false);
     }
@@ -177,7 +149,7 @@ function ChatContent() {
                     </span>
                   </div>
 
-                  {msg.responseMeta.safety_action === 'emergency' && (
+                  {msg.responseMeta.safety_action === 'EMERGENCY_ESCALATION' && (
                     <div className="p-2.5 rounded-xl bg-red-50 text-red-700 border border-red-200 text-xs flex items-center justify-between gap-2">
                       <div className="flex items-center gap-1.5 font-medium">
                         <ShieldAlert className="w-4 h-4 text-red-600 shrink-0" />
