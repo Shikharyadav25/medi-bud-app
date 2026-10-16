@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { supabase } from '@/lib/supabase';
+import { isSupabaseConfigured, supabase } from '@/lib/supabase';
 import { ShieldCheck, LogIn, UserPlus, Sparkles } from 'lucide-react';
 
 export default function LoginPage() {
@@ -65,6 +65,11 @@ export default function LoginPage() {
           </div>
         )}
 
+        {!isSupabaseConfigured && (
+          <div role="alert" className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-xs text-amber-900">
+            Sign-in is not configured. Add NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY to the web environment.
+          </div>
+        )}
         <form onSubmit={handleAuth} className="space-y-4">
           <div>
             <label className="block text-xs font-semibold text-(--text-secondary) mb-1">
@@ -97,7 +102,7 @@ export default function LoginPage() {
 
           <button
             type="submit"
-            disabled={loading}
+            disabled={loading || !isSupabaseConfigured}
             className="w-full py-2.5 rounded-xl font-medium text-xs bg-(--primary) text-white hover:bg-(--primary-hover) transition-colors flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
           >
             {isSignUp ? <UserPlus size={14} /> : <LogIn size={14} />}
@@ -105,22 +110,19 @@ export default function LoginPage() {
           </button>
         </form>
 
-        <div className="relative flex items-center justify-center my-4">
-          <div className="border-t border-(--border-subtle) w-full"></div>
-          <span className="bg-(--surface) px-2 text-[10px] text-(--text-muted) uppercase tracking-wider absolute">
-            Or Quick Demo
-          </span>
-        </div>
-
-        {/* Demo Fast-Track */}
-        <button
-          onClick={handleDemoSignIn}
-          type="button"
-          className="w-full py-2 rounded-xl border border-(--primary) text-(--primary) bg-(--primary-surface) hover:bg-emerald-100 transition-colors text-xs font-medium flex items-center justify-center gap-1.5 cursor-pointer"
-        >
-          <Sparkles size={14} />
-          <span>Launch Demonstration Account</span>
-        </button>
+        {process.env.NODE_ENV !== 'production' && process.env.NEXT_PUBLIC_DEMO_MODE === 'true' && (
+          <div className="space-y-4">
+            <p className="text-center text-xs text-(--text-muted)">Local demo mode</p>
+            <button
+              onClick={handleDemoSignIn}
+              type="button"
+              className="w-full py-2 rounded-xl border border-(--primary) text-(--primary) bg-(--primary-surface) hover:bg-emerald-100 transition-colors text-xs font-medium flex items-center justify-center gap-1.5 cursor-pointer"
+            >
+              <Sparkles size={14} />
+              <span>Launch local demo</span>
+            </button>
+          </div>
+        )}
 
         <div className="text-center pt-2">
           <button
