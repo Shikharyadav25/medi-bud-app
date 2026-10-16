@@ -18,85 +18,22 @@ import {
   Inbox
 } from 'lucide-react';
 
-const FALLBACK_DEMO_REPORTS: ReportDTO[] = [
-  {
-    id: 'rep-fixture-lipid',
-    user_id: '00000000-0000-0000-0000-000000000001',
-    object_key: 'reports/demo_lipid.pdf',
-    filename: 'Lipid_Panel_Sept2026.pdf',
-    mime: 'application/pdf',
-    checksum: 'demo_sha256_hash_1',
-    report_date: '2026-09-28',
-    status: 'review_needed',
-    created_at: new Date().toISOString(),
-    observations: [
-      {
-        id: 'obs-1',
-        report_id: 'rep-fixture-lipid',
-        user_id: '00000000-0000-0000-0000-000000000001',
-        original_label: 'Total Cholesterol',
-        canonical_test: 'Total Cholesterol',
-        value_text: '228',
-        numeric_value: 228,
-        unit: 'mg/dL',
-        reference_text: '< 200 mg/dL',
-        bounds_low: null,
-        bounds_high: 200,
-        status: 'proposed',
-        page: 1,
-      },
-      {
-        id: 'obs-2',
-        report_id: 'rep-fixture-lipid',
-        user_id: '00000000-0000-0000-0000-000000000001',
-        original_label: 'LDL Cholesterol',
-        canonical_test: 'LDL Cholesterol',
-        value_text: '148',
-        numeric_value: 148,
-        unit: 'mg/dL',
-        reference_text: '< 100 mg/dL',
-        bounds_low: null,
-        bounds_high: 100,
-        status: 'proposed',
-        page: 1,
-      },
-      {
-        id: 'obs-3',
-        report_id: 'rep-fixture-lipid',
-        user_id: '00000000-0000-0000-0000-000000000001',
-        original_label: 'HDL Cholesterol',
-        canonical_test: 'HDL Cholesterol',
-        value_text: '44',
-        numeric_value: 44,
-        unit: 'mg/dL',
-        reference_text: '> 40 mg/dL',
-        bounds_low: 40,
-        bounds_high: null,
-        status: 'confirmed',
-        page: 1,
-      }
-    ]
-  }
-];
-
 export default function ReportsPage() {
   const [reports, setReports] = useState<ReportDTO[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   const fetchReports = async () => {
+    setErrorMsg(null);
     try {
       const data = await apiClient.getReports();
-      if (data && data.length > 0) {
-        setReports(data);
-        if (!selectedId) setSelectedId(data[0].id);
-      } else {
-        setReports(FALLBACK_DEMO_REPORTS);
-        if (!selectedId) setSelectedId(FALLBACK_DEMO_REPORTS[0].id);
-      }
+      setReports(data);
+      setSelectedId((current) => current && data.some((r) => r.id === current)
+        ? current : data[0]?.id ?? null);
     } catch {
-      setReports(FALLBACK_DEMO_REPORTS);
-      if (!selectedId) setSelectedId(FALLBACK_DEMO_REPORTS[0].id);
+      setReports([]);
+      setErrorMsg('Reports could not be loaded. Sign in and check the service connection.');
     } finally {
       setLoading(false);
     }
@@ -105,6 +42,17 @@ export default function ReportsPage() {
   useEffect(() => {
     fetchReports();
   }, []);
+
+  useEffect(() => {
+    if (!selectedId) return;
+    let cancelled = false;
+    apiClient.getReport(selectedId).then((detail) => {
+      if (!cancelled) setReports((previous) => previous.map((r) => r.id === detail.id ? detail : r));
+    }).catch(() => {
+      if (!cancelled) setErrorMsg('Report details could not be loaded. Please retry.');
+    });
+    return () => { cancelled = true; };
+  }, [selectedId]);
 
   const handleUploadFn = async (file: File) => {
     return apiClient.uploadReport(file, file.name);
@@ -123,20 +71,7 @@ export default function ReportsPage() {
       await apiClient.updateObservations(selectedReport.id, updated);
       await fetchReports();
     } catch {
-      // Local optimistic update
-      setReports((prev) =>
-        prev.map((rep) =>
-          rep.id === selectedReport.id
-            ? {
-                ...rep,
-                observations: rep.observations?.map((o) => {
-                  const match = updated.find((u) => u.id === o.id);
-                  return match ? { ...o, ...match } : o;
-                }),
-              }
-            : rep
-        )
-      );
+      setErrorMsg('Changes were not saved. Your report has not been updated on the server.');
     }
   };
 
@@ -144,6 +79,7 @@ export default function ReportsPage() {
 
   return (
     <div className="space-y-8">
+      {errorMsg && <div role="alert" className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">{errorMsg}</div>}
       <div>
         <h1 className="text-2xl font-bold tracking-tight text-(--text-primary)">
           Lab Reports & Observation Review
