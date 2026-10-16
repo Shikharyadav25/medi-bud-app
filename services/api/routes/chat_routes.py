@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel
 from auth import get_current_user, AuthenticatedUser
 from services.orchestrator import orchestrate_chat_query
-from routes.report_routes import _USER_CHUNKS, _USER_OBSERVATIONS
+from routes.report_routes import _USER_OBSERVATIONS
 
 chat_router = APIRouter(prefix="/v1", tags=["Health Q&A Chat"])
 
@@ -26,10 +26,9 @@ async def chat(
             detail={"code": "EMPTY_QUERY", "message": "Query text cannot be empty"}
         )
 
-    # Gather chunks belonging to user
+    # Never put unreviewed raw report text into AI retrieval. Only explicitly
+    # confirmed observation values may be used as patient-specific evidence.
     user_chunks = []
-    for r_id, chunks in _USER_CHUNKS.items():
-        user_chunks.extend([c for c in chunks if c.get("user_id") == user_id])
 
     # Gather confirmed observations belonging to user
     confirmed_obs = []
