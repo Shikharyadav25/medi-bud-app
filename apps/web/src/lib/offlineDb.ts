@@ -1,6 +1,18 @@
-import Dexie, { type EntityTable } from 'dexie';
-import type { SyncMutationDTO, HealthLogDTO, ProfileDTO } from '@medi-bud/contracts';
-import { apiClient } from '@/lib/api';
+import Dexie, { type EntityTable } from "dexie";
+import type {
+  SyncMutationDTO,
+  HealthLogDTO,
+  ProfileDTO,
+} from "@medi-bud/contracts";
+import { apiClient } from "@/lib/api";
+import { supabase } from "@/lib/supabase";
+
+async function accountId() {
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
+  return session?.user.id || null;
+}
 
 export interface PendingMutationEntity extends SyncMutationDTO {
   id?: number;
@@ -15,16 +27,16 @@ export interface CachedProfileEntity extends ProfileDTO {
 }
 
 class MediBudOfflineDatabase extends Dexie {
-  pendingMutations!: EntityTable<PendingMutationEntity, 'id'>;
-  cachedLogs!: EntityTable<CachedLogEntity, 'id'>;
-  cachedProfile!: EntityTable<CachedProfileEntity, 'user_id'>;
+  pendingMutations!: EntityTable<PendingMutationEntity, "id">;
+  cachedLogs!: EntityTable<CachedLogEntity, "id">;
+  cachedProfile!: EntityTable<CachedProfileEntity, "user_id">;
 
   constructor() {
-    super('MediBudWebDB');
+    super("MediBudWebDB");
     this.version(1).stores({
-      pendingMutations: '++id, mutation_id, user_id, entity_type, occurred_at',
-      cachedLogs: 'id, user_id, kind, occurred_at',
-      cachedProfile: 'user_id',
+      pendingMutations: "++id, mutation_id, user_id, entity_type, occurred_at",
+      cachedLogs: "id, user_id, kind, occurred_at",
+      cachedProfile: "user_id",
     });
   }
 }
@@ -32,8 +44,11 @@ class MediBudOfflineDatabase extends Dexie {
 export const offlineDb = new MediBudOfflineDatabase();
 
 export async function queueOfflineMutation(
-  mutation: Omit<PendingMutationEntity, 'id'>
+  mutation: Omit<PendingMutationEntity, "id">,
 ): Promise<void> {
+  const uid = await accountId();
+  if (!uid || mutation.user_id !== uid)
+    throw new Error("An authenticated owner is required for offline entries.");
   await offlineDb.pendingMutations.add(mutation);
 }
 
@@ -42,7 +57,10 @@ export async function replayPendingMutations(): Promise<{
   conflicts: number;
   errors: number;
 }> {
-  const pending = await offlineDb.pendingMutations.toArray();
+  const uid = await accountId();
+  const pending = uid
+    ? await offlineDb.pendingMutations.where("user_id").equals(uid).toArray()
+    : [];
   if (pending.length === 0) {
     return { synced: 0, conflicts: 0, errors: 0 };
   }
@@ -65,10 +83,14 @@ export async function replayPendingMutations(): Promise<{
     let errors = 0;
 
     for (const result of res.results) {
-      if (result.status === 'applied') {
+      if (result.status === "applied") {
         synced++;
-        await offlineDb.pendingMutations.where('mutation_id').equals(result.mutation_id).delete();
-      } else if (result.status === 'conflict') {
+        await offlineDb.pendingMutations
+          .where("user_id")
+          .equals(uid!)
+          .and((row) => row.mutation_id === result.mutation_id)
+          .delete();
+      } else if (result.status === "conflict") {
         conflicts++;
       } else {
         errors++;
@@ -77,7 +99,7 @@ export async function replayPendingMutations(): Promise<{
 
     return { synced, conflicts, errors };
   } catch (error) {
-    console.error('Offline sync replay failed:', error);
+    console.error("Offline sync replay failed:", error);
     return { synced: 0, conflicts: 0, errors: pending.length };
   }
 }

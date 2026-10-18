@@ -10,19 +10,22 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   },
 });
 
+// Real sessions only. An explicitly enabled local demo may use a demo token;
+// shared demo identity must never be used automatically for public users.
+export const isSupabaseConfigured = Boolean(
+  process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+);
+
 export async function getCurrentAccessToken(): Promise<string | null> {
   try {
     const { data: { session } } = await supabase.auth.getSession();
-    if (session?.access_token) {
-      return session.access_token;
-    }
+    if (session?.access_token) return session.access_token;
   } catch {
-    // Ignore and fallback to test token in development
+    // Fail closed when Supabase cannot refresh the session.
   }
-  
-  // Development fallback token for local showcase
-  if (typeof window !== 'undefined') {
-    return localStorage.getItem('medi_bud_demo_token') || 'demo_jwt_token';
+
+  if (process.env.NODE_ENV !== 'production' && process.env.NEXT_PUBLIC_DEMO_MODE === 'true') {
+    return typeof window === 'undefined' ? null : localStorage.getItem('medi_bud_demo_token');
   }
-  return 'demo_jwt_token';
+  return null;
 }

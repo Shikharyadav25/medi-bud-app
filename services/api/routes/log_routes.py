@@ -1,31 +1,30 @@
 import uuid
 from typing import List, Dict, Any, Optional
-from fastapi import APIRouter, Depends, Query
-from pydantic import BaseModel
+from fastapi import APIRouter, Depends, Query, HTTPException
+from pydantic import BaseModel, Field
 from auth import get_current_user, AuthenticatedUser
 from services.sync_service import process_sync_mutations, get_user_offline_logs
+from storage import DurableList
+from validation import HealthLogInput
 
 log_router = APIRouter(prefix="/v1", tags=["Health Habits & Logs"])
 
-_ONLINE_LOGS: List[Dict[str, Any]] = []
+_ONLINE_LOGS = DurableList("logs")
 
-class SingleLogCreate(BaseModel):
-    kind: str
-    value: float
-    unit: str
-    occurred_at: str
-    timezone: str = "Asia/Kolkata"
-    mutation_id: Optional[str] = None
-    payload_hash: Optional[str] = None
+
+class SingleLogCreate(HealthLogInput):
+    pass
+
 
 class BatchSyncRequest(BaseModel):
-    mutations: List[Dict[str, Any]]
+    mutations: List[Dict[str, Any]] = Field(max_length=100)
+
 
 @log_router.get("/logs")
 async def get_logs(
     kind: Optional[str] = Query(None),
-    limit: int = Query(50),
-    current_user: AuthenticatedUser = Depends(get_current_user)
+    limit: int = Query(50, ge=1, le=500),
+    current_user: AuthenticatedUser = Depends(get_current_user),
 ):
     user_id = current_user.user_id
     # Combine online and replayed offline logs for user
@@ -38,31 +37,38 @@ async def get_logs(
     user_logs.sort(key=lambda x: x.get("occurred_at", ""), reverse=True)
     return user_logs[:limit]
 
+
 @log_router.post("/logs")
 async def create_log(
-    data: SingleLogCreate,
-    current_user: AuthenticatedUser = Depends(get_current_user)
+    data: SingleLogCreate, current_user: AuthenticatedUser = Depends(get_current_user)
 ):
     user_id = current_user.user_id
     mut_id = data.mutation_id or str(uuid.uuid4())
-    log_entry = {
-        "id": str(uuid.uuid4()),
-        "user_id": user_id,
-        "kind": data.kind,
-        "value": data.value,
-        "unit": data.unit,
-        "occurred_at": data.occurred_at,
-        "timezone": data.timezone,
-        "mutation_id": mut_id,
-        "payload_hash": data.payload_hash or str(hash(f"{data.kind}:{data.value}"))
-    }
-    _ONLINE_LOGS.append(log_entry)
-    return log_entry
+    result = process_sync_mutations(
+        user_id,
+        [
+            {
+                "mutation_id": mut_id,
+                "user_id": user_id,
+                "entity_type": "health_log",
+                "payload": {"kind": data.kind, "value": data.value, "unit": data.unit},
+                "occurred_at": data.occurred_at,
+                "timezone": data.timezone,
+            }
+        ],
+    )[0]
+    if result["status"] == "conflict":
+        raise HTTPException(409, detail="This entry ID was used for different data")
+    if result["status"] != "applied":
+        raise HTTPException(422, detail="Invalid health entry")
+    return next(
+        log for log in get_user_offline_logs(user_id) if log["mutation_id"] == mut_id
+    )
+
 
 @log_router.post("/sync/logs")
 async def sync_offline_mutations(
-    req: BatchSyncRequest,
-    current_user: AuthenticatedUser = Depends(get_current_user)
+    req: BatchSyncRequest, current_user: AuthenticatedUser = Depends(get_current_user)
 ):
     user_id = current_user.user_id
     results = process_sync_mutations(user_id=user_id, mutations=req.mutations)

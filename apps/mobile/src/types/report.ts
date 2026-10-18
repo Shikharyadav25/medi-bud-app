@@ -3,14 +3,17 @@ export interface LabTestResult {
   value: string;
   unit: string;
   referenceRange: string;
-  status: 'NORMAL' | 'LOW' | 'HIGH' | 'ABNORMAL';
+  status: "NORMAL" | "LOW" | "HIGH" | "ABNORMAL" | "UNVERIFIED";
+  observationId?: string;
+  reviewStatus?: "proposed" | "confirmed" | "rejected";
 }
 
 export interface MedicalReport {
   id: string;
   userId: string;
   title: string;
-  reportType: 'Pathology' | 'Radiology' | 'Prescription' | 'Cardiology' | 'Other';
+  reportType:
+    "Pathology" | "Radiology" | "Prescription" | "Cardiology" | "Other";
   date: string;
   doctorOrLabName?: string;
   fileUrl?: string;

@@ -1,20 +1,23 @@
 import uuid
-from typing import List, Dict, Any, Optional
-from fastapi import APIRouter, Depends, HTTPException, status, Response, Query, Header
+from typing import List, Optional
+from fastapi import APIRouter, Depends, HTTPException, status, Response
 from pydantic import BaseModel
-from auth import get_current_user, AuthenticatedUser, verify_token
+from auth import get_current_user, AuthenticatedUser
 from services.plan_service import load_food_catalog, generate_7day_indian_plan
 from services.pdf_service import generate_meal_plan_pdf
+from storage import DurableMap, DurableList
 
 diet_router = APIRouter(prefix="/v1", tags=["Indian Diet & Meal Planning"])
 
-_USER_SAVED_PLANS: Dict[str, Dict[str, Any]] = {}
-_USER_LOGGED_MEALS: List[Dict[str, Any]] = []
+_USER_SAVED_PLANS = DurableMap("plans")
+_USER_LOGGED_MEALS = DurableList("meals")
+
 
 class PlanGenerateRequest(BaseModel):
     is_veg: bool = True
     allergens: Optional[List[str]] = None
     preferred_region: Optional[str] = "Pan-Indian"
+
 
 class MealLogCreate(BaseModel):
     food_id: Optional[str] = None
@@ -26,75 +29,71 @@ class MealLogCreate(BaseModel):
     carbs_g: float
     fat_g: float
 
+
 @diet_router.get("/foods")
 async def get_food_catalog():
     return load_food_catalog()
 
+
 @diet_router.post("/plans")
 async def generate_plan(
     req: PlanGenerateRequest,
-    current_user: AuthenticatedUser = Depends(get_current_user)
+    current_user: AuthenticatedUser = Depends(get_current_user),
 ):
     user_id = current_user.user_id
-    plan = generate_7day_indian_plan(
-        is_veg=req.is_veg,
-        declared_allergens=req.allergens,
-        preferred_region=req.preferred_region
-    )
+    try:
+        plan = generate_7day_indian_plan(
+            is_veg=req.is_veg,
+            declared_allergens=req.allergens,
+            preferred_region=req.preferred_region,
+        )
+    except ValueError as exc:
+        raise HTTPException(422, detail=str(exc))
     plan["id"] = str(uuid.uuid4())
     plan["user_id"] = user_id
     _USER_SAVED_PLANS[user_id] = plan
     return plan
 
+
 @diet_router.get("/plans")
 async def get_saved_plan(current_user: AuthenticatedUser = Depends(get_current_user)):
     user_id = current_user.user_id
     if user_id not in _USER_SAVED_PLANS:
-        # Default fallback 7-day vegetarian plan
-        plan = generate_7day_indian_plan(is_veg=True, declared_allergens=[])
-        plan["id"] = str(uuid.uuid4())
-        plan["user_id"] = user_id
-        _USER_SAVED_PLANS[user_id] = plan
+        raise HTTPException(
+            404,
+            detail="No saved plan yet. Choose your preferences and generate a plan.",
+        )
     return _USER_SAVED_PLANS[user_id]
+
 
 @diet_router.get("/plans/{plan_id}/pdf")
 async def export_plan_pdf(
-    plan_id: str,
-    token: Optional[str] = Query(None),
-    authorization: Optional[str] = Header(None)
+    plan_id: str, current_user: AuthenticatedUser = Depends(get_current_user)
 ):
-    auth_token = None
-    if authorization and authorization.startswith("Bearer "):
-        auth_token = authorization.split("Bearer ")[1].strip()
-    elif token:
-        auth_token = token
-
-    if not auth_token:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail={"code": "UNAUTHORIZED", "message": "Missing Authorization header or token query parameter"}
-        )
-
-    current_user = verify_token(auth_token)
     user_id = current_user.user_id
     plan = _USER_SAVED_PLANS.get(user_id)
-    if not plan:
+    if not plan or plan.get("id") != plan_id:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail={"code": "PLAN_NOT_FOUND", "message": "No saved plan found for user"}
+            detail={
+                "code": "PLAN_NOT_FOUND",
+                "message": "No saved plan found for user",
+            },
         )
 
     pdf_bytes = generate_meal_plan_pdf(plan, user_name="Medi Bud User")
     return Response(
         content=pdf_bytes,
         media_type="application/pdf",
-        headers={"Content-Disposition": f"attachment; filename=medi_bud_meal_plan_{plan_id[:8]}.pdf"}
+        headers={
+            "Content-Disposition": f"attachment; filename=medi_bud_meal_plan_{plan_id[:8]}.pdf"
+        },
     )
+
 
 @diet_router.post("/meals")
 async def log_meal(
-    data: MealLogCreate,
-    current_user: AuthenticatedUser = Depends(get_current_user)
+    data: MealLogCreate, current_user: AuthenticatedUser = Depends(get_current_user)
 ):
     user_id = current_user.user_id
     entry = {
@@ -111,6 +110,7 @@ async def log_meal(
     }
     _USER_LOGGED_MEALS.append(entry)
     return entry
+
 
 @diet_router.get("/meals")
 async def get_logged_meals(current_user: AuthenticatedUser = Depends(get_current_user)):

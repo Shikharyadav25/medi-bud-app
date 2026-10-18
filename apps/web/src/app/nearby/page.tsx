@@ -1,90 +1,39 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import type { NearbyFacilityDTO } from '@medi-bud/contracts';
-import { apiClient } from '@/lib/api';
-import { 
-  MapPin, 
-  Navigation, 
-  Phone, 
-  Clock, 
-  Building2, 
-  Cross, 
-  Pill, 
-  Search, 
+import { useState, useEffect } from "react";
+import type { NearbyFacilityDTO } from "@medi-bud/contracts";
+import { apiClient } from "@/lib/api";
+import {
+  MapPin,
+  Navigation,
+  Phone,
+  Clock,
+  Building2,
+  Cross,
+  Pill,
+  Search,
   AlertCircle,
-  ExternalLink
-} from 'lucide-react';
-
-const FALLBACK_FACILITIES: NearbyFacilityDTO[] = [
-  {
-    id: 'osm-1',
-    name: 'All India Institute of Medical Sciences (AIIMS)',
-    type: 'hospital',
-    address: 'Sri Aurobindo Marg, Ansari Nagar, New Delhi',
-    distance_meters: 1450,
-    phone: '+91-11-26588500',
-    opening_hours: '24/7 Emergency',
-    lat: 28.5672,
-    lon: 77.2100,
-    map_url: 'https://www.google.com/maps/dir/?api=1&destination=28.5672,77.2100'
-  },
-  {
-    id: 'osm-2',
-    name: 'Safdarjung Hospital',
-    type: 'hospital',
-    address: 'Ring Road, Opposite AIIMS, New Delhi',
-    distance_meters: 2100,
-    phone: '+91-11-26165060',
-    opening_hours: '24/7 Emergency',
-    lat: 28.5700,
-    lon: 77.2070,
-    map_url: 'https://www.google.com/maps/dir/?api=1&destination=28.5700,77.2070'
-  },
-  {
-    id: 'osm-3',
-    name: 'Apollo Pharmacy & Wellness Store',
-    type: 'pharmacy',
-    address: 'Green Park Main Market, New Delhi',
-    distance_meters: 950,
-    phone: '+91-11-26861234',
-    opening_hours: '08:00 - 23:00',
-    lat: 28.5585,
-    lon: 77.2055,
-    map_url: 'https://www.google.com/maps/dir/?api=1&destination=28.5585,77.2055'
-  },
-  {
-    id: 'osm-4',
-    name: 'Max Multi-Speciality Centre',
-    type: 'clinic',
-    address: 'Panchsheel Park, New Delhi',
-    distance_meters: 3200,
-    phone: '+91-11-46099999',
-    opening_hours: '08:00 - 20:00',
-    lat: 28.5450,
-    lon: 77.2180,
-    map_url: 'https://www.google.com/maps/dir/?api=1&destination=28.5450,77.2180'
-  }
-];
+  ExternalLink,
+} from "lucide-react";
 
 export default function NearbyCarePage() {
-  const [facilities, setFacilities] = useState<NearbyFacilityDTO[]>(FALLBACK_FACILITIES);
-  const [selectedType, setSelectedType] = useState<string>('all');
+  const [facilities, setFacilities] = useState<NearbyFacilityDTO[]>([]);
+  const [selectedType, setSelectedType] = useState<string>("all");
   const [loading, setLoading] = useState(false);
-  const [locationName, setLocationName] = useState('New Delhi (Default Demo Area)');
-  const [coords, setCoords] = useState<{ lat: number; lon: number }>({ lat: 28.5672, lon: 77.2100 });
+  const [locationName, setLocationName] = useState("Choose your location");
+  const [error, setError] = useState("");
+  const [searched, setSearched] = useState(false);
 
   const fetchFacilities = async (latitude: number, longitude: number) => {
     setLoading(true);
+    setError("");
+    setSearched(true);
     try {
       const data = await apiClient.getNearbyCare(latitude, longitude, 5000);
-      if (data && data.length > 0) {
-        setFacilities(data);
-      } else {
-        setFacilities(FALLBACK_FACILITIES);
-      }
+      setFacilities(data || []);
     } catch {
-      setFacilities(FALLBACK_FACILITIES);
+      setFacilities([]);
+      setError("Nearby search is currently unavailable. Try again shortly.");
     } finally {
       setLoading(false);
     }
@@ -92,27 +41,32 @@ export default function NearbyCarePage() {
 
   const handleDetectLocation = () => {
     if (!navigator.geolocation) {
-      alert('Geolocation is not supported by your browser.');
+      alert("Geolocation is not supported by your browser.");
       return;
     }
     setLoading(true);
     navigator.geolocation.getCurrentPosition(
       (pos) => {
         const { latitude, longitude } = pos.coords;
-        setCoords({ lat: latitude, lon: longitude });
-        setLocationName(`Current Location (${latitude.toFixed(3)}, ${longitude.toFixed(3)})`);
+        setLocationName(
+          `Current Location (${latitude.toFixed(3)}, ${longitude.toFixed(3)})`,
+        );
         fetchFacilities(latitude, longitude);
       },
       () => {
         setLoading(false);
-        alert('Could not retrieve GPS coordinates. Retaining demo area.');
-      }
+        setError(
+          "Location access was declined or unavailable. Enable browser location access and try again.",
+        );
+      },
+      { timeout: 15000, maximumAge: 60000 },
     );
   };
 
-  const filtered = selectedType === 'all'
-    ? facilities
-    : facilities.filter((f) => f.type.toLowerCase().includes(selectedType));
+  const filtered =
+    selectedType === "all"
+      ? facilities
+      : facilities.filter((f) => f.type.toLowerCase().includes(selectedType));
 
   return (
     <div className="space-y-6 max-w-5xl mx-auto">
@@ -123,7 +77,8 @@ export default function NearbyCarePage() {
             Nearby Care & Emergency Facilities
           </h1>
           <p className="text-xs text-(--text-secondary) mt-1">
-            Discover verified hospitals, outpatient clinics, and pharmacies nearby using OpenStreetMap Overpass.
+            Find hospitals, clinics, and pharmacies listed on OpenStreetMap.
+            Call ahead to confirm details.
           </p>
         </div>
 
@@ -132,21 +87,23 @@ export default function NearbyCarePage() {
           disabled={loading}
           className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-(--primary) text-white text-xs font-medium hover:bg-(--primary-hover) transition-colors shadow-sm self-start sm:self-auto"
         >
-          <Navigation className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
-          {loading ? 'Locating...' : 'Use My GPS Location'}
+          <Navigation
+            className={`w-3.5 h-3.5 ${loading ? "animate-spin" : ""}`}
+          />
+          {loading ? "Locating..." : "Use My GPS Location"}
         </button>
       </div>
 
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-1.5 p-1 rounded-xl bg-(--surface) border border-(--border-subtle) text-xs">
-          {['all', 'hospital', 'clinic', 'pharmacy'].map((typeKey) => (
+          {["all", "hospital", "clinic", "pharmacy"].map((typeKey) => (
             <button
               key={typeKey}
               onClick={() => setSelectedType(typeKey)}
               className={`capitalize px-3 py-1.5 rounded-lg font-medium transition-colors ${
                 selectedType === typeKey
-                  ? 'bg-(--primary) text-white shadow-xs'
-                  : 'text-(--text-secondary) hover:text-(--text-primary)'
+                  ? "bg-(--primary) text-white shadow-xs"
+                  : "text-(--text-secondary) hover:text-(--text-primary)"
               }`}
             >
               {typeKey}
@@ -158,6 +115,22 @@ export default function NearbyCarePage() {
         </span>
       </div>
 
+      {error && (
+        <p role="alert" className="notice error-notice">
+          {error}
+        </p>
+      )}
+      {!loading && filtered.length === 0 && (
+        <div className="empty-state">
+          {searched
+            ? "No matching facilities were returned. Try a different category."
+            : "Use your location to find care nearby. Your location is shared with the map search provider for this search."}
+        </div>
+      )}
+      <p className="text-xs text-(--text-muted)">
+        Data © OpenStreetMap contributors · Listings may be incomplete. In an
+        emergency, contact your local emergency service.
+      </p>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {filtered.map((item) => (
           <div
@@ -206,11 +179,16 @@ export default function NearbyCarePage() {
                   {item.phone}
                 </a>
               ) : (
-                <span className="text-[11px] text-(--text-muted)">No phone listed</span>
+                <span className="text-[11px] text-(--text-muted)">
+                  No phone listed
+                </span>
               )}
 
               <a
-                href={item.map_url || `https://www.google.com/maps/dir/?api=1&destination=${item.lat},${item.lon}`}
+                href={
+                  item.map_url ||
+                  `https://www.google.com/maps/dir/?api=1&destination=${item.lat},${item.lon}`
+                }
                 target="_blank"
                 rel="noreferrer"
                 className="inline-flex items-center gap-1 text-xs font-semibold px-3 py-1.5 rounded-xl border border-(--border-subtle) hover:bg-(--surface-subtle) transition-colors text-(--text-primary)"

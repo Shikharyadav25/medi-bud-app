@@ -52,6 +52,13 @@ example
 
 # Next.js & Python cache
 .next/
+.next-*/
 __pycache__/
 *.pyc
 .pytest_cache/
+
+# Private runtime data
+.venv/
+*.sqlite3
+*.sqlite3-*
+.playwright/

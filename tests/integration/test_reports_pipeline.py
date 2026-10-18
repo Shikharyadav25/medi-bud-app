@@ -1,7 +1,10 @@
 import io
-import uuid
 import pytest
-from parsers.report_parser import validate_file_signature, extract_observations_from_text
+from parsers.report_parser import (
+    validate_file_signature,
+    extract_observations_from_text,
+)
+from conftest import synthetic_pdf
 
 # Synthetic report fixtures
 FIXTURE_CBC = """
@@ -48,6 +51,7 @@ FIXTURE_CORRUPT = """
 UNREADABLE GARBAGE DATA ONLY
 """
 
+
 def test_file_signature_validation():
     # PDF
     assert validate_file_signature(b"%PDF-1.7\n...") == "application/pdf"
@@ -60,6 +64,7 @@ def test_file_signature_validation():
     with pytest.raises(ValueError) as excinfo:
         validate_file_signature(b"Plain text file content...")
     assert "Invalid file signature" in str(excinfo.value)
+
 
 def test_synthetic_fixture_cbc_extraction():
     pages = [(1, FIXTURE_CBC)]
@@ -74,6 +79,8 @@ def test_synthetic_fixture_cbc_extraction():
 
     assert "platelet_count" in tests
     assert tests["platelet_count"]["numeric_value"] == 250000
+    assert tests["wbc_count"]["numeric_value"] == 7500
+
 
 def test_synthetic_fixture_lipid_extraction():
     pages = [(1, FIXTURE_LIPID)]
@@ -89,6 +96,7 @@ def test_synthetic_fixture_lipid_extraction():
     assert "hdl_cholesterol" in tests
     assert tests["hdl_cholesterol"]["numeric_value"] == 42
 
+
 def test_synthetic_fixture_glucose_extraction():
     pages = [(1, FIXTURE_GLUCOSE)]
     obs = extract_observations_from_text(pages)
@@ -101,6 +109,7 @@ def test_synthetic_fixture_glucose_extraction():
 
     assert "hba1c" in tests
     assert tests["hba1c"]["numeric_value"] == 6.2
+
 
 def test_synthetic_fixture_comparator_and_corrupt():
     # Comparator: should parse '< 0.5' with comparator '<' and numeric 0.5 without treating as range bounds
@@ -117,12 +126,13 @@ def test_synthetic_fixture_comparator_and_corrupt():
     assert isinstance(obs_corrupt, list)
     assert len(obs_corrupt) == 0
 
+
 def test_observation_confirmation_workflow(client, user_a):
-    fake_pdf = b"%PDF-1.4\n1 0 obj\n<<>>\nendobj\ntrailer\n<<>>\n%%EOF"
+    fake_pdf = synthetic_pdf()
     upload_res = client.post(
         "/v1/reports",
         headers=user_a["headers"],
-        files={"file": ("lab_report.pdf", io.BytesIO(fake_pdf), "application/pdf")}
+        files={"file": ("lab_report.pdf", io.BytesIO(fake_pdf), "application/pdf")},
     )
     assert upload_res.status_code == 200
     report_id = upload_res.json()["report_id"]
@@ -132,10 +142,15 @@ def test_observation_confirmation_workflow(client, user_a):
     assert rep["id"] == report_id
 
     # Update observations
-    obs_id = str(uuid.uuid4())
+    assert rep["observations"][0]["status"] == "proposed"
+    obs_id = rep["observations"][0]["id"]
     patch_res = client.patch(
         f"/v1/reports/{report_id}/observations",
         headers=user_a["headers"],
-        json={"observations": [{"id": obs_id, "status": "confirmed", "numeric_value": 15.0}]}
+        json={
+            "observations": [
+                {"id": obs_id, "status": "confirmed", "numeric_value": 15.0}
+            ]
+        },
     )
     assert patch_res.status_code == 200

@@ -1,27 +1,27 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import Link from 'next/link';
-import { 
-  RED_FLAG_QUESTIONS, 
-  evaluateSymptomAnswers, 
+import { useState } from "react";
+import Link from "next/link";
+import {
+  RED_FLAG_QUESTIONS,
+  evaluateSymptomAnswers,
   EMERGENCY_CONTACTS,
-  type SymptomEvaluationResult 
-} from '@medi-bud/safety-content';
-import { 
-  ShieldAlert, 
-  PhoneCall, 
-  AlertTriangle, 
-  CheckCircle2, 
+  type SymptomEvaluationResult,
+} from "@medi-bud/safety-content";
+import {
+  ShieldAlert,
+  PhoneCall,
+  AlertTriangle,
+  CheckCircle2,
   Info,
   MapPin,
-  HeartPulse
-} from 'lucide-react';
+  HeartPulse,
+} from "lucide-react";
 
 export default function SymptomsPage() {
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [evaluation, setEvaluation] = useState<SymptomEvaluationResult>(() =>
-    evaluateSymptomAnswers([])
+    evaluateSymptomAnswers([]),
   );
 
   const handleToggle = (id: string) => {
@@ -38,8 +38,8 @@ export default function SymptomsPage() {
     setEvaluation(evaluateSymptomAnswers([]));
   };
 
-  const isEmergency = evaluation.level === 'emergency';
-  const isSoon = evaluation.level === 'soon';
+  const isEmergency = evaluation.level === "emergency";
+  const isSoon = evaluation.level === "soon";
 
   return (
     <div className="max-w-4xl mx-auto space-y-8">
@@ -49,27 +49,28 @@ export default function SymptomsPage() {
           Symptom Guidance & Red-Flag Triage
         </h1>
         <p className="text-sm text-(--text-secondary) mt-1">
-          Deterministic safety evaluation to identify acute clinical red flags and direct users to emergency services.
+          A short checklist of warning signs. This guide cannot diagnose
+          symptoms or rule out an emergency.
         </p>
       </div>
 
       <div
         className={`p-6 rounded-2xl border transition-all ${
           isEmergency
-            ? 'bg-red-50 border-red-300 text-red-950 shadow-sm'
+            ? "bg-red-50 border-red-300 text-red-950 shadow-sm"
             : isSoon
-            ? 'bg-amber-50 border-amber-300 text-amber-950 shadow-sm'
-            : 'bg-emerald-50 border-emerald-300 text-emerald-950'
+              ? "bg-amber-50 border-amber-300 text-amber-950 shadow-sm"
+              : "bg-slate-50 border-slate-300 text-slate-800"
         }`}
       >
         <div className="flex items-start gap-4">
           <div
             className={`p-2.5 rounded-xl ${
               isEmergency
-                ? 'bg-red-600 text-white'
+                ? "bg-red-600 text-white"
                 : isSoon
-                ? 'bg-amber-600 text-white'
-                : 'bg-emerald-600 text-white'
+                  ? "bg-amber-600 text-white"
+                  : "bg-slate-600 text-white"
             }`}
           >
             {isEmergency ? (
@@ -81,9 +82,7 @@ export default function SymptomsPage() {
             )}
           </div>
           <div className="space-y-1.5 flex-1">
-            <h2 className="text-lg font-bold">
-              {evaluation.headline}
-            </h2>
+            <h2 className="text-lg font-bold">{evaluation.headline}</h2>
             <p className="text-xs leading-relaxed opacity-90">
               {evaluation.guidanceText}
             </p>
@@ -120,10 +119,10 @@ export default function SymptomsPage() {
                   key={q.id}
                   className={`flex items-start gap-3 p-3.5 rounded-xl border cursor-pointer transition-colors text-xs ${
                     isChecked
-                      ? q.severity === 'emergency'
-                        ? 'border-red-400 bg-red-50/60'
-                        : 'border-amber-400 bg-amber-50/60'
-                      : 'border-(--border-subtle) bg-(--surface) hover:border-slate-300'
+                      ? q.severity === "emergency"
+                        ? "border-red-400 bg-red-50/60"
+                        : "border-amber-400 bg-amber-50/60"
+                      : "border-(--border-subtle) bg-(--surface) hover:border-slate-300"
                   }`}
                 >
                   <input
@@ -133,8 +132,12 @@ export default function SymptomsPage() {
                     className="mt-0.5 w-4 h-4 accent-red-600 rounded shrink-0"
                   />
                   <div className="space-y-1">
-                    <p className="font-medium text-(--text-primary)">{q.prompt}</p>
-                    <p className="text-[11px] text-(--text-muted)">{q.explanation}</p>
+                    <p className="font-medium text-(--text-primary)">
+                      {q.prompt}
+                    </p>
+                    <p className="text-[11px] text-(--text-muted)">
+                      {q.explanation}
+                    </p>
                   </div>
                 </label>
               );
@@ -157,7 +160,7 @@ export default function SymptomsPage() {
                     {contact.label}
                   </span>
                   <a
-                    href={`tel:${contact.number.replace(/-/g, '')}`}
+                    href={`tel:${contact.number.replace(/-/g, "")}`}
                     className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-red-600 text-white font-bold text-xs hover:bg-red-700 transition-colors"
                   >
                     <PhoneCall className="w-3 h-3" />
@@ -180,7 +183,7 @@ export default function SymptomsPage() {
               Need Physical Care Nearby?
             </h4>
             <p className="text-[11px] text-(--text-secondary)">
-              Discover verified hospitals, clinics, and pharmacies within 5 km of your location.
+              Find hospitals, clinics, and pharmacies listed near your location.
             </p>
             <Link
               href="/nearby"

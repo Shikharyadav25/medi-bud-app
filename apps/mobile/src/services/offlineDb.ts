@@ -1,109 +1,75 @@
-import * as SQLite from 'expo-sqlite';
-import type { SyncMutationDTO } from '@medi-bud/contracts';
-import { apiClient } from './api/client';
+import type { SyncMutationDTO } from "@medi-bud/contracts";
+import { apiClient } from "./api/client";
+import { supabase } from "./supabase";
+import { privateStorage } from "./privateStorage";
 
-let dbInstance: SQLite.SQLiteDatabase | null = null;
-
-function getDb(): SQLite.SQLiteDatabase {
-  if (!dbInstance) {
-    dbInstance = SQLite.openDatabaseSync('medibud_outbox.db');
-    dbInstance.execSync(`
-      CREATE TABLE IF NOT EXISTS pending_mutations (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        mutation_id TEXT UNIQUE NOT NULL,
-        user_id TEXT NOT NULL,
-        device_id TEXT NOT NULL,
-        entity_type TEXT NOT NULL,
-        payload TEXT NOT NULL,
-        payload_hash TEXT NOT NULL,
-        occurred_at TEXT NOT NULL,
-        timezone TEXT NOT NULL,
-        created_at TEXT NOT NULL
+let writes = Promise.resolve();
+async function owner() {
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
+  if (!session) throw new Error("Sign in to use offline entries.");
+  return session.user.id;
+}
+async function read(uid: string): Promise<SyncMutationDTO[]> {
+  const raw = await privateStorage.getItem("medibud.outbox." + uid);
+  return raw ? JSON.parse(raw) : [];
+}
+export async function queueMobileMutation(
+  mutation: SyncMutationDTO,
+): Promise<void> {
+  const uid = await owner();
+  if (mutation.user_id !== uid) throw new Error("Entry owner mismatch.");
+  const action = writes.then(async () => {
+    const current = await read(uid);
+    const existing = current.find(
+      (m) => m.mutation_id === mutation.mutation_id,
+    );
+    if (existing && JSON.stringify(existing) !== JSON.stringify(mutation))
+      throw new Error("This entry ID already exists.");
+    if (!existing)
+      await privateStorage.setItem(
+        "medibud.outbox." + uid,
+        JSON.stringify([...current, mutation]),
       );
-    `);
-  }
-  return dbInstance;
+  });
+  writes = action.catch(() => undefined);
+  return action;
 }
-
-export async function queueMobileMutation(mutation: SyncMutationDTO): Promise<void> {
-  const db = getDb();
-  db.runSync(
-    `INSERT OR REPLACE INTO pending_mutations 
-     (mutation_id, user_id, device_id, entity_type, payload, payload_hash, occurred_at, timezone, created_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);`,
-    [
-      mutation.mutation_id,
-      mutation.user_id,
-      mutation.device_id,
-      mutation.entity_type,
-      JSON.stringify(mutation.payload),
-      mutation.payload_hash,
-      mutation.occurred_at,
-      mutation.timezone,
-      new Date().toISOString(),
-    ]
-  );
-}
-
 export async function getPendingMobileMutations(): Promise<SyncMutationDTO[]> {
-  const db = getDb();
-  const rows = db.getAllSync<{
-    mutation_id: string;
-    user_id: string;
-    device_id: string;
-    entity_type: 'health_log' | 'reminder_completion';
-    payload: string;
-    payload_hash: string;
-    occurred_at: string;
-    timezone: string;
-  }>(`SELECT * FROM pending_mutations ORDER BY id ASC;`);
-
-  return rows.map((r) => ({
-    mutation_id: r.mutation_id,
-    user_id: r.user_id,
-    device_id: r.device_id,
-    entity_type: r.entity_type,
-    payload: JSON.parse(r.payload),
-    payload_hash: r.payload_hash,
-    occurred_at: r.occurred_at,
-    timezone: r.timezone,
-  }));
+  await writes;
+  return read(await owner());
 }
-
 export async function replayPendingMobileMutations(): Promise<{
   synced: number;
   remaining: number;
 }> {
+  const uid = await owner();
   const pending = await getPendingMobileMutations();
-  if (pending.length === 0) {
-    return { synced: 0, remaining: 0 };
-  }
-
-  const db = getDb();
+  if (!pending.length) return { synced: 0, remaining: 0 };
   try {
-    const res = await apiClient<{ results: Array<{ mutation_id: string; status: string }> }>(
-      '/v1/sync/logs',
-      {
-        method: 'POST',
-        body: JSON.stringify({ mutations: pending }),
-      }
+    const result = await apiClient<{
+      results: Array<{ mutation_id: string; status: string }>;
+    }>("/v1/sync/logs", {
+      method: "POST",
+      body: JSON.stringify({ mutations: pending.slice(0, 100) }),
+    });
+    const applied = new Set(
+      result.results
+        .filter((r) => r.status === "applied")
+        .map((r) => r.mutation_id),
     );
-
-    let synced = 0;
-    if (res && res.results) {
-      for (const item of res.results) {
-        if (item.status === 'applied' || item.status === 'conflict') {
-          db.runSync(`DELETE FROM pending_mutations WHERE mutation_id = ?;`, [item.mutation_id]);
-          synced++;
-        }
-      }
-    }
-
-    const remainingRows = db.getAllSync(`SELECT COUNT(*) as count FROM pending_mutations;`);
-    const remaining = (remainingRows[0] as { count: number })?.count ?? 0;
-    return { synced, remaining };
-  } catch (err) {
-    console.warn('[Mobile Outbox] Sync replay deferred due to network error:', err);
+    const action = writes.then(async () => {
+      const current = await read(uid);
+      await privateStorage.setItem(
+        "medibud.outbox." + uid,
+        JSON.stringify(current.filter((m) => !applied.has(m.mutation_id))),
+      );
+    });
+    writes = action.catch(() => undefined);
+    await action;
+    return { synced: applied.size, remaining: (await read(uid)).length };
+  } catch {
     return { synced: 0, remaining: pending.length };
   }
 }

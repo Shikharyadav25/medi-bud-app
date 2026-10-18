@@ -1,16 +1,37 @@
-import { create } from 'zustand';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { DailyVitals, HealthScoreDetails, MealItem, WorkoutItem } from '../types/health';
-import { MedicalReport } from '../types/report';
-import { SevenDayDietPlan } from '../types/ai';
+import { create } from "zustand";
+import { privateStorage } from "../services/privateStorage";
+import { supabase } from "../services/supabase";
+import { apiClient } from "../services/api/client";
 import {
-  DEMO_DIET_PLAN,
-  DEMO_HEALTH_SCORE,
-  DEMO_RECENT_MEALS,
-  DEMO_SAMPLE_REPORT,
-  DEMO_VITALS,
-  DEMO_WORKOUTS,
-} from '../services/demo/demoData';
+  DailyVitals,
+  HealthScoreDetails,
+  MealItem,
+  WorkoutItem,
+} from "../types/health";
+import { MedicalReport } from "../types/report";
+import { SevenDayDietPlan } from "../types/ai";
+const EMPTY_VITALS: DailyVitals = {
+  bloodPressure: "—",
+  heartRate: 0,
+  bloodGlucose: "—",
+  spo2: 0,
+  weightKg: 0,
+  lastUpdated: "Not added yet",
+};
+const EMPTY_PLAN: SevenDayDietPlan = {
+  title: "No meal ideas yet",
+  targetDailyCalories: 0,
+  macroTargets: { proteinG: 0, carbsG: 0, fatG: 0 },
+  days: [],
+  dietitianRationale: "No plan generated.",
+  disclaimer: "Meal ideas are estimates, not a prescribed diet.",
+};
+const EMPTY_SCORE: HealthScoreDetails = {
+  score: 0,
+  category: "Not assessed",
+  breakdown: { hydration: 0, nutrition: 0, activity: 0, sleep: 0 },
+  disclaimer: "Journal activity is not a clinical assessment.",
+};
 
 interface HealthState {
   vitals: DailyVitals;
@@ -32,24 +53,42 @@ interface HealthState {
   setDietPlan: (plan: SevenDayDietPlan) => void;
   setDailyGoals: (calories: number, waterMl: number) => void;
   resetForNewUser: () => void;
-  resetToDemoUser: () => void;
   loadStoredHealth: () => Promise<void>;
 }
 
-const HEALTH_STORAGE_KEY = '@medibud_health';
-const saveHealth = (state: HealthState) => AsyncStorage.setItem(HEALTH_STORAGE_KEY, JSON.stringify(state)).catch(() => undefined);
+let saveQueue = Promise.resolve();
+export const flushHealthWrites = () => saveQueue;
+const saveHealth = (state: HealthState) => {
+  const snapshot = JSON.stringify({
+    ...state,
+    savedDate: new Date().toLocaleDateString("en-CA"),
+  });
+  const sessionAtWrite = supabase.auth.getSession();
+  saveQueue = saveQueue
+    .then(async () => {
+      const {
+        data: { session },
+      } = await sessionAtWrite;
+      if (session)
+        await privateStorage.setItem(
+          "medibud.health." + session.user.id,
+          snapshot,
+        );
+    })
+    .catch(() => undefined);
+};
 
 export const useHealthStore = create<HealthState>((set, get) => ({
-  vitals: DEMO_VITALS,
-  waterIntakeMl: 1750,
+  vitals: { ...EMPTY_VITALS },
+  waterIntakeMl: 0,
   waterGoalMl: 2500,
   calorieGoal: 2200,
-  waterStreakDays: 5,
-  recentMeals: DEMO_RECENT_MEALS,
-  workouts: DEMO_WORKOUTS,
-  reports: [DEMO_SAMPLE_REPORT],
-  dietPlan: DEMO_DIET_PLAN,
-  healthScore: DEMO_HEALTH_SCORE,
+  waterStreakDays: 0,
+  recentMeals: [],
+  workouts: [],
+  reports: [],
+  dietPlan: { ...EMPTY_PLAN },
+  healthScore: { ...EMPTY_SCORE },
 
   addWater: (amountMl) => {
     const current = get().waterIntakeMl;
@@ -64,12 +103,19 @@ export const useHealthStore = create<HealthState>((set, get) => ({
   },
 
   addMeal: (meal) => {
-    set({ recentMeals: [meal, ...get().recentMeals] });
+    set({
+      recentMeals: [
+        { ...meal, timestamp: new Date().toISOString() },
+        ...get().recentMeals,
+      ],
+    });
     saveHealth(get());
   },
 
   toggleWorkout: (id) => {
-    const updated = get().workouts.map((w) => (w.id === id ? { ...w, completed: !w.completed } : w));
+    const updated = get().workouts.map((w) =>
+      w.id === id ? { ...w, completed: !w.completed } : w,
+    );
     set({ workouts: updated });
     saveHealth(get());
   },
@@ -80,7 +126,7 @@ export const useHealthStore = create<HealthState>((set, get) => ({
   },
 
   updateVitals: (updates) => {
-    set({ vitals: { ...get().vitals, ...updates, lastUpdated: 'Just now' } });
+    set({ vitals: { ...get().vitals, ...updates, lastUpdated: "Just now" } });
     saveHealth(get());
   },
 
@@ -96,33 +142,45 @@ export const useHealthStore = create<HealthState>((set, get) => ({
 
   resetForNewUser: () => {
     set({
-      vitals: { ...DEMO_VITALS, bloodPressure: '—', heartRate: 0, bloodGlucose: '—', spo2: 0, lastUpdated: 'Not added yet' },
+      vitals: { ...EMPTY_VITALS },
       waterIntakeMl: 0,
       waterGoalMl: 2500,
       calorieGoal: 2000,
       waterStreakDays: 0,
       recentMeals: [],
-      workouts: DEMO_WORKOUTS.map((workout) => ({ ...workout, completed: false })),
+      workouts: [],
       reports: [],
-      dietPlan: DEMO_DIET_PLAN,
-      healthScore: { ...DEMO_HEALTH_SCORE, score: 0, category: 'Needs Attention' },
+      dietPlan: { ...EMPTY_PLAN },
+      healthScore: { ...EMPTY_SCORE },
     });
-    saveHealth(get());
-  },
-
-  resetToDemoUser: () => {
-    set({
-      vitals: DEMO_VITALS, waterIntakeMl: 1750, waterGoalMl: 2500, calorieGoal: 2200,
-      waterStreakDays: 5, recentMeals: DEMO_RECENT_MEALS, workouts: DEMO_WORKOUTS,
-      reports: [DEMO_SAMPLE_REPORT], dietPlan: DEMO_DIET_PLAN, healthScore: DEMO_HEALTH_SCORE,
-    });
-    saveHealth(get());
   },
 
   loadStoredHealth: async () => {
     try {
-      const stored = await AsyncStorage.getItem(HEALTH_STORAGE_KEY);
-      if (stored) set(JSON.parse(stored));
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      const stored = session
+        ? await privateStorage.getItem("medibud.health." + session.user.id)
+        : null;
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        const sameDay =
+          parsed.savedDate === new Date().toLocaleDateString("en-CA");
+        set({
+          ...parsed,
+          waterIntakeMl: sameDay ? parsed.waterIntakeMl : 0,
+          recentMeals: sameDay ? parsed.recentMeals : [],
+        });
+      }
+      if (session) {
+        try {
+          const reports = await apiClient<MedicalReport[]>("/api/reports");
+          set({ reports });
+        } catch {
+          /* Preserve this account's encrypted cache when offline. */
+        }
+      }
     } catch {
       // Keep safe in-memory defaults when storage is unavailable.
     }

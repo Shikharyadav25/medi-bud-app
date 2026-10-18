@@ -1,12 +1,15 @@
-'use client';
+"use client";
 
-import { useState, useRef } from 'react';
-import { UploadCloud, AlertCircle, FileText, CheckCircle2 } from 'lucide-react';
+import { useState, useRef } from "react";
+import { UploadCloud, AlertCircle, FileText, CheckCircle2 } from "lucide-react";
 
 interface ReportUploadZoneProps {
   onUploadSuccess: (reportId: string, filename: string) => void;
   onUploadError?: (error: string) => void;
-  uploadFn: (file: File) => Promise<{ report_id: string; status: string }>;
+  uploadFn: (
+    file: File,
+    consentAI: boolean,
+  ) => Promise<{ report_id: string; status: string }>;
 }
 
 const MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024; // 10MB
@@ -18,6 +21,7 @@ export function ReportUploadZone({
 }: ReportUploadZoneProps) {
   const [isDragging, setIsDragging] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+  const [consentAI, setConsentAI] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -26,11 +30,21 @@ export function ReportUploadZone({
     const bytes = new Uint8Array(buffer);
 
     // PDF magic bytes: %PDF (0x25 0x50 0x44 0x46)
-    if (bytes[0] === 0x25 && bytes[1] === 0x50 && bytes[2] === 0x44 && bytes[3] === 0x46) {
+    if (
+      bytes[0] === 0x25 &&
+      bytes[1] === 0x50 &&
+      bytes[2] === 0x44 &&
+      bytes[3] === 0x46
+    ) {
       return true;
     }
     // PNG magic bytes: \x89PNG (0x89 0x50 0x4E 0x47)
-    if (bytes[0] === 0x89 && bytes[1] === 0x50 && bytes[2] === 0x4e && bytes[3] === 0x47) {
+    if (
+      bytes[0] === 0x89 &&
+      bytes[1] === 0x50 &&
+      bytes[2] === 0x4e &&
+      bytes[3] === 0x47
+    ) {
       return true;
     }
     // JPEG magic bytes: \xFF\xD8\xFF
@@ -41,10 +55,11 @@ export function ReportUploadZone({
   };
 
   const handleProcessFile = async (file: File) => {
+    if (isUploading) return;
     setErrorMessage(null);
 
     if (file.size > MAX_FILE_SIZE_BYTES) {
-      const err = 'File size exceeds maximum permitted limit of 10MB.';
+      const err = "File size exceeds maximum permitted limit of 10MB.";
       setErrorMessage(err);
       onUploadError?.(err);
       return;
@@ -52,7 +67,8 @@ export function ReportUploadZone({
 
     const isValidFormat = await validateFileSignature(file);
     if (!isValidFormat) {
-      const err = 'Unrecognized file header. Only authentic PDF, PNG, or JPEG lab reports are accepted.';
+      const err =
+        "Unrecognized file header. Only authentic PDF, PNG, or JPEG lab reports are accepted.";
       setErrorMessage(err);
       onUploadError?.(err);
       return;
@@ -60,10 +76,13 @@ export function ReportUploadZone({
 
     setIsUploading(true);
     try {
-      const result = await uploadFn(file);
+      const result = await uploadFn(file, consentAI);
       onUploadSuccess(result.report_id, file.name);
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Upload failed. Please verify network connectivity.';
+      const msg =
+        err instanceof Error
+          ? err.message
+          : "Upload failed. Please verify network connectivity.";
       setErrorMessage(msg);
       onUploadError?.(msg);
     } finally {
@@ -96,19 +115,42 @@ export function ReportUploadZone({
 
   return (
     <div className="space-y-3">
+      <label className="text-xs text-(--text-secondary) flex gap-2 items-start">
+        <input
+          type="checkbox"
+          checked={consentAI}
+          onChange={(e) => setConsentAI(e.target.checked)}
+          className="mt-1 shrink-0"
+        />
+        For image reports, I agree to send this file to Google Gemini for
+        extraction. Text-based PDFs are processed on the server without Gemini.
+      </label>
       <div
+        role="button"
+        tabIndex={0}
+        aria-label="Choose a lab report to upload"
+        aria-busy={isUploading}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            fileInputRef.current?.click();
+          }
+        }}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
-        onClick={() => fileInputRef.current?.click()}
+        onClick={() => {
+          if (!isUploading) fileInputRef.current?.click();
+        }}
         className={`relative border-2 border-dashed rounded-2xl p-6 sm:p-8 text-center cursor-pointer transition-colors ${
           isDragging
-            ? 'border-(--primary) bg-(--primary-surface)'
-            : 'border-(--border-medium) hover:border-(--primary) bg-(--surface)'
+            ? "border-(--primary) bg-(--primary-surface)"
+            : "border-(--border-medium) hover:border-(--primary) bg-(--surface)"
         }`}
       >
         <input
           ref={fileInputRef}
+          aria-label="Report file"
           type="file"
           accept=".pdf,.png,.jpg,.jpeg"
           onChange={handleFileChange}
@@ -125,7 +167,9 @@ export function ReportUploadZone({
           </div>
           <div>
             <p className="font-semibold text-sm text-(--text-primary)">
-              {isUploading ? 'Validating & Uploading Report...' : 'Upload Lab Report (PDF, PNG, JPEG)'}
+              {isUploading
+                ? "Validating & Uploading Report..."
+                : "Upload Lab Report (PDF, PNG, JPEG)"}
             </p>
             <p className="text-xs text-(--text-muted) mt-1">
               Drag & drop or click to browse. Max 10MB, up to 20 pages.

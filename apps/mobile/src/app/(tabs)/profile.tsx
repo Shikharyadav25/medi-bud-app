@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -8,29 +8,31 @@ import {
   TouchableOpacity,
   Switch,
   Alert,
-} from 'react-native';
-import { Feather, MaterialCommunityIcons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
-import { COLORS, RADIUS, TYPOGRAPHY } from '../../constants/theme';
-import { Card } from '../../components/ui/Card';
-import { SectionHeader } from '../../components/ui/SectionHeader';
-import { Button } from '../../components/ui/Button';
-import { Input } from '../../components/ui/Input';
-import { Chip } from '../../components/ui/Chip';
-import { SUPPORTED_LANGUAGES, SupportedLanguage } from '../../constants/i18n';
-import { useAuthStore } from '../../store/useAuthStore';
-import { useHealthStore } from '../../store/useHealthStore';
-import type { FamilyMember } from '../../types/user';
+} from "react-native";
+import { Feather, MaterialCommunityIcons } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
+import { COLORS, RADIUS, TYPOGRAPHY } from "../../constants/theme";
+import { Card } from "../../components/ui/Card";
+import { SectionHeader } from "../../components/ui/SectionHeader";
+import { Button } from "../../components/ui/Button";
+import { Input } from "../../components/ui/Input";
+import { Chip } from "../../components/ui/Chip";
+import { SUPPORTED_LANGUAGES, SupportedLanguage } from "../../constants/i18n";
+import { useAuthStore } from "../../store/useAuthStore";
+import { apiClient } from "../../services/api/client";
+import { useHealthStore } from "../../store/useHealthStore";
+import type { FamilyMember } from "../../types/user";
 
 export default function ProfileScreen() {
   const router = useRouter();
-  const { profile, setProfile, setLanguage, logout, resetToDemoUser, addFamilyMember } = useAuthStore();
-  const resetDemoHealth = useHealthStore((state) => state.resetToDemoUser);
+  const { profile, setProfile, setLanguage, logout, addFamilyMember } =
+    useAuthStore();
   const [seniorMode, setSeniorMode] = useState(profile.isSeniorMode || false);
   const [showFamilyForm, setShowFamilyForm] = useState(false);
-  const [familyName, setFamilyName] = useState('');
-  const [familyAge, setFamilyAge] = useState('');
-  const [familyRelation, setFamilyRelation] = useState<FamilyMember['relation']>('Parent');
+  const [familyName, setFamilyName] = useState("");
+  const [familyAge, setFamilyAge] = useState("");
+  const [familyRelation, setFamilyRelation] =
+    useState<FamilyMember["relation"]>("Parent");
 
   const toggleSeniorMode = (val: boolean) => {
     setSeniorMode(val);
@@ -39,7 +41,10 @@ export default function ProfileScreen() {
 
   const handleSelectLanguage = (lang: SupportedLanguage) => {
     setLanguage(lang);
-    Alert.alert('Language Updated', `Medi Bud language preference switched to ${lang}.`);
+    Alert.alert(
+      "Language Updated",
+      `Medi Bud language preference switched to ${lang}.`,
+    );
   };
 
   const handleAddFamilyMember = () => {
@@ -49,31 +54,50 @@ export default function ProfileScreen() {
   const saveFamilyMember = () => {
     const age = Number(familyAge);
     if (!familyName.trim() || age < 1 || age > 120) {
-      Alert.alert('Check family details', 'Enter a name and an age between 1 and 120.');
+      Alert.alert(
+        "Check family details",
+        "Enter a name and an age between 1 and 120.",
+      );
       return;
     }
     addFamilyMember({
-      id: `family-${Date.now()}`, name: familyName.trim(), relation: familyRelation, age,
+      id: `family-${Date.now()}`,
+      name: familyName.trim(),
+      relation: familyRelation,
+      age,
       uniqueFamilyId: `MB-${Math.random().toString(36).slice(2, 8).toUpperCase()}`,
-      permissions: { profile: true, reports: false, medications: false, vitals: true, plans: true },
+      permissions: {
+        profile: true,
+        reports: false,
+        medications: false,
+        vitals: true,
+        plans: true,
+      },
     });
-    setFamilyName('');
-    setFamilyAge('');
+    setFamilyName("");
+    setFamilyAge("");
     setShowFamilyForm(false);
   };
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
         {/* Profile Card */}
         <Card style={styles.profileCard}>
           <View style={styles.profileTopRow}>
             <View style={styles.avatar}>
-              <Text style={styles.avatarText}>{profile.name ? profile.name[0] : 'A'}</Text>
+              <Text style={styles.avatarText}>
+                {profile.name ? profile.name[0] : "A"}
+              </Text>
             </View>
             <View style={styles.profileMeta}>
-              <Text style={styles.name}>{profile.name || 'Aarav'}</Text>
-              <Text style={styles.healthId}>Health ID: {profile.healthId || '91-4523-8871-0021'}</Text>
+              <Text style={styles.name}>{profile.name || "Aarav"}</Text>
+              <Text style={styles.healthId}>
+                Health ID: {profile.healthId || "91-4523-8871-0021"}
+              </Text>
               <Text style={styles.phone}>{profile.phone}</Text>
             </View>
           </View>
@@ -105,15 +129,18 @@ export default function ProfileScreen() {
         <Card style={styles.settingCard}>
           <View style={styles.switchRow}>
             <View style={styles.switchInfo}>
-              <Text style={styles.switchTitle}>Senior-Friendly Readable UI</Text>
+              <Text style={styles.switchTitle}>
+                Senior-Friendly Readable UI
+              </Text>
               <Text style={styles.switchSub}>
-                Enlarges typography, emphasizes vital medication alerts and walking routines.
+                Enlarges typography, emphasizes vital medication alerts and
+                walking routines.
               </Text>
             </View>
             <Switch
               value={seniorMode}
               onValueChange={toggleSeniorMode}
-              trackColor={{ false: '#D1D5DB', true: COLORS.primaryAccent }}
+              trackColor={{ false: "#D1D5DB", true: COLORS.primaryAccent }}
             />
           </View>
         </Card>
@@ -129,16 +156,51 @@ export default function ProfileScreen() {
         {showFamilyForm && (
           <Card style={styles.familyForm}>
             <Text style={styles.familyFormTitle}>Connect a trusted person</Text>
-            <Input label="Name" placeholder="Family member name" value={familyName} onChangeText={setFamilyName} />
-            <Input label="Age" placeholder="Age" keyboardType="number-pad" value={familyAge} onChangeText={setFamilyAge} />
+            <Input
+              label="Name"
+              placeholder="Family member name"
+              value={familyName}
+              onChangeText={setFamilyName}
+            />
+            <Input
+              label="Age"
+              placeholder="Age"
+              keyboardType="number-pad"
+              value={familyAge}
+              onChangeText={setFamilyAge}
+            />
             <View style={styles.relationChips}>
-              {(['Parent', 'Spouse', 'Child', 'Sibling', 'Other'] as FamilyMember['relation'][]).map((relation) => (
-                <Chip key={relation} label={relation} selected={familyRelation === relation} onPress={() => setFamilyRelation(relation)} />
+              {(
+                [
+                  "Parent",
+                  "Spouse",
+                  "Child",
+                  "Sibling",
+                  "Other",
+                ] as FamilyMember["relation"][]
+              ).map((relation) => (
+                <Chip
+                  key={relation}
+                  label={relation}
+                  selected={familyRelation === relation}
+                  onPress={() => setFamilyRelation(relation)}
+                />
               ))}
             </View>
-            <Text style={styles.permissionNote}>Default access: profile, vitals, and plans. Reports and medications remain private.</Text>
-            <Button title="Save Connection" variant="secondary" onPress={saveFamilyMember} />
-            <Button title="Cancel" variant="ghost" onPress={() => setShowFamilyForm(false)} />
+            <Text style={styles.permissionNote}>
+              Default access: profile, vitals, and plans. Reports and
+              medications remain private.
+            </Text>
+            <Button
+              title="Save Connection"
+              variant="secondary"
+              onPress={saveFamilyMember}
+            />
+            <Button
+              title="Cancel"
+              variant="ghost"
+              onPress={() => setShowFamilyForm(false)}
+            />
           </Card>
         )}
 
@@ -147,7 +209,11 @@ export default function ProfileScreen() {
             <View style={styles.familyHeader}>
               <View style={styles.familyLeft}>
                 <View style={styles.familyAvatar}>
-                  <Feather name="heart" size={16} color={COLORS.secondaryAccent} />
+                  <Feather
+                    name="heart"
+                    size={16}
+                    color={COLORS.secondaryAccent}
+                  />
                 </View>
                 <View>
                   <Text style={styles.familyName}>{fam.name}</Text>
@@ -164,10 +230,18 @@ export default function ProfileScreen() {
             <View style={styles.permissionsRow}>
               <Text style={styles.permTitle}>Active Permissions:</Text>
               <View style={styles.permChips}>
-                {fam.permissions.vitals && <Text style={styles.permChip}>Vitals</Text>}
-                {fam.permissions.reports && <Text style={styles.permChip}>Reports</Text>}
-                {fam.permissions.medications && <Text style={styles.permChip}>Meds</Text>}
-                {fam.permissions.plans && <Text style={styles.permChip}>Diet & Habits</Text>}
+                {fam.permissions.vitals && (
+                  <Text style={styles.permChip}>Vitals</Text>
+                )}
+                {fam.permissions.reports && (
+                  <Text style={styles.permChip}>Reports</Text>
+                )}
+                {fam.permissions.medications && (
+                  <Text style={styles.permChip}>Meds</Text>
+                )}
+                {fam.permissions.plans && (
+                  <Text style={styles.permChip}>Diet & Habits</Text>
+                )}
               </View>
             </View>
           </Card>
@@ -178,7 +252,11 @@ export default function ProfileScreen() {
           title="Language / भाषा"
           subtitle={`Current: ${profile.language}`}
         />
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.langScroll}>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          style={styles.langScroll}
+        >
           {SUPPORTED_LANGUAGES.map((lang) => (
             <TouchableOpacity
               key={lang.code}
@@ -205,33 +283,59 @@ export default function ProfileScreen() {
         <Card style={styles.privacyCard}>
           <View style={styles.privacyHeader}>
             <Feather name="shield" size={16} color="#2E7D32" />
-            <Text style={styles.privacyTitle}>Security & Privacy Architecture</Text>
+            <Text style={styles.privacyTitle}>
+              Security & Privacy Architecture
+            </Text>
           </View>
           <Text style={styles.privacyText}>
-            Your health records, lab reports, and AI context remain strictly scoped to your account with end-to-end access rules. No medical data is shared without explicit consent.
+            Your native device cache uses protected storage. Report and meal
+            analysis sends selected files to the AI provider. Review the privacy
+            notice before uploading.
           </Text>
         </Card>
 
         {/* Account Actions */}
         <View style={styles.actionsContainer}>
           <Button
-            title="Reset to Demo State (Aarav, 21)"
+            title="Delete account data"
             variant="outline"
-            onPress={() => {
-              resetToDemoUser();
-              resetDemoHealth();
-              Alert.alert('Reset', 'Profile restored to demo state.');
-            }}
-            style={styles.actionBtn}
+            onPress={() =>
+              Alert.alert(
+                "Delete your account data?",
+                "This removes API-held health data and this device’s cache. Identity removal may require administrator completion. This cannot be undone.",
+                [
+                  { text: "Cancel", style: "cancel" },
+                  {
+                    text: "Delete data",
+                    style: "destructive",
+                    onPress: async () => {
+                      try {
+                        const result = await apiClient<{ message: string }>(
+                          "/v1/me",
+                          { method: "DELETE" },
+                        );
+                        await logout();
+                        Alert.alert("Deletion result", result.message);
+                        router.replace("/(auth)/login");
+                      } catch {
+                        Alert.alert(
+                          "Deletion not completed",
+                          "Please check the connection and try again.",
+                        );
+                      }
+                    },
+                  },
+                ],
+              )
+            }
           />
-
           <Button
             title="Sign Out"
             variant="ghost"
             textStyle={{ color: COLORS.statusDanger }}
             onPress={() => {
               logout();
-              router.replace('/(onboarding)/splash');
+              router.replace("/(onboarding)/splash");
             }}
             style={styles.actionBtn}
           />
@@ -256,8 +360,8 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   profileTopRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     marginBottom: 20,
   },
   avatar: {
@@ -265,28 +369,28 @@ const styles = StyleSheet.create({
     height: 60,
     borderRadius: 30,
     backgroundColor: COLORS.primaryAccent,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     marginRight: 16,
   },
   avatarText: {
     fontSize: 24,
-    fontWeight: '700',
-    color: '#FFFFFF',
+    fontWeight: "700",
+    color: "#FFFFFF",
   },
   profileMeta: {
     flex: 1,
   },
   name: {
     fontSize: 20,
-    fontWeight: '700',
+    fontWeight: "700",
     color: COLORS.primaryDark,
     fontFamily: TYPOGRAPHY.serifHeading,
   },
   healthId: {
     fontSize: 12.5,
     color: COLORS.primaryAccent,
-    fontWeight: '600',
+    fontWeight: "600",
     marginTop: 2,
   },
   phone: {
@@ -295,20 +399,20 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   statsRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    backgroundColor: '#F7FAFF',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    backgroundColor: "#F7FAFF",
     borderRadius: RADIUS.md,
     paddingVertical: 12,
     paddingHorizontal: 8,
   },
   statCol: {
     flex: 1,
-    alignItems: 'center',
+    alignItems: "center",
   },
   statVal: {
     fontSize: 15,
-    fontWeight: '700',
+    fontWeight: "700",
     color: COLORS.textPrimary,
   },
   statLabel: {
@@ -319,16 +423,16 @@ const styles = StyleSheet.create({
   statDivider: {
     width: 1,
     height: 24,
-    backgroundColor: 'rgba(43, 58, 85, 0.1)',
+    backgroundColor: "rgba(43, 58, 85, 0.1)",
   },
   settingCard: {
     padding: 16,
     marginBottom: 16,
   },
   switchRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
   },
   switchInfo: {
     flex: 1,
@@ -336,7 +440,7 @@ const styles = StyleSheet.create({
   },
   switchTitle: {
     fontSize: 15,
-    fontWeight: '600',
+    fontWeight: "600",
     color: COLORS.textPrimary,
   },
   switchSub: {
@@ -350,31 +454,41 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   familyForm: { padding: 16, marginBottom: 12 },
-  familyFormTitle: { fontSize: 16, fontWeight: '700', color: COLORS.textPrimary, marginBottom: 14 },
-  relationChips: { flexDirection: 'row', flexWrap: 'wrap', marginBottom: 8 },
-  permissionNote: { fontSize: 11.5, color: COLORS.textSecondary, lineHeight: 16, marginBottom: 12 },
+  familyFormTitle: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: COLORS.textPrimary,
+    marginBottom: 14,
+  },
+  relationChips: { flexDirection: "row", flexWrap: "wrap", marginBottom: 8 },
+  permissionNote: {
+    fontSize: 11.5,
+    color: COLORS.textSecondary,
+    lineHeight: 16,
+    marginBottom: 12,
+  },
   familyHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     marginBottom: 10,
   },
   familyLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 10,
   },
   familyAvatar: {
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: '#FFF3E0',
-    alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: "#FFF3E0",
+    alignItems: "center",
+    justifyContent: "center",
   },
   familyName: {
     fontSize: 14.5,
-    fontWeight: '600',
+    fontWeight: "600",
     color: COLORS.textPrimary,
   },
   familyRelation: {
@@ -383,22 +497,22 @@ const styles = StyleSheet.create({
     marginTop: 1,
   },
   familyBadge: {
-    backgroundColor: '#E8F5E9',
+    backgroundColor: "#E8F5E9",
     paddingHorizontal: 8,
     paddingVertical: 3,
     borderRadius: RADIUS.sm,
   },
   familyBadgeText: {
     fontSize: 11,
-    fontWeight: '600',
-    color: '#2E7D32',
+    fontWeight: "600",
+    color: "#2E7D32",
   },
   permissionsRow: {
     borderTopWidth: 1,
-    borderTopColor: 'rgba(43, 58, 85, 0.08)',
+    borderTopColor: "rgba(43, 58, 85, 0.08)",
     paddingTop: 8,
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 8,
   },
   permTitle: {
@@ -406,12 +520,12 @@ const styles = StyleSheet.create({
     color: COLORS.textSecondary,
   },
   permChips: {
-    flexDirection: 'row',
+    flexDirection: "row",
     gap: 4,
   },
   permChip: {
     fontSize: 10.5,
-    fontWeight: '600',
+    fontWeight: "600",
     color: COLORS.primaryAccent,
     backgroundColor: COLORS.backgroundSubtle,
     paddingHorizontal: 6,
@@ -422,9 +536,9 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   langChip: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: "#FFFFFF",
     borderWidth: 1,
-    borderColor: 'rgba(43, 58, 85, 0.15)',
+    borderColor: "rgba(43, 58, 85, 0.15)",
     borderRadius: RADIUS.full,
     paddingHorizontal: 14,
     paddingVertical: 8,
@@ -437,26 +551,26 @@ const styles = StyleSheet.create({
   langLabel: {
     fontSize: 12.5,
     color: COLORS.textPrimary,
-    fontWeight: '500',
+    fontWeight: "500",
   },
   langLabelSelected: {
-    color: '#FFFFFF',
-    fontWeight: '600',
+    color: "#FFFFFF",
+    fontWeight: "600",
   },
   privacyCard: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: "#FFFFFF",
     padding: 16,
     marginBottom: 20,
   },
   privacyHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 6,
     marginBottom: 6,
   },
   privacyTitle: {
     fontSize: 13.5,
-    fontWeight: '600',
+    fontWeight: "600",
     color: COLORS.textPrimary,
   },
   privacyText: {

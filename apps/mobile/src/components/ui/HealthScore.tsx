@@ -1,8 +1,14 @@
-import React from 'react';
-import { View, Text, StyleSheet, Pressable } from 'react-native';
-import { Feather, MaterialCommunityIcons } from '@expo/vector-icons';
-import { COLORS, RADIUS, TYPOGRAPHY, TRACKING, SHADOWS } from '../../constants/theme';
-import { Card } from './Card';
+import React from "react";
+import { View, Text, StyleSheet, Pressable } from "react-native";
+import { Feather, MaterialCommunityIcons } from "@expo/vector-icons";
+import {
+  COLORS,
+  RADIUS,
+  TYPOGRAPHY,
+  TRACKING,
+  SHADOWS,
+} from "../../constants/theme";
+import { Card } from "./Card";
 
 interface HealthScoreProps {
   score?: number;
@@ -15,13 +21,13 @@ interface HealthScoreProps {
 }
 
 export const HealthScore: React.FC<HealthScoreProps> = ({
-  score = 82,
+  score = 0,
   maxScore = 100,
   showPremiumLock = true,
   onPressGoal,
-  hydrationPercent = 85,
-  dietPercent = 80,
-  habitsPercent = 82,
+  hydrationPercent = 0,
+  dietPercent = 0,
+  habitsPercent = 0,
 }) => {
   const percentage = Math.min(100, Math.max(0, (score / maxScore) * 100));
 
@@ -30,11 +36,15 @@ export const HealthScore: React.FC<HealthScoreProps> = ({
       <View style={styles.headerRow}>
         <View style={styles.titleWithIcon}>
           <View style={styles.iconCircle}>
-            <MaterialCommunityIcons name="heart-pulse" size={18} color={COLORS.appleRed} />
+            <MaterialCommunityIcons
+              name="heart-pulse"
+              size={18}
+              color={COLORS.appleRed}
+            />
           </View>
           <View>
             <Text style={styles.headerEyebrow}>DAILY WELLNESS GAUGE</Text>
-            <Text style={styles.headerTitle}>Medi Bud Health Score</Text>
+            <Text style={styles.headerTitle}>Daily journal activity</Text>
           </View>
         </View>
 
@@ -54,10 +64,17 @@ export const HealthScore: React.FC<HealthScoreProps> = ({
 
         <Pressable
           onPress={onPressGoal}
-          style={({ pressed }) => [styles.goalButton, pressed && styles.goalButtonPressed]}
+          style={({ pressed }) => [
+            styles.goalButton,
+            pressed && styles.goalButtonPressed,
+          ]}
         >
           <Text style={styles.goalText}>View Trends</Text>
-          <Feather name="chevron-right" size={15} color={COLORS.primaryAccent} />
+          <Feather
+            name="chevron-right"
+            size={15}
+            color={COLORS.primaryAccent}
+          />
         </Pressable>
       </View>
 
@@ -68,22 +85,34 @@ export const HealthScore: React.FC<HealthScoreProps> = ({
 
       {/* Apple Health Metric Breakdown Pills */}
       <View style={styles.factorsRow}>
-        <View style={[styles.factorPill, { backgroundColor: '#E1F5FE' }]}>
+        <View style={[styles.factorPill, { backgroundColor: "#E1F5FE" }]}>
           <Feather name="droplet" size={12} color={COLORS.appleBlue} />
-          <Text style={[styles.factorLabel, { color: COLORS.appleBlue }]}>Hydration {hydrationPercent}%</Text>
+          <Text style={[styles.factorLabel, { color: COLORS.appleBlue }]}>
+            Hydration {hydrationPercent}%
+          </Text>
         </View>
-        <View style={[styles.factorPill, { backgroundColor: '#E8F5E9' }]}>
-          <MaterialCommunityIcons name="silverware-fork-knife" size={12} color={COLORS.appleGreen} />
-          <Text style={[styles.factorLabel, { color: COLORS.appleGreen }]}>Diet {dietPercent}%</Text>
+        <View style={[styles.factorPill, { backgroundColor: "#E8F5E9" }]}>
+          <MaterialCommunityIcons
+            name="silverware-fork-knife"
+            size={12}
+            color={COLORS.appleGreen}
+          />
+          <Text style={[styles.factorLabel, { color: COLORS.appleGreen }]}>
+            Diet {dietPercent}%
+          </Text>
         </View>
-        <View style={[styles.factorPill, { backgroundColor: '#FFF3E0' }]}>
+        <View style={[styles.factorPill, { backgroundColor: "#FFF3E0" }]}>
           <Feather name="activity" size={12} color={COLORS.appleOrange} />
-          <Text style={[styles.factorLabel, { color: COLORS.appleOrange }]}>Habits {habitsPercent}%</Text>
+          <Text style={[styles.factorLabel, { color: COLORS.appleOrange }]}>
+            Habits {habitsPercent}%
+          </Text>
         </View>
       </View>
 
       <Text style={styles.disclaimerText}>
-        Your score reflects your recent wellness habits and is not a clinical assessment.
+        Journal activity only: hydration (35), meal logging (25), workout
+        check-ins (25), and report organization (15). This does not measure your
+        health or nutrition quality.
       </Text>
     </Card>
   );
@@ -95,40 +124,40 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   headerRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
     marginBottom: 14,
   },
   titleWithIcon: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 10,
   },
   iconCircle: {
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: '#FFEBEE',
-    alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: "#FFEBEE",
+    alignItems: "center",
+    justifyContent: "center",
   },
   headerEyebrow: {
     fontSize: 10.5,
-    fontWeight: '700',
+    fontWeight: "700",
     color: COLORS.textSecondary,
     letterSpacing: 0.6,
   },
   headerTitle: {
     fontSize: 16,
-    fontWeight: '700',
+    fontWeight: "700",
     color: COLORS.textPrimary,
     letterSpacing: TRACKING.subheadline,
     fontFamily: TYPOGRAPHY.displayFont,
   },
   premiumBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 4,
     backgroundColor: COLORS.cta,
     paddingHorizontal: 9,
@@ -137,23 +166,23 @@ const styles = StyleSheet.create({
   },
   premiumText: {
     fontSize: 11,
-    color: '#FFFFFF',
-    fontWeight: '700',
+    color: "#FFFFFF",
+    fontWeight: "700",
     letterSpacing: 0.2,
   },
   scoreRow: {
-    flexDirection: 'row',
-    alignItems: 'baseline',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "baseline",
+    justifyContent: "space-between",
     marginBottom: 12,
   },
   scoreContainer: {
-    flexDirection: 'row',
-    alignItems: 'baseline',
+    flexDirection: "row",
+    alignItems: "baseline",
   },
   scoreNumber: {
     fontSize: 48,
-    fontWeight: '800',
+    fontWeight: "800",
     color: COLORS.textPrimary,
     letterSpacing: -1.5, // Apple tight negative display tracking
     fontFamily: TYPOGRAPHY.displayFont,
@@ -162,11 +191,11 @@ const styles = StyleSheet.create({
     fontSize: 18,
     color: COLORS.textSecondary,
     marginLeft: 3,
-    fontWeight: '500',
+    fontWeight: "500",
   },
   goalButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     backgroundColor: COLORS.systemFill,
     paddingHorizontal: 12,
     paddingVertical: 7,
@@ -179,40 +208,40 @@ const styles = StyleSheet.create({
   },
   goalText: {
     fontSize: 13,
-    fontWeight: '600',
+    fontWeight: "600",
     color: COLORS.primaryAccent,
     letterSpacing: TRACKING.subheadline,
   },
   progressTrack: {
     height: 9,
-    backgroundColor: '#E5E5EA',
+    backgroundColor: "#E5E5EA",
     borderRadius: RADIUS.full,
-    overflow: 'hidden',
+    overflow: "hidden",
     marginBottom: 14,
   },
   progressBar: {
-    height: '100%',
+    height: "100%",
     backgroundColor: COLORS.primaryAccent,
     borderRadius: RADIUS.full,
   },
   factorsRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    justifyContent: "space-between",
     gap: 8,
     marginBottom: 12,
   },
   factorPill: {
     flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
     paddingVertical: 6,
     borderRadius: RADIUS.sm,
     gap: 4,
   },
   factorLabel: {
     fontSize: 11,
-    fontWeight: '600',
+    fontWeight: "600",
     letterSpacing: 0.1,
   },
   disclaimerText: {
