@@ -1,21 +1,35 @@
 import os
 import json
+import re
+from config import settings
+from services.embedding_service import get_embedding_model
 from typing import List, Dict, Any, Optional
 from services.embedding_service import get_text_embedding, cosine_similarity
 
 KNOWLEDGE_EXCERPTS_PATH = os.path.abspath(
-    os.path.join(os.path.dirname(__file__), "..", "..", "..", "data", "knowledge", "excerpts.json")
+    os.path.join(
+        os.path.dirname(__file__),
+        "..",
+        "..",
+        "..",
+        "data",
+        "knowledge",
+        "excerpts.json",
+    )
 )
 KNOWLEDGE_SOURCES_PATH = os.path.abspath(
-    os.path.join(os.path.dirname(__file__), "..", "..", "..", "data", "knowledge", "sources.json")
+    os.path.join(
+        os.path.dirname(__file__), "..", "..", "..", "data", "knowledge", "sources.json"
+    )
 )
+
 
 def load_knowledge_corpus() -> List[Dict[str, Any]]:
     if not os.path.exists(KNOWLEDGE_EXCERPTS_PATH):
         return []
     with open(KNOWLEDGE_EXCERPTS_PATH, "r", encoding="utf-8") as f:
         excerpts = json.load(f)
-    
+
     sources_map = {}
     if os.path.exists(KNOWLEDGE_SOURCES_PATH):
         with open(KNOWLEDGE_SOURCES_PATH, "r", encoding="utf-8") as f:
@@ -25,29 +39,68 @@ def load_knowledge_corpus() -> List[Dict[str, Any]]:
     for item in excerpts:
         src = sources_map.get(item["source_id"], {})
         item["source_title"] = src.get("title", "Approved Health Source")
+        item["source_url"] = src.get("url")
         item["publisher"] = src.get("publisher", "Health Organization")
         item["date"] = src.get("access_date", "2026-10-01")
 
     return excerpts
 
+
 def compute_lexical_score(query: str, text: str) -> float:
     """Computes token match lexical score with bonus for consecutive matches."""
-    q_words = [w for w in query.lower().replace("?", "").replace(",", "").split() if len(w) > 2]
+    stopwords = {
+        "what",
+        "does",
+        "this",
+        "that",
+        "with",
+        "from",
+        "have",
+        "your",
+        "about",
+        "please",
+        "tell",
+        "explain",
+        "result",
+        "results",
+        "confirmed",
+        "test",
+        "tests",
+        "mean",
+        "means",
+        "can",
+        "for",
+        "the",
+        "and",
+        "are",
+        "how",
+        "my",
+        "you",
+        "me",
+        "of",
+        "is",
+        "in",
+        "it",
+        "was",
+        "report",
+    }
+    q_words = {
+        w
+        for w in re.findall(r"[a-z0-9]+", query.lower())
+        if len(w) > 2 and w not in stopwords
+    }
     if not q_words:
         return 0.0
-    text_lower = text.lower()
-    score = 0.0
-    for w in q_words:
-        if w in text_lower:
-            score += 1.0
-    return score / len(q_words)
+    text_words = set(re.findall(r"[a-z0-9]+", text.lower()))
+    return len(q_words.intersection(text_words)) / len(q_words)
+
 
 def hybrid_rrf_rank(
     query: str,
     query_embedding: List[float],
     candidates: List[Dict[str, Any]],
     top_k: int = 5,
-    rrf_k: int = 60
+    rrf_k: int = 60,
 ) -> List[Dict[str, Any]]:
     """
     Combines dense semantic ranking and lexical ranking using Reciprocal Rank Fusion.
@@ -56,10 +109,13 @@ def hybrid_rrf_rank(
     if not candidates:
         return []
 
-    # 1. Semantic scoring
+    semantic_enabled = (
+        settings.ENABLE_LOCAL_EMBEDDINGS and get_embedding_model() is not None
+    )
+    # Projection hash similarity is not semantic evidence.
     for cand in candidates:
         cand_emb = cand.get("embedding")
-        if cand_emb and len(cand_emb) == len(query_embedding):
+        if semantic_enabled and cand_emb and len(cand_emb) == len(query_embedding):
             cand["sim_score"] = cosine_similarity(query_embedding, cand_emb)
         else:
             cand["sim_score"] = 0.0
@@ -77,13 +133,18 @@ def hybrid_rrf_rank(
 
     # Compute RRF score
     for cand in candidates:
-        cand["rrf_score"] = (1.0 / (rrf_k + cand["rank_sem"])) + (1.0 / (rrf_k + cand["rank_lex"]))
+        cand["rrf_score"] = (
+            ((1.0 / (rrf_k + cand["rank_sem"])) + (1.0 / (rrf_k + cand["rank_lex"])))
+            if semantic_enabled
+            else cand["lex_score"]
+        )
 
     candidates.sort(key=lambda x: x["rrf_score"], reverse=True)
-    
+
     # Filter out candidates with zero lexical and very low semantic match
     filtered = [c for c in candidates if c["sim_score"] > 0.15 or c["lex_score"] > 0.0]
     return filtered[:top_k]
+
 
 def search_hybrid(
     user_id: str,
@@ -91,7 +152,7 @@ def search_hybrid(
     user_report_chunks: List[Dict[str, Any]],
     user_confirmed_observations: List[Dict[str, Any]],
     specific_report_id: Optional[str] = None,
-    top_k: int = 5
+    top_k: int = 5,
 ) -> Dict[str, Any]:
     """
     Searches authorized user report chunks and approved educational knowledge.
@@ -102,16 +163,26 @@ def search_hybrid(
     # 1. Filter report chunks strictly to authorized user
     scoped_user_chunks = [c for c in user_report_chunks if c.get("user_id") == user_id]
     if specific_report_id:
-        scoped_user_chunks = [c for c in scoped_user_chunks if c.get("report_id") == specific_report_id]
+        scoped_user_chunks = [
+            c for c in scoped_user_chunks if c.get("report_id") == specific_report_id
+        ]
 
     # 2. Add confirmed observations as high-priority extractive facts
     obs_chunks = []
-    scoped_obs = [o for o in user_confirmed_observations if o.get("user_id") == user_id]
+    scoped_obs = [
+        o
+        for o in user_confirmed_observations
+        if o.get("user_id") == user_id and o.get("status") == "confirmed"
+    ]
     if specific_report_id:
         scoped_obs = [o for o in scoped_obs if o.get("report_id") == specific_report_id]
 
     for obs in scoped_obs:
-        status_phrase = "outside stated interval" if obs.get("is_outside_stated_interval") else "within stated interval"
+        status_phrase = (
+            "outside stated interval"
+            if obs.get("is_outside_stated_interval")
+            else "within stated interval"
+        )
         if obs.get("is_outside_stated_interval") is None:
             status_phrase = "not assessed"
         text = (
@@ -120,15 +191,17 @@ def search_hybrid(
             f"Reported Reference: {obs.get('reference_text') or 'Not specified'}. "
             f"Evaluation: {status_phrase}."
         )
-        obs_chunks.append({
-            "id": f"obs_{obs.get('id')}",
-            "source_id": obs.get("report_id", "report"),
-            "title": f"Confirmed Lab Test ({obs.get('canonical_test')})",
-            "page": obs.get("page", 1),
-            "date": obs.get("report_date", "Recent"),
-            "text": text,
-            "embedding": get_text_embedding(text)
-        })
+        obs_chunks.append(
+            {
+                "id": f"obs_{obs.get('id')}",
+                "source_id": obs.get("report_id", "report"),
+                "title": f"Confirmed Lab Test ({obs.get('canonical_test')})",
+                "page": obs.get("page", 1),
+                "date": obs.get("report_date", "Recent"),
+                "text": text,
+                "embedding": get_text_embedding(text),
+            }
+        )
 
     # 3. Approved educational knowledge
     edu_corpus = load_knowledge_corpus()
@@ -143,5 +216,5 @@ def search_hybrid(
     return {
         "query": query,
         "results": ranked_results,
-        "has_evidence": len(ranked_results) > 0
+        "has_evidence": len(ranked_results) > 0,
     }

@@ -1,12 +1,12 @@
-import { z } from 'zod';
+import { z } from "zod";
 
 export const ProfileSchema = z.object({
   user_id: z.string().uuid(),
   name: z.string().min(1),
-  age: z.number().int().min(18).max(120),
+  age: z.number().int().min(18).max(120).nullable(),
   height_cm: z.number().positive().optional().nullable(),
   weight_kg: z.number().positive().optional().nullable(),
-  locale: z.enum(['en', 'hi']).default('en'),
+  locale: z.enum(["en", "hi"]).default("en"),
   goals: z.array(z.string()).default([]),
   dietary_preferences: z.array(z.string()).default([]),
   declared_allergens: z.array(z.string()).default([]),
@@ -20,7 +20,7 @@ export type ProfileDTO = z.infer<typeof ProfileSchema>;
 export const HealthLogSchema = z.object({
   id: z.string().uuid(),
   user_id: z.string().uuid(),
-  kind: z.enum(['water', 'sleep', 'activity']),
+  kind: z.enum(["water", "sleep", "activity"]),
   value: z.number(),
   unit: z.string(),
   occurred_at: z.string(),
@@ -30,11 +30,14 @@ export const HealthLogSchema = z.object({
 });
 export type HealthLogDTO = z.infer<typeof HealthLogSchema>;
 
-export const HealthLogCreateSchema = HealthLogSchema.omit({ id: true, user_id: true }).extend({
+export const HealthLogCreateSchema = HealthLogSchema.omit({
+  id: true,
+  user_id: true,
+}).extend({
   id: z.string().uuid().optional(),
   mutation_id: z.string().uuid().optional(),
   payload_hash: z.string().optional(),
-  timezone: z.string().default('Asia/Kolkata'),
+  timezone: z.string().default("Asia/Kolkata"),
 });
 export type HealthLogCreateDTO = z.infer<typeof HealthLogCreateSchema>;
 
@@ -42,7 +45,7 @@ export const SyncMutationSchema = z.object({
   mutation_id: z.string().uuid(),
   user_id: z.string().uuid(),
   device_id: z.string(),
-  entity_type: z.enum(['health_log', 'reminder_completion']),
+  entity_type: z.enum(["health_log", "reminder_completion"]),
   payload: z.record(z.unknown()),
   payload_hash: z.string(),
   occurred_at: z.string(),
@@ -55,7 +58,7 @@ export const ReminderSchema = z.object({
   user_id: z.string().uuid(),
   label: z.string().min(1),
   user_entered_schedule: z.string().min(1), // e.g. "08:00 AM", "daily"
-  timezone: z.string().default('Asia/Kolkata'),
+  timezone: z.string().default("Asia/Kolkata"),
   enabled: z.boolean().default(true),
   created_at: z.string().optional(),
   updated_at: z.string().optional(),
@@ -73,18 +76,18 @@ export const ReminderCompletionSchema = z.object({
 export type ReminderCompletionDTO = z.infer<typeof ReminderCompletionSchema>;
 
 export const ReportStatusEnum = z.enum([
-  'queued',
-  'processing',
-  'review_needed',
-  'ready',
-  'failed',
+  "queued",
+  "processing",
+  "review_needed",
+  "ready",
+  "failed",
 ]);
 export type ReportStatus = z.infer<typeof ReportStatusEnum>;
 
 export const ObservationStatusEnum = z.enum([
-  'proposed',
-  'confirmed',
-  'rejected',
+  "proposed",
+  "confirmed",
+  "rejected",
 ]);
 export type ObservationStatus = z.infer<typeof ObservationStatusEnum>;
 
@@ -101,7 +104,7 @@ export const ReportObservationSchema = z.object({
   reference_text: z.string().nullable().optional(),
   bounds_low: z.number().nullable().optional(),
   bounds_high: z.number().nullable().optional(),
-  status: ObservationStatusEnum.default('proposed'),
+  status: ObservationStatusEnum.default("proposed"),
   page: z.number().int().default(1),
   source_span: z.string().optional(),
 });
@@ -123,6 +126,7 @@ export const ReportSchema = z.object({
 export type ReportDTO = z.infer<typeof ReportSchema>;
 
 export const CitationSchema = z.object({
+  url: z.string().url().nullable().optional(),
   source_id: z.string(),
   title: z.string(),
   date: z.string().nullable().optional(),
@@ -134,14 +138,14 @@ export type CitationDTO = z.infer<typeof CitationSchema>;
 export const ChatResponseSchema = z.object({
   answer: z.string(),
   intent: z.enum([
-    'report_question',
-    'nutrition_question',
-    'plan_request',
-    'tracker_help',
-    'app_help',
-    'general_health',
+    "report_question",
+    "nutrition_question",
+    "plan_request",
+    "tracker_help",
+    "app_help",
+    "general_health",
   ]),
-  mode: z.enum(['extractive', 'grounded_generation', 'rules']),
+  mode: z.enum(["extractive", "grounded_generation", "rules"]),
   citations: z.array(CitationSchema),
   limitations: z.string(),
   safety_action: z.string().nullable().optional(),
@@ -155,8 +159,8 @@ export const NearbyFacilitySchema = z.object({
   type: z.string(), // hospital, clinic, pharmacy, doctors
   address: z.string().optional(),
   distance_meters: z.number().optional(),
-  phone: z.string().optional(),
-  opening_hours: z.string().optional(),
+  phone: z.string().nullable().optional(),
+  opening_hours: z.string().nullable().optional(),
   lat: z.number(),
   lon: z.number(),
   map_url: z.string(),
@@ -166,7 +170,7 @@ export type NearbyFacilityDTO = z.infer<typeof NearbyFacilitySchema>;
 export const MealDetailSchema = z.object({
   food_id: z.string(),
   name: z.string(),
-  portion_basis: z.string().default('1 portion'),
+  portion_basis: z.string().default("1 portion"),
   is_veg: z.boolean().default(true),
   ingredients: z.array(z.string()).default([]),
   allergens: z.array(z.string()).default([]),
@@ -201,4 +205,3 @@ export const MealPlanSchema = z.object({
   created_at: z.string().optional(),
 });
 export type MealPlanDTO = z.infer<typeof MealPlanSchema>;
-

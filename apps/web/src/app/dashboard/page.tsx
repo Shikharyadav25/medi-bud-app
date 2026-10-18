@@ -1,273 +1,384 @@
-'use client';
-
-import { useState, useEffect } from 'react';
-import Link from 'next/link';
-import { 
-  Droplets, 
-  Moon, 
-  Flame, 
-  CheckCircle2, 
-  Clock, 
-  FileText, 
-  Upload, 
-  Utensils, 
-  MessageSquare,
-  Plus
-} from 'lucide-react';
-import { apiClient } from '@/lib/api';
-import { queueOfflineMutation } from '@/lib/offlineDb';
+"use client";
+import { useState, useEffect, useCallback } from "react";
+import Link from "next/link";
+import {
+  Droplets,
+  Moon,
+  Footprints,
+  ArrowUpRight,
+  Plus,
+  Files,
+  MessagesSquare,
+  Sun,
+  Check,
+  LoaderCircle,
+} from "lucide-react";
+import { apiClient } from "@/lib/api";
+import type { ReportDTO, ReminderDTO } from "@medi-bud/contracts";
 
 export default function DashboardPage() {
-  const [waterMl, setWaterMl] = useState(1500);
-  const [sleepHours, setSleepHours] = useState(7.5);
-  const [activityMins, setActivityMins] = useState(30);
-  const [reports, setReports] = useState<Array<{ id: string; filename: string; report_date?: string | null; status: string }>>([]);
-  const [reminders, setReminders] = useState<Array<{ id: string; label: string; user_entered_schedule: string; completed?: boolean }>>([
-    { id: 'rem-1', label: 'Morning hydration (2 glasses of water)', user_entered_schedule: '08:00 AM', completed: true },
-    { id: 'rem-2', label: 'Evening brisk walk (30 mins)', user_entered_schedule: '06:00 PM', completed: false },
-  ]);
-
-  useEffect(() => {
-    async function loadData() {
-      try {
-        const repList = await apiClient.getReports();
-        if (repList && repList.length > 0) {
-          setReports(repList);
-        }
-      } catch {
-        // Fallback default demonstration reports
-        setReports([
-          { id: 'rep-demo-1', filename: 'CBC_Metabolic_Panel.pdf', report_date: '2026-09-20', status: 'ready' },
-          { id: 'rep-demo-2', filename: 'Lipid_Profile_Sept.pdf', report_date: '2026-09-28', status: 'review_needed' }
-        ]);
-      }
-
-      try {
-        const remList = await apiClient.getReminders();
-        if (remList && remList.length > 0) {
-          setReminders(remList.map(r => ({ ...r, completed: false })));
-        }
-      } catch {
-        // Keep default initial reminders
-      }
+  const [water, setWater] = useState(0);
+  const [sleep, setSleep] = useState<number | null>(null);
+  const [activity, setActivity] = useState(0);
+  const [reports, setReports] = useState<ReportDTO[]>([]);
+  const [reminders, setReminders] = useState<
+    Array<ReminderDTO & { completed?: boolean }>
+  >([]);
+  const [name, setName] = useState("");
+  const [error, setError] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [entry, setEntry] = useState<"sleep" | "activity" | null>(null);
+  const [amount, setAmount] = useState("");
+  const load = useCallback(async () => {
+    try {
+      const [profile, logs, reps, rems] = await Promise.all([
+        apiClient.getProfile(),
+        apiClient.getLogs(undefined, 500),
+        apiClient.getReports(),
+        apiClient.getReminders(),
+      ]);
+      const today = new Date().toLocaleDateString("en-CA");
+      const todays = logs.filter(
+        (log) =>
+          new Date(log.occurred_at).toLocaleDateString("en-CA") === today,
+      );
+      setName(profile.name === "User" ? "" : profile.name);
+      setWater(
+        todays
+          .filter((l) => l.kind === "water")
+          .reduce((sum, l) => sum + Number(l.value), 0),
+      );
+      setActivity(
+        todays
+          .filter((l) => l.kind === "activity")
+          .reduce((sum, l) => sum + Number(l.value), 0),
+      );
+      setSleep(todays.find((l) => l.kind === "sleep")?.value ?? null);
+      setReports(reps);
+      setReminders(rems);
+      setError("");
+    } catch {
+      setError(
+        "Your health space could not be loaded. Check your connection and sign in to your account.",
+      );
+    } finally {
+      setLoading(false);
     }
-    loadData();
   }, []);
-
-  // Transparent habit calculation (4 target habits)
-  const habitsDone = [
-    waterMl >= 2000,
-    sleepHours >= 7.0,
-    activityMins >= 30,
-    reminders.some(r => r.completed)
-  ].filter(Boolean).length;
-
-  const handleAddWater = async (amount: number) => {
-    const nextWater = waterMl + amount;
-    setWaterMl(nextWater);
-
-    const demoUserId = typeof window !== 'undefined'
-      ? (localStorage.getItem('medi_bud_demo_user') || '00000000-0000-0000-0000-000000000001')
-      : '00000000-0000-0000-0000-000000000001';
-
-    const mutation = {
-      mutation_id: crypto.randomUUID(),
-      user_id: demoUserId,
-      device_id: 'web_browser',
-      entity_type: 'health_log' as const,
-      payload: { kind: 'water', value: nextWater, unit: 'ml' },
-      payload_hash: String(Date.now()),
-      occurred_at: new Date().toISOString(),
-      timezone: 'Asia/Kolkata'
-    };
-
-    if (navigator.onLine) {
-      try {
-        await apiClient.createLog({
-          kind: 'water',
-          value: nextWater,
-          unit: 'ml',
-          occurred_at: new Date().toISOString(),
-          timezone: 'Asia/Kolkata',
-          mutation_id: mutation.mutation_id,
-          payload_hash: mutation.payload_hash
-        });
-        return;
-      } catch {
-        // Fall through to offline queue
-      }
-    }
-    await queueOfflineMutation(mutation);
-  };
-
-  const handleToggleReminder = async (id: string) => {
-    const target = reminders.find(r => r.id === id);
-    const nextCompleted = !target?.completed;
-    setReminders(prev => prev.map(r => r.id === id ? { ...r, completed: nextCompleted } : r));
-
-    if (nextCompleted) {
-      try {
-        await apiClient.completeReminder(id, {
-          due_at: new Date().toISOString(),
-          completed_at: new Date().toISOString(),
-          mutation_id: crypto.randomUUID()
-        });
-      } catch {
-        // Local state preserved
-      }
+  useEffect(() => {
+    void load();
+  }, [load]);
+  const log = async (kind: "water" | "sleep" | "activity", value: number) => {
+    setBusy(true);
+    setError("");
+    try {
+      await apiClient.createLog({
+        kind,
+        value,
+        unit: kind === "water" ? "ml" : kind === "sleep" ? "hours" : "minutes",
+        occurred_at: new Date().toISOString(),
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+        mutation_id: crypto.randomUUID(),
+        payload_hash: "",
+      });
+      setEntry(null);
+      setAmount("");
+      await load();
+    } catch {
+      setError(
+        "This entry was not saved. Check your connection and try again.",
+      );
+    } finally {
+      setBusy(false);
     }
   };
-
+  const complete = async (id: string) => {
+    setBusy(true);
+    try {
+      await apiClient.completeReminder(id, {
+        due_at: new Date().toISOString(),
+        completed_at: new Date().toISOString(),
+        mutation_id: crypto.randomUUID(),
+      });
+      await load();
+    } catch {
+      setError("The reminder could not be saved. Please try again.");
+    } finally {
+      setBusy(false);
+    }
+  };
   return (
-    <div className="space-y-6">
-      {/* Habit Score Card */}
-      <section className="p-6 rounded-2xl bg-(--surface) border border-(--border-subtle) flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+    <div>
+      <div className="page-eyebrow">
+        <span className="status-dot" /> YOUR DAILY OVERVIEW{" "}
+        <span className="ml-auto">
+          {new Date().toLocaleDateString("en-IN", {
+            weekday: "long",
+            day: "numeric",
+            month: "long",
+          })}
+        </span>
+      </div>
+      <div className="page-heading">
         <div>
-          <span className="text-xs font-semibold text-(--primary) uppercase tracking-wider">
-            Daily Habits Completed
-          </span>
-          <h2 className="text-2xl sm:text-3xl font-bold text-(--text-primary) mt-1">
-            {habitsDone} of 4 Habits Completed Today
-          </h2>
-          <p className="text-xs text-(--text-muted) mt-0.5">
-            Transparent tracking based on logged goals. Conditions and medications are never penalized.
+          <h1 className="page-title">
+            A little care, every day{name ? ", " + name.split(" ")[0] : ""}.
+          </h1>
+          <p className="page-subtitle">
+            Make room for small habits. Your health space starts with you.
           </p>
         </div>
-        <div className="flex items-center gap-1.5">
-          {[1, 2, 3, 4].map((step) => (
-            <div
-              key={step}
-              className={`w-8 h-8 rounded-xl flex items-center justify-center text-xs font-bold transition-all ${
-                step <= habitsDone
-                  ? 'bg-(--primary) text-white'
-                  : 'bg-(--surface-subtle) text-(--text-muted) border border-(--border-subtle)'
-              }`}
-            >
-              {step}
-            </div>
-          ))}
+        <Link className="primary-button" href="/reports">
+          <Plus size={17} /> Add a report
+        </Link>
+      </div>
+      {error && (
+        <div role="alert" className="notice error-notice mb-5">
+          {error}{" "}
+          <Link href="/login" className="underline">
+            Sign in
+          </Link>{" "}
+          ·{" "}
+          <button onClick={() => void load()} className="underline">
+            Retry
+          </button>
         </div>
-      </section>
-
-      {/* Habit Tracker Cards */}
-      <section className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        {/* Water */}
-        <div className="p-4 rounded-xl bg-(--surface) border border-(--border-subtle) space-y-3">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-(--text-secondary) flex items-center gap-1.5">
-              <Droplets size={16} className="text-sky-600" />
-              <span>Water Intake</span>
-            </span>
-            <span className="text-xs font-bold text-(--text-primary)">{waterMl} / 2500 ml</span>
+      )}
+      {loading && (
+        <p role="status" className="mb-4 flex items-center gap-2 text-sm">
+          <LoaderCircle size={17} className="animate-spin" /> Loading your
+          health space…
+        </p>
+      )}
+      <div className="stat-grid">
+        <section className="stat-card">
+          <span className="feature-icon mint">
+            <Droplets size={23} />
+          </span>
+          <h2>Water journal</h2>
+          <div className="stat-value">
+            {water.toLocaleString()}
+            <small>ml logged today</small>
           </div>
-          <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
-            <div className="bg-sky-500 h-2 rounded-full" style={{ width: `${Math.min(100, (waterMl / 2500) * 100)}%` }} />
+          <p>Follow the fluid goal agreed with your clinician.</p>
+          <button
+            disabled={busy || loading}
+            onClick={() => void log("water", 250)}
+          >
+            <Plus size={13} className="inline mr-1" />
+            Log 250 ml
+          </button>
+        </section>
+        <section className="stat-card">
+          <span className="feature-icon lilac">
+            <Moon size={23} />
+          </span>
+          <h2>Last night's rest</h2>
+          <div className="stat-value">
+            {sleep ?? "—"}
+            <small>{sleep === null ? "not logged" : "hours"}</small>
           </div>
-          <div className="flex gap-2">
-            <button
-              onClick={() => handleAddWater(250)}
-              className="flex-1 py-1.5 rounded-lg text-xs font-medium border border-(--border-medium) hover:bg-(--surface-subtle) flex items-center justify-center gap-1 cursor-pointer"
-            >
-              <Plus size={12} /> 250ml
-            </button>
-            <button
-              onClick={() => handleAddWater(500)}
-              className="flex-1 py-1.5 rounded-lg text-xs font-medium border border-(--border-medium) hover:bg-(--surface-subtle) flex items-center justify-center gap-1 cursor-pointer"
-            >
-              <Plus size={12} /> 500ml
-            </button>
+          <p>A moment to notice how rested you feel.</p>
+          <button
+            disabled={busy || loading}
+            onClick={() => {
+              setEntry("sleep");
+              setAmount("");
+            }}
+          >
+            <Plus size={13} className="inline mr-1" />
+            Log sleep
+          </button>
+        </section>
+        <section className="stat-card">
+          <span className="feature-icon peach">
+            <Footprints size={23} />
+          </span>
+          <h2>Movement today</h2>
+          <div className="stat-value">
+            {activity}
+            <small>minutes logged</small>
           </div>
-        </div>
-
-        {/* Sleep */}
-        <div className="p-4 rounded-xl bg-(--surface) border border-(--border-subtle) space-y-3">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-(--text-secondary) flex items-center gap-1.5">
-              <Moon size={16} className="text-indigo-600" />
-              <span>Sleep Duration</span>
-            </span>
-            <span className="text-xs font-bold text-(--text-primary)">{sleepHours} hrs</span>
-          </div>
-          <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
-            <div className="bg-indigo-500 h-2 rounded-full" style={{ width: `${Math.min(100, (sleepHours / 8) * 100)}%` }} />
-          </div>
-          <p className="text-[11px] text-(--text-muted)">Target: 7–8 hours of restorative sleep</p>
-        </div>
-
-        {/* Activity */}
-        <div className="p-4 rounded-xl bg-(--surface) border border-(--border-subtle) space-y-3">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-(--text-secondary) flex items-center gap-1.5">
-              <Flame size={16} className="text-amber-600" />
-              <span>Physical Activity</span>
-            </span>
-            <span className="text-xs font-bold text-(--text-primary)">{activityMins} mins</span>
-          </div>
-          <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
-            <div className="bg-amber-500 h-2 rounded-full" style={{ width: `${Math.min(100, (activityMins / 45) * 100)}%` }} />
-          </div>
-          <p className="text-[11px] text-(--text-muted)">WHO: 150+ minutes of moderate weekly exercise</p>
-        </div>
-      </section>
-
-      {/* Reminders & Recent Reports */}
-      <section className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-        {/* Due Reminders */}
-        <div className="p-5 rounded-2xl bg-(--surface) border border-(--border-subtle) space-y-3">
-          <div className="flex items-center justify-between">
-            <h3 className="font-semibold text-sm text-(--text-primary) flex items-center gap-2">
-              <Clock size={16} className="text-(--primary)" />
-              <span>User-Entered Reminders Due Today</span>
-            </h3>
-          </div>
-          <div className="space-y-2">
-            {reminders.map(rem => (
-              <div
-                key={rem.id}
-                onClick={() => handleToggleReminder(rem.id)}
-                className="p-3 rounded-xl border border-(--border-subtle) hover:bg-(--surface-subtle) flex items-center justify-between cursor-pointer transition-colors"
-              >
-                <div className="flex items-center gap-2.5">
-                  <CheckCircle2 size={16} className={rem.completed ? 'text-emerald-600' : 'text-slate-300'} />
-                  <span className={`text-xs ${rem.completed ? 'line-through text-(--text-muted)' : 'text-(--text-primary)'}`}>
-                    {rem.label}
-                  </span>
-                </div>
-                <span className="text-[11px] font-medium text-(--text-muted)">{rem.user_entered_schedule}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Recent Reports Overview */}
-        <div className="p-5 rounded-2xl bg-(--surface) border border-(--border-subtle) space-y-3">
-          <div className="flex items-center justify-between">
-            <h3 className="font-semibold text-sm text-(--text-primary) flex items-center gap-2">
-              <FileText size={16} className="text-(--primary)" />
-              <span>Lab Reports & Verification Status</span>
-            </h3>
-            <Link href="/reports" className="text-xs font-medium text-(--primary) hover:underline">
-              View All
+          <p>Every walk, stretch, and small step counts.</p>
+          <button
+            disabled={busy || loading}
+            onClick={() => {
+              setEntry("activity");
+              setAmount("");
+            }}
+          >
+            <Plus size={13} className="inline mr-1" />
+            Log movement
+          </button>
+        </section>
+      </div>
+      {entry && (
+        <form
+          className="panel mt-5 flex flex-wrap items-end gap-4"
+          onSubmit={(e) => {
+            e.preventDefault();
+            void log(entry, Number(amount));
+          }}
+        >
+          <label className="text-sm" htmlFor="habit-amount">
+            {entry === "sleep" ? "Hours of sleep" : "Minutes of movement"}
+            <input
+              id="habit-amount"
+              className="block mt-2 border border-(--border-medium) px-3 w-40"
+              type="number"
+              min="0"
+              max={entry === "sleep" ? 24 : 1440}
+              step={entry === "sleep" ? 0.25 : 1}
+              required
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+            />
+          </label>
+          <button disabled={busy} className="primary-button">
+            {busy ? "Saving…" : "Save entry"}
+          </button>
+          <button
+            type="button"
+            onClick={() => setEntry(null)}
+            className="text-sm p-2"
+          >
+            Cancel
+          </button>
+        </form>
+      )}
+      <div className="dashboard-columns">
+        <section className="panel">
+          <div className="flex items-center justify-between mb-5">
+            <h2 className="panel-title">Your health library</h2>
+            <Link href="/reports" className="text-link">
+              View all <ArrowUpRight size={16} />
             </Link>
           </div>
-          <div className="space-y-2">
-            {reports.map(rep => (
-              <div key={rep.id} className="p-3 rounded-xl border border-(--border-subtle) flex items-center justify-between">
+          {reports.length === 0 ? (
+            <div className="empty-state">
+              <Files size={30} className="mx-auto mb-3 text-(--primary)" />
+              <p>No reports here yet.</p>
+              <p className="text-xs mt-1 mb-4">
+                Add your first report and keep the details together.
+              </p>
+              <Link href="/reports" className="text-link">
+                Upload a report <ArrowUpRight size={15} />
+              </Link>
+            </div>
+          ) : (
+            reports.slice(0, 4).map((r) => (
+              <Link href="/reports" key={r.id} className="dashboard-row">
+                <Files size={20} className="text-(--primary)" />
                 <div>
-                  <p className="text-xs font-semibold text-(--text-primary)">{rep.filename}</p>
-                  <p className="text-[11px] text-(--text-muted)">Date: {rep.report_date}</p>
+                  {r.filename}
+                  <br />
+                  <small>{r.report_date || "Report date not provided"}</small>
                 </div>
-                <span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${
-                  rep.status === 'ready' 
-                    ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' 
-                    : 'bg-amber-50 text-amber-700 border border-amber-200'
-                }`}>
-                  {rep.status === 'ready' ? 'Ready & Cited' : 'Review Needed'}
+                <span className="status-badge">
+                  {r.status === "ready" ? "Reviewed" : "Needs review"}
                 </span>
-              </div>
-            ))}
+              </Link>
+            ))
+          )}
+        </section>
+        <section className="panel">
+          <div className="flex items-center justify-between mb-5">
+            <h2 className="panel-title">A gentle reminder</h2>
+            <Sun size={19} className="text-amber-600" />
           </div>
+          {reminders.length === 0 ? (
+            <div className="empty-state">
+              <p>No reminders yet.</p>
+              <p className="text-xs mt-1">
+                Give a daily habit a little space in your day.
+              </p>
+            </div>
+          ) : (
+            reminders.map((r) => (
+              <div className="dashboard-row" key={r.id}>
+                <button
+                  disabled={busy || r.completed}
+                  onClick={() => void complete(r.id)}
+                  aria-label={"Complete " + r.label}
+                  className="rounded-full border border-(--border-medium) p-2"
+                >
+                  {r.completed ? <Check size={15} /> : <Plus size={15} />}
+                </button>
+                <div>
+                  {r.label}
+                  <br />
+                  <small>{r.user_entered_schedule}</small>
+                </div>
+              </div>
+            ))
+          )}
+          <form
+            className="mt-5 space-y-3"
+            onSubmit={async (e) => {
+              e.preventDefault();
+              const form = e.currentTarget;
+              const data = new FormData(form);
+              setBusy(true);
+              try {
+                await apiClient.createReminder({
+                  label: String(data.get("label")),
+                  user_entered_schedule: String(data.get("time")),
+                  timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+                  enabled: true,
+                });
+                form.reset();
+                await load();
+              } catch {
+                setError("The reminder was not saved.");
+              } finally {
+                setBusy(false);
+              }
+            }}
+          >
+            <label htmlFor="reminder-label" className="text-xs">
+              Add a personal reminder
+            </label>
+            <input
+              id="reminder-label"
+              name="label"
+              required
+              maxLength={120}
+              placeholder="e.g. Take a screen break"
+              className="w-full border border-(--border-medium) px-3 text-sm"
+            />
+            <div className="flex gap-3">
+              <input
+                name="time"
+                type="time"
+                aria-label="Reminder time"
+                required
+                className="border border-(--border-medium) px-3 text-sm flex-1 min-w-0"
+              />
+              <button className="primary-button" disabled={busy || loading}>
+                Add
+              </button>
+            </div>
+            <p className="text-xs text-(--text-muted)">
+              Journal reminders are shown here; device notifications are not
+              scheduled.
+            </p>
+          </form>
+        </section>
+      </div>
+      <section className="gentle-banner">
+        <span className="mint-icon">
+          <MessagesSquare size={23} />
+        </span>
+        <div>
+          <h3>A question on your mind?</h3>
+          <p>
+            Bring it to Medi Bud. Explore source-based answers at your own pace.
+          </p>
         </div>
+        <Link href="/chat" className="text-link">
+          Let's talk <ArrowUpRight size={16} />
+        </Link>
       </section>
     </div>
   );

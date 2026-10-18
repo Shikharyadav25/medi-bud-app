@@ -10,7 +10,7 @@ import type {
   ChatResponseDTO,
   NearbyFacilityDTO,
   MealPlanDTO,
-} from '@medi-bud/contracts';
+} from "@medi-bud/contracts";
 
 export interface ApiClientConfig {
   baseUrl: string;
@@ -32,9 +32,9 @@ export class MediBudApiError extends Error {
 
   constructor(status: number, errorData: ApiErrorResponse) {
     super(errorData.message || `API error ${status}`);
-    this.name = 'MediBudApiError';
+    this.name = "MediBudApiError";
     this.status = status;
-    this.code = errorData.code || 'UNKNOWN_ERROR';
+    this.code = errorData.code || "UNKNOWN_ERROR";
     this.requestId = errorData.request_id;
   }
 }
@@ -45,27 +45,27 @@ export class MediBudClient {
   private readonly timeoutMs: number;
 
   constructor(config: ApiClientConfig) {
-    this.baseUrl = config.baseUrl.replace(/\/$/, '');
+    this.baseUrl = config.baseUrl.replace(/\/$/, "");
     this.getToken = config.getToken;
     this.timeoutMs = config.timeoutMs ?? 15000;
   }
 
   private async request<T>(
     endpoint: string,
-    options: RequestInit = {}
+    options: RequestInit = {},
   ): Promise<T> {
-    const url = `${this.baseUrl}${endpoint.startsWith('/') ? endpoint : `/${endpoint}`}`;
+    const url = `${this.baseUrl}${endpoint.startsWith("/") ? endpoint : `/${endpoint}`}`;
     const headers = new Headers(options.headers || {});
 
     if (this.getToken) {
       const token = await this.getToken();
       if (token) {
-        headers.set('Authorization', `Bearer ${token}`);
+        headers.set("Authorization", `Bearer ${token}`);
       }
     }
 
-    if (!headers.has('Content-Type') && !(options.body instanceof FormData)) {
-      headers.set('Content-Type', 'application/json');
+    if (!headers.has("Content-Type") && !(options.body instanceof FormData)) {
+      headers.set("Content-Type", "application/json");
     }
 
     const controller = new AbortController();
@@ -81,10 +81,17 @@ export class MediBudClient {
       if (!response.ok) {
         let errJson: ApiErrorResponse;
         try {
-          errJson = await response.json();
+          const body = await response.json();
+          const detail = body.detail;
+          errJson =
+            typeof detail === "object" && detail !== null
+              ? detail
+              : typeof detail === "string"
+                ? { code: "HTTP_ERROR", message: detail }
+                : body;
         } catch {
           errJson = {
-            code: 'HTTP_ERROR',
+            code: "HTTP_ERROR",
             message: `Request failed with status ${response.status}`,
           };
         }
@@ -103,88 +110,112 @@ export class MediBudClient {
 
   // Health
   public async getHealth(): Promise<{ status: string; service: string }> {
-    return this.request<{ status: string; service: string }>('/health');
+    return this.request<{ status: string; service: string }>("/health");
   }
 
-  public async getReady(): Promise<{ ready: boolean; model_loaded: boolean; db_connected: boolean }> {
-    return this.request<{ ready: boolean; model_loaded: boolean; db_connected: boolean }>('/ready');
+  public async getReady(): Promise<{
+    ready: boolean;
+    database_connected: boolean;
+    ai_configured: boolean;
+    retrieval_mode: string;
+  }> {
+    return this.request("/ready");
   }
 
   // Profile
   public async getProfile(): Promise<ProfileDTO> {
-    return this.request<ProfileDTO>('/v1/me');
+    return this.request<ProfileDTO>("/v1/me");
   }
 
   public async updateProfile(data: Partial<ProfileDTO>): Promise<ProfileDTO> {
-    return this.request<ProfileDTO>('/v1/me', {
-      method: 'PUT',
+    return this.request<ProfileDTO>("/v1/me", {
+      method: "PUT",
       body: JSON.stringify(data),
     });
   }
 
   public async deleteAccount(): Promise<void> {
-    return this.request<void>('/v1/me', { method: 'DELETE' });
+    return this.request<void>("/v1/me", { method: "DELETE" });
   }
 
   // Habits / Logs
   public async getLogs(kind?: string, limit = 50): Promise<HealthLogDTO[]> {
     const query = new URLSearchParams();
-    if (kind) query.set('kind', kind);
-    query.set('limit', String(limit));
+    if (kind) query.set("kind", kind);
+    query.set("limit", String(limit));
     return this.request<HealthLogDTO[]>(`/v1/logs?${query.toString()}`);
   }
 
   public async createLog(log: HealthLogCreateDTO): Promise<HealthLogDTO> {
-    return this.request<HealthLogDTO>('/v1/logs', {
-      method: 'POST',
+    return this.request<HealthLogDTO>("/v1/logs", {
+      method: "POST",
       body: JSON.stringify(log),
     });
   }
 
   public async syncMutations(
-    mutations: SyncMutationDTO[]
-  ): Promise<{ results: Array<{ mutation_id: string; status: 'applied' | 'conflict' | 'error'; message?: string }> }> {
-    return this.request('/v1/sync/logs', {
-      method: 'POST',
+    mutations: SyncMutationDTO[],
+  ): Promise<{
+    results: Array<{
+      mutation_id: string;
+      status: "applied" | "conflict" | "error";
+      message?: string;
+    }>;
+  }> {
+    return this.request("/v1/sync/logs", {
+      method: "POST",
       body: JSON.stringify({ mutations }),
     });
   }
 
   // Reminders
   public async getReminders(): Promise<ReminderDTO[]> {
-    return this.request<ReminderDTO[]>('/v1/reminders');
+    return this.request<ReminderDTO[]>("/v1/reminders");
   }
 
-  public async createReminder(data: Omit<ReminderDTO, 'id' | 'user_id'>): Promise<ReminderDTO> {
-    return this.request<ReminderDTO>('/v1/reminders', {
-      method: 'POST',
+  public async createReminder(
+    data: Omit<ReminderDTO, "id" | "user_id">,
+  ): Promise<ReminderDTO> {
+    return this.request<ReminderDTO>("/v1/reminders", {
+      method: "POST",
       body: JSON.stringify(data),
     });
   }
 
-  public async completeReminder(reminderId: string, data: { due_at: string; completed_at: string; mutation_id: string }): Promise<ReminderCompletionDTO> {
-    return this.request<ReminderCompletionDTO>(`/v1/reminders/${reminderId}/complete`, {
-      method: 'POST',
-      body: JSON.stringify(data),
-    });
+  public async completeReminder(
+    reminderId: string,
+    data: { due_at: string; completed_at: string; mutation_id: string },
+  ): Promise<ReminderCompletionDTO> {
+    return this.request<ReminderCompletionDTO>(
+      `/v1/reminders/${reminderId}/complete`,
+      {
+        method: "POST",
+        body: JSON.stringify(data),
+      },
+    );
   }
 
   public async deleteReminder(id: string): Promise<void> {
-    return this.request<void>(`/v1/reminders/${id}`, { method: 'DELETE' });
+    return this.request<void>(`/v1/reminders/${id}`, { method: "DELETE" });
   }
 
   // Reports
-  public async uploadReport(file: Blob, filename: string): Promise<{ report_id: string; status: string }> {
+  public async uploadReport(
+    file: Blob,
+    filename: string,
+    consentAI = false,
+  ): Promise<{ report_id: string; status: string }> {
     const formData = new FormData();
-    formData.append('file', file, filename);
-    return this.request<{ report_id: string; status: string }>('/v1/reports', {
-      method: 'POST',
+    formData.append("file", file, filename);
+    formData.append("consent_ai", String(consentAI));
+    return this.request<{ report_id: string; status: string }>("/v1/reports", {
+      method: "POST",
       body: formData,
     });
   }
 
   public async getReports(): Promise<ReportDTO[]> {
-    return this.request<ReportDTO[]>('/v1/reports');
+    return this.request<ReportDTO[]>("/v1/reports");
   }
 
   public async getReport(id: string): Promise<ReportDTO> {
@@ -193,16 +224,24 @@ export class MediBudClient {
 
   public async updateObservations(
     reportId: string,
-    observations: Array<{ id: string; status: 'confirmed' | 'rejected'; numeric_value?: number; value_text?: string }>
+    observations: Array<{
+      id: string;
+      status: "confirmed" | "rejected";
+      numeric_value?: number;
+      value_text?: string;
+    }>,
   ): Promise<ReportObservationDTO[]> {
-    return this.request<ReportObservationDTO[]>(`/v1/reports/${reportId}/observations`, {
-      method: 'PATCH',
-      body: JSON.stringify({ observations }),
-    });
+    return this.request<ReportObservationDTO[]>(
+      `/v1/reports/${reportId}/observations`,
+      {
+        method: "PATCH",
+        body: JSON.stringify({ observations }),
+      },
+    );
   }
 
   public async deleteReport(id: string): Promise<void> {
-    return this.request<void>(`/v1/reports/${id}`, { method: 'DELETE' });
+    return this.request<void>(`/v1/reports/${id}`, { method: "DELETE" });
   }
 
   public getDownloadUrl(reportId: string): string {
@@ -210,25 +249,45 @@ export class MediBudClient {
   }
 
   // AI Chat & Symptom Guidance
-  public async chat(data: { query: string; report_id?: string; conversation_id?: string }): Promise<ChatResponseDTO> {
-    return this.request<ChatResponseDTO>('/v1/chat', {
-      method: 'POST',
+  public async chat(data: {
+    query: string;
+    report_id?: string;
+    conversation_id?: string;
+  }): Promise<ChatResponseDTO> {
+    return this.request<ChatResponseDTO>("/v1/chat", {
+      method: "POST",
       body: JSON.stringify(data),
     });
   }
 
   // Indian Food & Meal Planning
-  public async getFoods(): Promise<Array<{ id: string; name: string; region: string; calories: number; protein_g: number; carbs_g: number; fat_g: number; is_veg: boolean; allergens: string[] }>> {
-    return this.request('/v1/foods');
+  public async getFoods(): Promise<
+    Array<{
+      id: string;
+      name: string;
+      region: string;
+      calories: number;
+      protein_g: number;
+      carbs_g: number;
+      fat_g: number;
+      is_veg: boolean;
+      allergens: string[];
+    }>
+  > {
+    return this.request("/v1/foods");
   }
 
   public async getMealPlan(): Promise<MealPlanDTO> {
-    return this.request<MealPlanDTO>('/v1/plans');
+    return this.request<MealPlanDTO>("/v1/plans");
   }
 
-  public async generateMealPlan(preferences: { is_veg: boolean; allergens: string[]; regional_preference?: string }): Promise<MealPlanDTO> {
-    return this.request<MealPlanDTO>('/v1/plans', {
-      method: 'POST',
+  public async generateMealPlan(preferences: {
+    is_veg: boolean;
+    allergens: string[];
+    preferred_region?: string;
+  }): Promise<MealPlanDTO> {
+    return this.request<MealPlanDTO>("/v1/plans", {
+      method: "POST",
       body: JSON.stringify(preferences),
     });
   }
@@ -238,7 +297,11 @@ export class MediBudClient {
   }
 
   // Nearby Care
-  public async getNearbyCare(lat: number, lon: number, radius = 5000): Promise<NearbyFacilityDTO[]> {
+  public async getNearbyCare(
+    lat: number,
+    lon: number,
+    radius = 5000,
+  ): Promise<NearbyFacilityDTO[]> {
     const params = new URLSearchParams({
       lat: String(lat),
       lon: String(lon),

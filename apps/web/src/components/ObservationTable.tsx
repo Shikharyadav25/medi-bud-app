@@ -1,26 +1,38 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import type { ReportObservationDTO } from '@medi-bud/contracts';
-import { Check, X, Edit3, ShieldAlert, CheckCircle2 } from 'lucide-react';
+import { useState } from "react";
+import type { ReportObservationDTO } from "@medi-bud/contracts";
+import { Check, X, Edit3, ShieldAlert, CheckCircle2 } from "lucide-react";
 
 interface ObservationTableProps {
   observations: ReportObservationDTO[];
   onSaveObservations: (
-    updated: Array<{ id: string; status: 'confirmed' | 'rejected'; numeric_value?: number; value_text?: string }>
+    updated: Array<{
+      id: string;
+      status: "confirmed" | "rejected";
+      numeric_value?: number;
+      value_text?: string;
+    }>,
   ) => Promise<void>;
 }
 
-export function ObservationTable({ observations, onSaveObservations }: ObservationTableProps) {
+export function ObservationTable({
+  observations,
+  onSaveObservations,
+}: ObservationTableProps) {
   const [items, setItems] = useState<ReportObservationDTO[]>(observations);
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [editValue, setEditValue] = useState<string>('');
+  const [editValue, setEditValue] = useState<string>("");
   const [saving, setSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
+  const [error, setError] = useState("");
 
-  const handleStatusChange = (id: string, newStatus: 'confirmed' | 'rejected') => {
+  const handleStatusChange = (
+    id: string,
+    newStatus: "confirmed" | "rejected",
+  ) => {
     setItems((prev) =>
-      prev.map((obs) => (obs.id === id ? { ...obs, status: newStatus } : obs))
+      prev.map((obs) => (obs.id === id ? { ...obs, status: newStatus } : obs)),
     );
     setSaveSuccess(false);
   };
@@ -39,10 +51,10 @@ export function ObservationTable({ observations, onSaveObservations }: Observati
               ...obs,
               value_text: editValue,
               numeric_value: isNaN(num) ? obs.numeric_value : num,
-              status: 'confirmed',
+              status: "confirmed",
             }
-          : obs
-      )
+          : obs,
+      ),
     );
     setEditingId(null);
     setSaveSuccess(false);
@@ -51,15 +63,22 @@ export function ObservationTable({ observations, onSaveObservations }: Observati
   const handleSaveAll = async () => {
     setSaving(true);
     try {
-      const payload = items.map((obs) => ({
-        id: obs.id,
-        status: obs.status as 'confirmed' | 'rejected',
-        numeric_value: obs.numeric_value ?? undefined,
-        value_text: obs.value_text,
-      }));
+      setError("");
+      const payload = items
+        .filter(
+          (obs) => obs.status === "confirmed" || obs.status === "rejected",
+        )
+        .map((obs) => ({
+          id: obs.id,
+          status: obs.status as "confirmed" | "rejected",
+          numeric_value: obs.numeric_value ?? undefined,
+          value_text: obs.value_text,
+        }));
       await onSaveObservations(payload);
       setSaveSuccess(true);
       setTimeout(() => setSaveSuccess(false), 3000);
+    } catch {
+      setError("Your changes were not saved. Please try again.");
     } finally {
       setSaving(false);
     }
@@ -73,18 +92,33 @@ export function ObservationTable({ observations, onSaveObservations }: Observati
             Extracted Lab Observations
           </h3>
           <p className="text-xs text-(--text-muted)">
-            Verify and confirm values extracted from your report before they are used for cited AI Q&A.
+            Verify and confirm values extracted from your report before they are
+            used for cited AI Q&A.
           </p>
         </div>
         <button
           onClick={handleSaveAll}
-          disabled={saving}
+          disabled={
+            saving ||
+            !items.some(
+              (o) => o.status === "confirmed" || o.status === "rejected",
+            )
+          }
           className="px-3.5 py-1.5 rounded-xl bg-(--primary) text-white text-xs font-medium hover:bg-(--primary-hover) disabled:opacity-50 transition-colors shadow-sm"
         >
-          {saving ? 'Saving...' : saveSuccess ? 'Saved ✓' : 'Confirm Observations'}
+          {saving
+            ? "Saving..."
+            : saveSuccess
+              ? "Saved ✓"
+              : "Save reviewed values"}
         </button>
       </div>
 
+      {error && (
+        <p role="alert" className="notice error-notice">
+          {error}
+        </p>
+      )}
       <div className="overflow-x-auto rounded-xl border border-(--border-subtle) bg-(--surface)">
         <table className="w-full text-left text-xs">
           <thead className="bg-(--surface-subtle) text-(--text-secondary) font-medium border-b border-(--border-subtle)">
@@ -98,7 +132,10 @@ export function ObservationTable({ observations, onSaveObservations }: Observati
           </thead>
           <tbody className="divide-y divide-(--border-subtle)">
             {items.map((obs) => (
-              <tr key={obs.id} className="hover:bg-(--surface-subtle) transition-colors">
+              <tr
+                key={obs.id}
+                className="hover:bg-(--surface-subtle) transition-colors"
+              >
                 <td className="px-4 py-3 font-medium text-(--text-primary)">
                   {obs.original_label}
                   {obs.canonical_test !== obs.original_label && (
@@ -126,22 +163,25 @@ export function ObservationTable({ observations, onSaveObservations }: Observati
                     </div>
                   ) : (
                     <span>
-                      {obs.comparator ? `${obs.comparator} ` : ''}
+                      {obs.comparator ? `${obs.comparator} ` : ""}
                       {obs.value_text} {obs.unit}
                     </span>
                   )}
                 </td>
                 <td className="px-4 py-3 text-(--text-secondary)">
-                  {obs.reference_text || (obs.bounds_low != null && obs.bounds_high != null ? `${obs.bounds_low} - ${obs.bounds_high} ${obs.unit}` : 'Not provided')}
+                  {obs.reference_text ||
+                    (obs.bounds_low != null && obs.bounds_high != null
+                      ? `${obs.bounds_low} - ${obs.bounds_high} ${obs.unit}`
+                      : "Not provided")}
                 </td>
                 <td className="px-4 py-3 text-center">
                   <span
                     className={`inline-flex px-2 py-0.5 rounded-full text-[11px] font-medium ${
-                      obs.status === 'confirmed'
-                        ? 'bg-emerald-100 text-emerald-800'
-                        : obs.status === 'rejected'
-                        ? 'bg-rose-100 text-rose-800'
-                        : 'bg-amber-100 text-amber-800'
+                      obs.status === "confirmed"
+                        ? "bg-emerald-100 text-emerald-800"
+                        : obs.status === "rejected"
+                          ? "bg-rose-100 text-rose-800"
+                          : "bg-amber-100 text-amber-800"
                     }`}
                   >
                     {obs.status}
@@ -157,22 +197,22 @@ export function ObservationTable({ observations, onSaveObservations }: Observati
                       <Edit3 className="w-3.5 h-3.5" />
                     </button>
                     <button
-                      onClick={() => handleStatusChange(obs.id, 'confirmed')}
+                      onClick={() => handleStatusChange(obs.id, "confirmed")}
                       className={`p-1 rounded ${
-                        obs.status === 'confirmed'
-                          ? 'bg-emerald-100 text-emerald-700'
-                          : 'text-(--text-muted) hover:text-emerald-600 hover:bg-emerald-50'
+                        obs.status === "confirmed"
+                          ? "bg-emerald-100 text-emerald-700"
+                          : "text-(--text-muted) hover:text-emerald-600 hover:bg-emerald-50"
                       }`}
                       title="Confirm value"
                     >
                       <Check className="w-3.5 h-3.5" />
                     </button>
                     <button
-                      onClick={() => handleStatusChange(obs.id, 'rejected')}
+                      onClick={() => handleStatusChange(obs.id, "rejected")}
                       className={`p-1 rounded ${
-                        obs.status === 'rejected'
-                          ? 'bg-rose-100 text-rose-700'
-                          : 'text-(--text-muted) hover:text-rose-600 hover:bg-rose-50'
+                        obs.status === "rejected"
+                          ? "bg-rose-100 text-rose-700"
+                          : "text-(--text-muted) hover:text-rose-600 hover:bg-rose-50"
                       }`}
                       title="Reject value"
                     >

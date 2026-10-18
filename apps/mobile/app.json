@@ -25,11 +25,23 @@
     "plugins": [
       "expo-router",
       [
+        "expo-image-picker",
+        {
+          "photosPermission": "Choose a photo for report or meal analysis. Selected photos are sent to the configured AI provider only when you request analysis.",
+          "cameraPermission": "Use the camera to take a meal photo for optional AI analysis.",
+          "microphonePermission": false
+        }
+      ],
+      "expo-secure-store",
+      [
         "expo-location",
         {
           "locationWhenInUsePermission": "Allow Medi Bud to use your location to find nearby hospitals, clinics, and pharmacies."
         }
-      ]
+      ],
+      "expo-sharing",
+      "expo-splash-screen",
+      "expo-sqlite"
     ],
     "experiments": {
       "typedRoutes": true

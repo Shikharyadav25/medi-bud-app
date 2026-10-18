@@ -11,13 +11,13 @@ export interface WaterEntry {
   id: string;
   amountMl: number;
   timestamp: string;
-  source: 'manual' | 'ai_image_verified';
+  source: "manual" | "ai_image_verified";
 }
 
 export interface MealItem {
   id: string;
   name: string;
-  mealType: 'Breakfast' | 'Lunch' | 'Dinner' | 'Snack';
+  mealType: "Breakfast" | "Lunch" | "Dinner" | "Snack";
   calories: number;
   proteinG: number;
   carbsG: number;
@@ -30,7 +30,7 @@ export interface MealItem {
 export interface WorkoutItem {
   id: string;
   title: string;
-  category: 'Cardio' | 'Strength' | 'Yoga' | 'Walking';
+  category: "Cardio" | "Strength" | "Yoga" | "Walking";
   durationMinutes: number;
   completed: boolean;
   date: string;
@@ -40,7 +40,7 @@ export interface SleepEntry {
   id: string;
   date: string;
   durationHours: number;
-  quality: 'Restful' | 'Average' | 'Restless';
+  quality: "Restful" | "Average" | "Restless";
 }
 
 export interface MoodEntry {
@@ -53,7 +53,7 @@ export interface MoodEntry {
 
 export interface HealthScoreDetails {
   score: number;
-  category: 'Optimal' | 'Good' | 'Needs Attention';
+  category: "Optimal" | "Good" | "Needs Attention" | "Not assessed";
   breakdown: {
     hydration: number;
     nutrition: number;

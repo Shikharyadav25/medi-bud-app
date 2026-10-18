@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef } from "react";
 import {
   View,
   Text,
@@ -10,85 +10,99 @@ import {
   KeyboardAvoidingView,
   Platform,
   ActivityIndicator,
-} from 'react-native';
-import { Feather, MaterialCommunityIcons } from '@expo/vector-icons';
-import { COLORS, RADIUS, TYPOGRAPHY, TRACKING, SHADOWS } from '../../constants/theme';
-import { AIMessageBubble } from '../../components/ai/AIMessageBubble';
-import { DisclaimerBadge } from '../../components/ai/DisclaimerBadge';
-import { useAuthStore } from '../../store/useAuthStore';
-import { useHealthStore } from '../../store/useHealthStore';
-import { useChatStore } from '../../store/useChatStore';
-import { AIService } from '../../services/api/aiService';
+} from "react-native";
+import { Feather, MaterialCommunityIcons } from "@expo/vector-icons";
+import {
+  COLORS,
+  RADIUS,
+  TYPOGRAPHY,
+  TRACKING,
+  SHADOWS,
+} from "../../constants/theme";
+import { AIMessageBubble } from "../../components/ai/AIMessageBubble";
+import { DisclaimerBadge } from "../../components/ai/DisclaimerBadge";
+import { useAuthStore } from "../../store/useAuthStore";
+import { useHealthStore } from "../../store/useHealthStore";
+import { useChatStore } from "../../store/useChatStore";
+import { AIService } from "../../services/api/aiService";
 
 export default function AIChatScreen() {
   const { profile } = useAuthStore();
   const { vitals, waterIntakeMl, recentMeals, reports } = useHealthStore();
-  const { messages, isLoading, isListening, suggestions, addMessage, setLoading, setListening, clearMessages } =
-    useChatStore();
+  const {
+    messages,
+    isLoading,
+    isListening,
+    suggestions,
+    addMessage,
+    setLoading,
+    setListening,
+    clearMessages,
+  } = useChatStore();
 
-  const [inputQuery, setInputQuery] = useState('');
+  const [inputQuery, setInputQuery] = useState("");
   const scrollViewRef = useRef<ScrollView>(null);
 
   const handleSend = async (queryToSend?: string) => {
     const text = (queryToSend || inputQuery).trim();
     if (!text || isLoading) return;
 
-    setInputQuery('');
+    setInputQuery("");
 
     const userMsgId = `usr-${Date.now()}`;
     addMessage({
       id: userMsgId,
-      sender: 'user',
+      sender: "user",
       text,
-      timestamp: 'Just now',
+      timestamp: "Just now",
     });
 
     setLoading(true);
-    setTimeout(() => scrollViewRef.current?.scrollToEnd({ animated: true }), 100);
+    setTimeout(
+      () => scrollViewRef.current?.scrollToEnd({ animated: true }),
+      100,
+    );
 
     try {
-      const mealsSummary = recentMeals.map((m) => `${m.mealType}: ${m.name}`).join(', ');
+      const mealsSummary = recentMeals
+        .map((m) => `${m.mealType}: ${m.name}`)
+        .join(", ");
       const response = await AIService.sendHealthChat(
         text,
         profile,
         vitals,
         waterIntakeMl,
         mealsSummary,
-        reports
+        reports,
       );
 
       addMessage({
         id: `ai-${Date.now()}`,
-        sender: 'ai',
+        sender: "ai",
         text: response.response,
         citations: response.citations,
         action: response.action as any,
         disclaimer: response.disclaimer,
-        timestamp: 'Just now',
+        timestamp: "Just now",
       });
     } catch {
       addMessage({
         id: `ai-${Date.now()}`,
-        sender: 'ai',
-        text: 'Your AI health assistant is temporarily unavailable. Please try again.',
-        timestamp: 'Just now',
+        sender: "ai",
+        text: "Your AI health assistant is temporarily unavailable. Please try again.",
+        timestamp: "Just now",
       });
     } finally {
       setLoading(false);
-      setTimeout(() => scrollViewRef.current?.scrollToEnd({ animated: true }), 150);
+      setTimeout(
+        () => scrollViewRef.current?.scrollToEnd({ animated: true }),
+        150,
+      );
     }
   };
 
   const handleToggleVoice = () => {
-    if (isListening) {
-      setListening(false);
-    } else {
-      setListening(true);
-      setTimeout(() => {
-        setListening(false);
-        handleSend('How does my recent water intake affect my health?');
-      }, 2500);
-    }
+    setListening(false);
   };
 
   return (
@@ -97,7 +111,11 @@ export default function AIChatScreen() {
       <View style={styles.topBar}>
         <View style={styles.titleWithIcon}>
           <View style={styles.aiIconBadge}>
-            <MaterialCommunityIcons name="creation" size={18} color={COLORS.secondaryAccent} />
+            <MaterialCommunityIcons
+              name="creation"
+              size={18}
+              color={COLORS.secondaryAccent}
+            />
           </View>
           <View>
             <Text style={styles.topBarTitle}>Medi Bud AI</Text>
@@ -107,7 +125,10 @@ export default function AIChatScreen() {
 
         <Pressable
           onPress={clearMessages}
-          style={({ pressed }) => [styles.clearButton, pressed && styles.elementPressed]}
+          style={({ pressed }) => [
+            styles.clearButton,
+            pressed && styles.elementPressed,
+          ]}
         >
           <Feather name="rotate-ccw" size={16} color={COLORS.textSecondary} />
         </Pressable>
@@ -122,7 +143,9 @@ export default function AIChatScreen() {
         ref={scrollViewRef}
         contentContainerStyle={styles.messagesList}
         showsVerticalScrollIndicator={false}
-        onContentSizeChange={() => scrollViewRef.current?.scrollToEnd({ animated: true })}
+        onContentSizeChange={() =>
+          scrollViewRef.current?.scrollToEnd({ animated: true })
+        }
       >
         {messages.map((msg) => (
           <AIMessageBubble key={msg.id} message={msg} />
@@ -131,19 +154,28 @@ export default function AIChatScreen() {
         {isLoading && (
           <View style={styles.loadingRow}>
             <ActivityIndicator size="small" color={COLORS.primaryAccent} />
-            <Text style={styles.loadingText}>Synthesizing clinical facts & context...</Text>
+            <Text style={styles.loadingText}>
+              Synthesizing clinical facts & context...
+            </Text>
           </View>
         )}
       </ScrollView>
 
       {/* Suggestion Chips */}
       <View style={styles.suggestionsContainer}>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.suggestionsScroll}>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.suggestionsScroll}
+        >
           {suggestions.map((chip, index) => (
             <Pressable
               key={index}
               onPress={() => handleSend(chip)}
-              style={({ pressed }) => [styles.suggestionChip, pressed && styles.chipPressed]}
+              style={({ pressed }) => [
+                styles.suggestionChip,
+                pressed && styles.chipPressed,
+              ]}
             >
               <Text style={styles.suggestionText}>{chip}</Text>
             </Pressable>
@@ -152,10 +184,14 @@ export default function AIChatScreen() {
       </View>
 
       {/* Input Row */}
-      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
+      >
         <View style={styles.inputArea}>
           <Pressable
             onPress={handleToggleVoice}
+            disabled
+            accessibilityLabel="Voice input is not available; use the text field"
             style={({ pressed }) => [
               styles.voiceButton,
               isListening && styles.voiceButtonActive,
@@ -163,7 +199,7 @@ export default function AIChatScreen() {
             ]}
           >
             <Feather
-              name={isListening ? 'mic-off' : 'mic'}
+              name={isListening ? "mic-off" : "mic"}
               size={18}
               color={isListening ? COLORS.appleRed : COLORS.primaryAccent}
             />
@@ -171,7 +207,11 @@ export default function AIChatScreen() {
 
           <TextInput
             style={styles.input}
-            placeholder={isListening ? 'Listening...' : 'Ask about meals, reports, vitals...'}
+            placeholder={
+              isListening
+                ? "Listening..."
+                : "Ask about meals, reports, vitals..."
+            }
             placeholderTextColor={COLORS.textTertiary}
             value={inputQuery}
             onChangeText={setInputQuery}
@@ -201,31 +241,31 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.systemBackground,
   },
   topBar: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     paddingHorizontal: 20,
     paddingVertical: 12,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: "#FFFFFF",
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderBottomColor: COLORS.borderSubtle,
   },
   titleWithIcon: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 10,
   },
   aiIconBadge: {
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: '#FFF3E0',
-    alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: "#FFF3E0",
+    alignItems: "center",
+    justifyContent: "center",
   },
   topBarTitle: {
     fontSize: 16,
-    fontWeight: '700',
+    fontWeight: "700",
     color: COLORS.textPrimary,
     letterSpacing: TRACKING.subheadline,
     fontFamily: TYPOGRAPHY.displayFont,
@@ -240,8 +280,8 @@ const styles = StyleSheet.create({
     height: 34,
     borderRadius: 17,
     backgroundColor: COLORS.systemFill,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   disclaimerWrapper: {
     paddingHorizontal: 16,
@@ -250,8 +290,8 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
   },
   loadingRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 8,
     paddingHorizontal: 20,
     marginVertical: 10,
@@ -259,11 +299,11 @@ const styles = StyleSheet.create({
   loadingText: {
     fontSize: 12.5,
     color: COLORS.textSecondary,
-    fontStyle: 'italic',
+    fontStyle: "italic",
   },
   suggestionsContainer: {
     paddingVertical: 8,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: "#FFFFFF",
     borderTopWidth: StyleSheet.hairlineWidth,
     borderTopColor: COLORS.borderSubtle,
   },
@@ -281,20 +321,20 @@ const styles = StyleSheet.create({
   },
   chipPressed: {
     transform: [{ scale: 0.96 }],
-    backgroundColor: 'rgba(120, 120, 128, 0.2)',
+    backgroundColor: "rgba(120, 120, 128, 0.2)",
   },
   suggestionText: {
     fontSize: 12.5,
-    fontWeight: '500',
+    fontWeight: "500",
     color: COLORS.primaryAccent,
     letterSpacing: 0.1,
   },
   inputArea: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     paddingHorizontal: 16,
     paddingVertical: 10,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: "#FFFFFF",
     borderTopWidth: StyleSheet.hairlineWidth,
     borderTopColor: COLORS.borderSubtle,
     gap: 10,
@@ -304,16 +344,16 @@ const styles = StyleSheet.create({
     height: 40,
     borderRadius: 20,
     backgroundColor: COLORS.systemFill,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   voiceButtonActive: {
-    backgroundColor: '#FFEBEE',
+    backgroundColor: "#FFEBEE",
   },
   input: {
     flex: 1,
     height: 44,
-    backgroundColor: '#F2F2F7',
+    backgroundColor: "#F2F2F7",
     borderRadius: RADIUS.full,
     borderWidth: StyleSheet.hairlineWidth,
     borderColor: COLORS.borderSubtle,
@@ -326,11 +366,11 @@ const styles = StyleSheet.create({
     height: 40,
     borderRadius: 20,
     backgroundColor: COLORS.primaryAccent,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   sendButtonDisabled: {
-    backgroundColor: '#C7C7CC',
+    backgroundColor: "#C7C7CC",
   },
   elementPressed: {
     transform: [{ scale: 0.94 }],

@@ -2,6 +2,10 @@
   "name": "medi-bud-monorepo",
   "version": "1.0.0",
   "private": true,
+  "packageManager": "pnpm@12.8.1",
+  "engines": {
+    "node": ">=22.13.0"
+  },
   "description": "Medi Bud AI Health Companion - Monorepo for Web, Mobile, and Python FastAPI Service",
   "scripts": {
     "dev:web": "pnpm --filter @medi-bud/web dev",
@@ -9,8 +13,8 @@
     "dev:api": "cd services/api && uvicorn main:app --reload --port 8000",
     "worker": "cd services/api && python3 worker.py",
     "build": "pnpm --filter @medi-bud/design-tokens build && pnpm --filter @medi-bud/safety-content build && pnpm --filter @medi-bud/contracts build && pnpm --filter @medi-bud/api-client build",
-    "build:web": "pnpm --filter @medi-bud/web build",
-    "build:mobile": "pnpm --filter @medi-bud/mobile exec tsc --noEmit",
+    "build:web": "pnpm build && pnpm --filter @medi-bud/web build",
+    "build:mobile": "pnpm build && pnpm --filter @medi-bud/mobile exec tsc --noEmit",
     "test": "pnpm test:contracts && pnpm test:api",
     "test:contracts": "pnpm --filter @medi-bud/contracts test",
     "test:api": "python3 -m pytest tests/integration -v",

@@ -1,5 +1,7 @@
 # MEDI BUD AI HEALTH COMPANION
 
+Production hardening, environment setup, verification limits, data lifecycle and remaining release gates are documented in [docs/production.md](docs/production.md). Clinical production use requires independent professional review; a successful build is not clinical validation.
+
 > **Understand your lab reports, ground your health discussions, and build everyday wellness habits.**  
 > *A demonstrable college engineering prototype monorepo with web, mobile, and shared Python intelligence.*
 

@@ -2,14 +2,16 @@ import os
 import joblib
 import uuid
 from typing import Dict, Any, List, Optional
-from config import settings
 from services.retrieval_service import search_hybrid
 
 INTENT_MODEL_PATH = os.path.abspath(
-    os.path.join(os.path.dirname(__file__), "..", "..", "..", "ml", "intent_pipeline.joblib")
+    os.path.join(
+        os.path.dirname(__file__), "..", "..", "..", "ml", "intent_pipeline.joblib"
+    )
 )
 
 _intent_pipeline = None
+
 
 def get_intent_pipeline():
     global _intent_pipeline
@@ -20,23 +22,41 @@ def get_intent_pipeline():
             print(f"Warning: Could not load intent pipeline ({e})")
     return _intent_pipeline
 
+
 # Reviewed red-flag patterns that immediately trigger emergency escalation
 RED_FLAG_PATTERNS = [
-    "chest pain", "crushing pressure", "difficulty breathing", "cannot breathe",
-    "face drooping", "arm weakness", "slurred speech", "stroke", "stiff neck fever",
-    "anaphylaxis", "throat swelling", "swollen tongue"
+    "chest pain",
+    "crushing pressure",
+    "difficulty breathing",
+    "cannot breathe",
+    "face drooping",
+    "arm weakness",
+    "slurred speech",
+    "stroke",
+    "stiff neck fever",
+    "anaphylaxis",
+    "throat swelling",
+    "swollen tongue",
+    "can't breathe",
+    "unconscious",
+    "severe bleeding",
+    "suicid",
+    "kill myself",
+    "overdose",
 ]
+
 
 def check_emergency_signals(text: str) -> bool:
     t_lower = text.lower()
     return any(p in t_lower for p in RED_FLAG_PATTERNS)
+
 
 def orchestrate_chat_query(
     user_id: str,
     query: str,
     user_report_chunks: List[Dict[str, Any]],
     user_confirmed_observations: List[Dict[str, Any]],
-    specific_report_id: Optional[str] = None
+    specific_report_id: Optional[str] = None,
 ) -> Dict[str, Any]:
     """
     Fixed-workflow orchestration:
@@ -61,37 +81,27 @@ def orchestrate_chat_query(
             "citations": [],
             "limitations": "Immediate life-safety escalation. Non-clinical triage rule triggered.",
             "safety_action": "EMERGENCY_ESCALATION",
-            "request_id": request_id
+            "request_id": request_id,
         }
 
     # Step 2: Intent classification
     pipeline = get_intent_pipeline()
     intent = "general_health"
-    confidence = 1.0
 
     if pipeline is not None:
         try:
             probs = pipeline.predict_proba([query])[0]
             max_idx = probs.argmax()
-            confidence = float(probs[max_idx])
             intent = pipeline.classes_[max_idx]
         except Exception:
-            intent = "report_question" if "report" in query.lower() or "test" in query.lower() else "general_health"
+            intent = (
+                "report_question"
+                if "report" in query.lower() or "test" in query.lower()
+                else "general_health"
+            )
 
-    # Low-confidence threshold check
-    if confidence < settings.CLARIFICATION_THRESHOLD:
-        return {
-            "answer": (
-                "Could you please clarify your question? You can ask about your confirmed lab results, "
-                "nutrition facts for Indian foods, generating a 7-day meal plan, or how to log daily habits."
-            ),
-            "intent": intent,
-            "mode": "rules",
-            "citations": [],
-            "limitations": f"Classifier confidence ({confidence:.2f}) was below clarification threshold ({settings.CLARIFICATION_THRESHOLD}).",
-            "safety_action": "REQUEST_CLARIFICATION",
-            "request_id": request_id
-        }
+    # Retrieval evidence is evaluated even when an intent label is uncertain.
+    # A weak classifier must not hide an exact confirmed observation.
 
     # Step 3: Scoped Retrieval
     retrieval_res = search_hybrid(
@@ -100,7 +110,7 @@ def orchestrate_chat_query(
         user_report_chunks=user_report_chunks,
         user_confirmed_observations=user_confirmed_observations,
         specific_report_id=specific_report_id,
-        top_k=5
+        top_k=5,
     )
 
     ranked_results = retrieval_res.get("results", [])
@@ -118,7 +128,7 @@ def orchestrate_chat_query(
             "citations": [],
             "limitations": "Zero evidence chunks matched authorized user records.",
             "safety_action": None,
-            "request_id": request_id
+            "request_id": request_id,
         }
 
     # Step 5: Format Grounded Extractive Answer & Citations
@@ -127,16 +137,21 @@ def orchestrate_chat_query(
 
     for item in ranked_results:
         cid = str(item.get("id") or item.get("source_id") or "src")
-        citations.append({
-            "source_id": cid,
-            "title": item.get("title", "Health Document"),
-            "date": str(item.get("date") or "2026"),
-            "page": item.get("page", 1),
-            "excerpt": item.get("text", "")[:250]
-        })
+        citations.append(
+            {
+                "source_id": cid,
+                "title": item.get("title", "Health Document"),
+                "date": str(item.get("date") or "2026"),
+                "page": item.get("page", 1),
+                "excerpt": item.get("text", "")[:250],
+                "url": item.get("source_url"),
+            }
+        )
         excerpts_text.append(item.get("text", ""))
 
-    extractive_summary = "Based on your confirmed documents and approved sources:\n\n"
+    extractive_summary = (
+        "Available excerpts from confirmed observations and curated sources:\n\n"
+    )
     for i, exc in enumerate(excerpts_text[:3], 1):
         extractive_summary += f"• {exc}\n"
 
@@ -152,5 +167,5 @@ def orchestrate_chat_query(
         "citations": citations,
         "limitations": "Strictly extractive response grounded in authorized user reports and approved wellness sources.",
         "safety_action": None,
-        "request_id": request_id
+        "request_id": request_id,
     }

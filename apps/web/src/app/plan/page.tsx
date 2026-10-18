@@ -1,35 +1,35 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import type { MealPlanDTO } from '@medi-bud/contracts';
-import { apiClient } from '@/lib/api';
-import { getCurrentAccessToken } from '@/lib/supabase';
-import { MealDayCard } from '@/components/MealDayCard';
-import { 
-  Utensils, 
-  Download, 
-  RefreshCw, 
-  Check, 
-  AlertCircle, 
-  Leaf, 
+import { useState, useEffect } from "react";
+import type { MealPlanDTO } from "@medi-bud/contracts";
+import { apiClient } from "@/lib/api";
+import { getCurrentAccessToken } from "@/lib/supabase";
+import { MealDayCard } from "@/components/MealDayCard";
+import {
+  Utensils,
+  Download,
+  RefreshCw,
+  Check,
+  AlertCircle,
+  Leaf,
   ShieldCheck,
-  FileText
-} from 'lucide-react';
+  FileText,
+} from "lucide-react";
 
 const COMMON_ALLERGENS = [
-  'dairy',
-  'peanuts',
-  'tree_nuts',
-  'gluten',
-  'soy',
-  'mustard',
-  'sesame'
+  "dairy",
+  "peanuts",
+  "tree_nuts",
+  "gluten",
+  "soy",
+  "mustard",
+  "sesame",
 ];
 
 export default function MealPlanPage() {
   const [isVeg, setIsVeg] = useState(true);
   const [selectedAllergens, setSelectedAllergens] = useState<string[]>([]);
-  const [selectedRegion, setSelectedRegion] = useState('Pan-Indian');
+  const [selectedRegion, setSelectedRegion] = useState("Pan-Indian");
   const [plan, setPlan] = useState<MealPlanDTO | null>(null);
   const [selectedDayNum, setSelectedDayNum] = useState<number>(1);
   const [loading, setLoading] = useState(false);
@@ -42,8 +42,9 @@ export default function MealPlanPage() {
       const data = await apiClient.getMealPlan();
       setPlan(data);
     } catch {
-      setErrorMsg('Could not fetch saved plan. Generating initial plan...');
-      await handleGeneratePlan();
+      setErrorMsg(
+        "No saved plan is available. Sign in, choose your preferences below, and generate meal ideas.",
+      );
     } finally {
       setLoading(false);
     }
@@ -56,12 +57,12 @@ export default function MealPlanPage() {
       const data = await apiClient.generateMealPlan({
         is_veg: isVeg,
         allergens: selectedAllergens,
-        regional_preference: selectedRegion,
+        preferred_region: selectedRegion,
       });
       setPlan(data);
       setSelectedDayNum(1);
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Plan generation failed';
+      const msg = err instanceof Error ? err.message : "Plan generation failed";
       setErrorMsg(msg);
     } finally {
       setLoading(false);
@@ -74,7 +75,7 @@ export default function MealPlanPage() {
 
   const toggleAllergen = (item: string) => {
     setSelectedAllergens((prev) =>
-      prev.includes(item) ? prev.filter((a) => a !== item) : [...prev, item]
+      prev.includes(item) ? prev.filter((a) => a !== item) : [...prev, item],
     );
   };
 
@@ -84,28 +85,29 @@ export default function MealPlanPage() {
     setErrorMsg(null);
     try {
       const token = await getCurrentAccessToken();
-      if (!token) throw new Error('Please sign in to download your plan.');
+      if (!token) throw new Error("Please sign in to download your plan.");
       const url = apiClient.getPlanPdfUrl(plan.id);
       const res = await fetch(url, {
         headers: { Authorization: `Bearer ${token}` },
-        cache: 'no-store',
+        cache: "no-store",
       });
-      if (!res.ok) throw new Error('Unable to download your plan.');
+      if (!res.ok) throw new Error("Unable to download your plan.");
       const blob = await res.blob();
       const downloadUrl = URL.createObjectURL(blob);
-      const link = document.createElement('a');
+      const link = document.createElement("a");
       link.href = downloadUrl;
-      link.download = 'medi-bud-meal-plan.pdf';
+      link.download = "medi-bud-meal-plan.pdf";
       document.body.appendChild(link);
       link.click();
       link.remove();
       window.setTimeout(() => URL.revokeObjectURL(downloadUrl), 1000);
     } catch (err) {
-      setErrorMsg(err instanceof Error ? err.message : 'PDF download failed.');
+      setErrorMsg(err instanceof Error ? err.message : "PDF download failed.");
     }
   };
 
-  const selectedDay = plan?.days.find((d) => d.day === selectedDayNum) || plan?.days[0];
+  const selectedDay =
+    plan?.days.find((d) => d.day === selectedDayNum) || plan?.days[0];
 
   return (
     <div className="space-y-8">
@@ -113,10 +115,11 @@ export default function MealPlanPage() {
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-(--text-primary) flex items-center gap-2">
             <Utensils className="w-6 h-6 text-(--primary)" />
-            7-Day Indian Wellness Meal Planner
+            Indian meal ideas for your week
           </h1>
           <p className="text-xs text-(--text-secondary) mt-1">
-            Nutritional estimates calibrated against ICMR-NIN Indian Food Composition Tables (IFCT).
+            Explore ingredient-filtered combinations. Nutrition is estimated;
+            this is not a complete or prescribed diet.
           </p>
         </div>
 
@@ -171,8 +174,10 @@ export default function MealPlanPage() {
             disabled={loading}
             className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-(--primary) text-(--primary) hover:bg-(--primary-surface) text-xs font-medium transition-colors"
           >
-            <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
-            {loading ? 'Regenerating...' : 'Regenerate 7-Day Plan'}
+            <RefreshCw
+              className={`w-3.5 h-3.5 ${loading ? "animate-spin" : ""}`}
+            />
+            {loading ? "Regenerating..." : "Regenerate 7-Day Plan"}
           </button>
         </div>
 
@@ -187,12 +192,12 @@ export default function MealPlanPage() {
                 onClick={() => toggleAllergen(allergen)}
                 className={`text-[11px] px-2.5 py-1 rounded-full border capitalize transition-colors ${
                   selectedAllergens.includes(allergen)
-                    ? 'border-red-400 bg-red-50 text-red-700 font-medium'
-                    : 'border-(--border-subtle) bg-(--surface) text-(--text-secondary) hover:border-slate-300'
+                    ? "border-red-400 bg-red-50 text-red-700 font-medium"
+                    : "border-(--border-subtle) bg-(--surface) text-(--text-secondary) hover:border-slate-300"
                 }`}
               >
-                {selectedAllergens.includes(allergen) ? '✕ ' : '+ '}
-                {allergen.replace('_', ' ')}
+                {selectedAllergens.includes(allergen) ? "✕ " : "+ "}
+                {allergen.replace("_", " ")}
               </button>
             ))}
           </div>
@@ -206,9 +211,14 @@ export default function MealPlanPage() {
         </div>
       )}
 
+      <p className="notice">
+        Check ingredient labels and cross-contact with your food provider.
+        Catalogue filters cannot guarantee allergy safety. For medical dietary
+        needs, work with a qualified dietitian.
+      </p>
       {plan && (
         <div className="space-y-6">
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
             {plan.days.map((dayPlan) => (
               <MealDayCard
                 key={dayPlan.day}
@@ -221,46 +231,76 @@ export default function MealPlanPage() {
 
           {selectedDay && (
             <div className="rounded-2xl border border-(--border-subtle) bg-(--surface) p-6 space-y-4 shadow-sm">
-              <div className="flex items-center justify-between border-b border-(--border-subtle) pb-3">
+              <div className="flex flex-wrap gap-3 items-center justify-between border-b border-(--border-subtle) pb-3">
                 <h2 className="font-semibold text-base text-(--text-primary)">
                   Detailed Breakdown — Day {selectedDay.day}
                 </h2>
-                <div className="flex items-center gap-3 text-xs">
-                  <span><strong>{selectedDay.daily_nutrition_summary.calories}</strong> kcal</span>
-                  <span><strong>{selectedDay.daily_nutrition_summary.protein_g}g</strong> protein</span>
-                  <span><strong>{selectedDay.daily_nutrition_summary.carbs_g}g</strong> carbs</span>
-                  <span><strong>{selectedDay.daily_nutrition_summary.fat_g}g</strong> fats</span>
-                  <span><strong>{selectedDay.daily_nutrition_summary.fiber_g}g</strong> fiber</span>
+                <div className="flex flex-wrap items-center gap-3 text-xs">
+                  <span>
+                    <strong>
+                      {selectedDay.daily_nutrition_summary.calories}
+                    </strong>{" "}
+                    kcal
+                  </span>
+                  <span>
+                    <strong>
+                      {selectedDay.daily_nutrition_summary.protein_g}g
+                    </strong>{" "}
+                    protein
+                  </span>
+                  <span>
+                    <strong>
+                      {selectedDay.daily_nutrition_summary.carbs_g}g
+                    </strong>{" "}
+                    carbs
+                  </span>
+                  <span>
+                    <strong>
+                      {selectedDay.daily_nutrition_summary.fat_g}g
+                    </strong>{" "}
+                    fats
+                  </span>
+                  <span>
+                    <strong>
+                      {selectedDay.daily_nutrition_summary.fiber_g}g
+                    </strong>{" "}
+                    fiber
+                  </span>
                 </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {(['breakfast', 'lunch', 'snack', 'dinner'] as const).map((slot) => {
-                  const m = selectedDay.meals[slot];
-                  return (
-                    <div key={slot} className="p-4 rounded-xl border border-(--border-subtle) bg-(--surface-subtle) space-y-2">
-                      <div className="flex items-center justify-between">
-                        <span className="uppercase text-[11px] font-bold tracking-wider text-(--text-muted)">
-                          {slot}
-                        </span>
-                        <span className="text-xs font-semibold text-(--primary)">
-                          {m.nutrition.calories} kcal
-                        </span>
+                {(["breakfast", "lunch", "snack", "dinner"] as const).map(
+                  (slot) => {
+                    const m = selectedDay.meals[slot];
+                    return (
+                      <div
+                        key={slot}
+                        className="p-4 rounded-xl border border-(--border-subtle) bg-(--surface-subtle) space-y-2"
+                      >
+                        <div className="flex items-center justify-between">
+                          <span className="uppercase text-[11px] font-bold tracking-wider text-(--text-muted)">
+                            {slot}
+                          </span>
+                          <span className="text-xs font-semibold text-(--primary)">
+                            {m.nutrition.calories} kcal
+                          </span>
+                        </div>
+                        <p className="font-medium text-sm text-(--text-primary)">
+                          {m.name}
+                        </p>
+                        <p className="text-xs text-(--text-muted)">
+                          Portion: {m.portion_basis}
+                        </p>
+                        <div className="flex gap-2 text-[11px] text-(--text-secondary) pt-1">
+                          <span>P: {m.nutrition.protein_g}g</span>
+                          <span>C: {m.nutrition.carbs_g}g</span>
+                          <span>F: {m.nutrition.fat_g}g</span>
+                        </div>
                       </div>
-                      <p className="font-medium text-sm text-(--text-primary)">
-                        {m.name}
-                      </p>
-                      <p className="text-xs text-(--text-muted)">
-                        Portion: {m.portion_basis}
-                      </p>
-                      <div className="flex gap-2 text-[11px] text-(--text-secondary) pt-1">
-                        <span>P: {m.nutrition.protein_g}g</span>
-                        <span>C: {m.nutrition.carbs_g}g</span>
-                        <span>F: {m.nutrition.fat_g}g</span>
-                      </div>
-                    </div>
-                  );
-                })}
+                    );
+                  },
+                )}
               </div>
 
               <p className="text-[11px] text-(--text-muted) italic pt-2 border-t border-(--border-subtle)">

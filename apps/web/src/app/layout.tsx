@@ -1,12 +1,11 @@
-import type { Metadata } from 'next';
-import './globals.css';
-import { Navbar } from '@/components/Navbar';
-
+import type { Metadata } from "next";
+import "./globals.css";
+import { Navbar } from "@/components/Navbar";
 export const metadata: Metadata = {
-  title: 'Medi Bud — Understand your reports and build everyday health habits',
-  description: 'A college prototype AI health companion for lab report comprehension, cited health Q&A, transparent habit tracking, and 7-day Indian meal plans.',
+  title: "Medi Bud — A little clarity for your health",
+  description:
+    "Organize health reports, explore source-based answers, and build everyday habits.",
 };
-
 export default function RootLayout({
   children,
 }: {
@@ -14,16 +13,17 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className="min-h-screen flex flex-col bg-(--background) text-(--text-primary)">
+      <body>
         <Navbar />
-        <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8">
+        <main id="main-content" className="app-main">
           {children}
         </main>
-        <footer className="border-t border-(--border-subtle) py-6 text-center text-xs text-(--text-muted) px-4">
-          <p className="max-w-2xl mx-auto">
-            Medi Bud AI Health Companion &copy; 2026. Academic College Prototype.
-            Not a clinical platform or medical diagnostic tool. Always consult a certified healthcare professional.
-          </p>
+        <footer className="app-footer">
+          <span>© 2026 Medi Bud · Care, with clarity.</span>
+          <span>
+            Wellness information only. For medical decisions, speak with a
+            qualified clinician.
+          </span>
         </footer>
       </body>
     </html>

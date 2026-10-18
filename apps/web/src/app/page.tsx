@@ -1,125 +1,139 @@
-import Link from 'next/link';
-import { 
-  FileText, 
-  MessageSquare, 
-  Activity, 
-  Utensils, 
-  ShieldAlert, 
-  MapPin, 
-  ArrowRight, 
-  ShieldCheck 
-} from 'lucide-react';
+import Link from "next/link";
+import {
+  ArrowUpRight,
+  ArrowRight,
+  Files,
+  MessagesSquare,
+  Utensils,
+  Activity,
+  ShieldCheck,
+  HeartPulse,
+  Leaf,
+  Sparkles,
+} from "lucide-react";
 
 export default function HomePage() {
-  const features = [
-    {
-      title: 'Lab Report Verification',
-      desc: 'Upload CBC, Lipid, or Glucose reports. Review and confirm extracted values with stated intervals.',
-      icon: FileText,
-      href: '/reports',
-    },
-    {
-      title: 'Source-Grounded Q&A',
-      desc: 'Ask questions about your confirmed tests with direct citations from your reports and approved wellness guides.',
-      icon: MessageSquare,
-      href: '/chat',
-    },
-    {
-      title: 'Daily Habit Tracking',
-      desc: 'Log water intake, sleep, and physical activity with offline sync and a transparent completion counter.',
-      icon: Activity,
-      href: '/dashboard',
-    },
-    {
-      title: '7-Day Indian Meal Planner',
-      desc: 'Deterministic meal plans with declared allergen filters, IFCT macro estimates, and downloadable PDF export.',
-      icon: Utensils,
-      href: '/plan',
-    },
-    {
-      title: 'Symptom Guidance',
-      desc: 'Structured red-flag evaluation questionnaire with immediate access to verified 112 / 108 emergency helplines.',
-      icon: ShieldAlert,
-      href: '/symptoms',
-    },
-    {
-      title: 'Nearby Care Discovery',
-      desc: 'Locate local hospitals, clinics, and pharmacies using OpenStreetMap data with direct navigation links.',
-      icon: MapPin,
-      href: '/nearby',
-    },
-  ];
-
   return (
-    <div className="space-y-12 py-4 sm:py-8">
-      {/* Hero Section */}
-      <section className="text-center max-w-3xl mx-auto space-y-4">
-        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-(--primary-surface) text-(--primary) border border-(--primary-light)">
-          <ShieldCheck size={14} />
-          <span>College Prototype — Information & Habit Companion</span>
+    <div className="home-page">
+      <div className="page-eyebrow">
+        <span className="status-dot" /> YOUR EVERYDAY HEALTH COMPANION
+      </div>
+      <section className="welcome-hero">
+        <div className="hero-copy">
+          <span className="eyebrow">A LITTLE CLARITY GOES A LONG WAY</span>
+          <h1>
+            Your health.
+            <br />A little <em>clearer.</em>
+          </h1>
+          <p>
+            Make sense of your reports, build gentle daily habits, and feel more
+            prepared for your next conversation with a doctor.
+          </p>
+          <div className="hero-actions">
+            <Link href="/dashboard" className="primary-button">
+              Enter your health space <ArrowRight size={18} />
+            </Link>
+            <Link href="/reports" className="text-link">
+              Explore reports <ArrowUpRight size={17} />
+            </Link>
+          </div>
+          <div className="hero-assurance">
+            <ShieldCheck size={17} /> Private by design. Guided by sources.
+          </div>
         </div>
-        <h1 className="text-3xl sm:text-5xl font-extrabold text-(--text-primary) tracking-tight">
-          Understand your reports and build everyday health habits.
-        </h1>
-        <p className="text-sm sm:text-base text-(--text-secondary) max-w-2xl mx-auto">
-          Medi Bud helps you organize personal health reports, verify extracted observations,
-          ask questions with transparent source citations, and plan balanced Indian meals.
-        </p>
-
-        <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
-          <Link
-            href="/dashboard"
-            className="flex items-center gap-2 px-5 py-2.5 rounded-xl font-medium text-sm bg-(--primary) text-white hover:bg-(--primary-hover) shadow-sm transition-colors"
-          >
-            <span>Open Dashboard</span>
-            <ArrowRight size={16} />
-          </Link>
-          <Link
-            href="/reports"
-            className="flex items-center gap-2 px-5 py-2.5 rounded-xl font-medium text-sm border border-(--border-medium) bg-(--surface) text-(--text-primary) hover:bg-(--surface-subtle) transition-colors"
-          >
-            <span>Upload Lab Report</span>
-          </Link>
+        <div className="hero-art" aria-hidden="true">
+          <div className="orbit orbit-one" />
+          <div className="orbit orbit-two" />
+          <div className="floating-tag tag-top">
+            <span className="mint-icon">
+              <Files size={21} />
+            </span>
+            <div>
+              <strong>More understanding</strong>
+              <small>One report at a time</small>
+            </div>
+          </div>
+          <div className="health-emblem">
+            <HeartPulse strokeWidth={1.15} />
+            <span>care, with clarity</span>
+          </div>
+          <div className="floating-tag tag-bottom">
+            <span className="peach-icon">
+              <Leaf size={22} />
+            </span>
+            <div>
+              <strong>Small steps count</strong>
+              <small>Build a routine that feels like you</small>
+            </div>
+            <Sparkles size={17} />
+          </div>
+          <div className="art-cross cross-one">+</div>
+          <div className="art-cross cross-two">+</div>
         </div>
       </section>
-
-      {/* Feature Cards Grid */}
-      <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-        {features.map(({ title, desc, icon: Icon, href }) => (
-          <Link
-            key={title}
-            href={href}
-            className="p-5 rounded-2xl border border-(--border-subtle) bg-(--surface) hover:border-(--primary) hover:shadow-sm transition-all text-decoration-none group flex flex-col justify-between"
-          >
-            <div className="space-y-3">
-              <div className="w-10 h-10 rounded-xl bg-(--primary-surface) text-(--primary) flex items-center justify-center">
-                <Icon size={20} />
-              </div>
-              <h3 className="font-semibold text-base text-(--text-primary) group-hover:text-(--primary) transition-colors">
-                {title}
-              </h3>
-              <p className="text-xs text-(--text-secondary) leading-relaxed">
-                {desc}
-              </p>
+      <section className="section-heading">
+        <div>
+          <span className="eyebrow">MADE FOR YOUR EVERYDAY</span>
+          <h2>A calmer way to care for yourself.</h2>
+        </div>
+        <span className="subtle-caption">Everything you need, together.</span>
+      </section>
+      <section className="feature-grid">
+        {[
+          {
+            href: "/reports",
+            icon: Files,
+            n: "01",
+            title: "Your reports, explained",
+            text: "Keep your lab reports together. Check extracted values against the original before using them.",
+            color: "mint",
+          },
+          {
+            href: "/chat",
+            icon: MessagesSquare,
+            n: "02",
+            title: "A place for your questions",
+            text: "Explore health information with visible sources and clear limits on what we know.",
+            color: "lilac",
+          },
+          {
+            href: "/plan",
+            icon: Utensils,
+            n: "03",
+            title: "Good food. Simple choices.",
+            text: "Discover Indian meal ideas with ingredient filters and transparent nutrition estimates.",
+            color: "peach",
+          },
+        ].map(({ href, icon: Icon, n, title, text, color }) => (
+          <Link href={href} key={href} className="feature-card">
+            <div className="feature-top">
+              <span className={`feature-icon ${color}`}>
+                <Icon size={23} />
+              </span>
+              <span className="feature-number">{n}</span>
             </div>
-            <div className="pt-4 flex items-center gap-1 text-xs font-medium text-(--primary)">
-              <span>Explore</span>
-              <ArrowRight size={12} className="group-hover:translate-x-1 transition-transform" />
-            </div>
+            <h3>{title}</h3>
+            <p>{text}</p>
+            <span className="feature-action">
+              Take a look <ArrowUpRight size={19} />
+            </span>
           </Link>
         ))}
       </section>
-
-      {/* Disclaimer Alert */}
-      <section className="p-4 rounded-xl border border-(--border-subtle) bg-(--surface-subtle) text-xs text-(--text-secondary) space-y-1">
-        <p className="font-semibold text-(--text-primary)">
-          Important Academic Prototype Notice:
-        </p>
-        <p>
-          Medi Bud is developed for academic demonstration. It does not provide medical diagnoses, treatment plans,
-          or clinical prescriptions. Numerical values and meal plans are estimates based on ICMR-NIN IFCT tables.
-          Always consult a licensed medical practitioner for health decisions.
-        </p>
+      <section className="gentle-banner">
+        <span className="mint-icon">
+          <Activity size={23} />
+        </span>
+        <div>
+          <h3>Progress begins with paying attention.</h3>
+          <p>
+            A glass of water, a better night's rest, a question you finally ask.
+            Start where you are.
+          </p>
+        </div>
+        <Link href="/dashboard" className="text-link">
+          Your daily overview <ArrowRight size={17} />
+        </Link>
       </section>
     </div>
   );

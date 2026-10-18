@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import type { DayPlanDTO } from '@medi-bud/contracts';
-import { Utensils, Coffee, Sun, Sunset, Moon } from 'lucide-react';
+import type { DayPlanDTO } from "@medi-bud/contracts";
+import { Utensils, Coffee, Sun, Sunset, Moon } from "lucide-react";
 
 interface MealDayCardProps {
   dayPlan: DayPlanDTO;
@@ -16,24 +16,38 @@ const SLOT_ICONS = {
   dinner: Moon,
 };
 
-export function MealDayCard({ dayPlan, isSelected, onSelect }: MealDayCardProps) {
-  const slots: Array<'breakfast' | 'lunch' | 'snack' | 'dinner'> = [
-    'breakfast',
-    'lunch',
-    'snack',
-    'dinner',
+export function MealDayCard({
+  dayPlan,
+  isSelected,
+  onSelect,
+}: MealDayCardProps) {
+  const slots: Array<"breakfast" | "lunch" | "snack" | "dinner"> = [
+    "breakfast",
+    "lunch",
+    "snack",
+    "dinner",
   ];
 
   return (
     <div
       onClick={onSelect}
+      role="button"
+      tabIndex={0}
+      aria-pressed={isSelected}
+      aria-label={`Show day ${dayPlan.day} details`}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          onSelect();
+        }
+      }}
       className={`cursor-pointer rounded-2xl border p-4 transition-all ${
         isSelected
-          ? 'border-(--primary) bg-(--surface) shadow-sm ring-1 ring-(--primary)'
-          : 'border-(--border-subtle) bg-(--surface) hover:border-slate-300'
+          ? "border-(--primary) bg-(--surface) shadow-sm ring-1 ring-(--primary)"
+          : "border-(--border-subtle) bg-(--surface) hover:border-slate-300"
       }`}
     >
-      <div className="flex items-center justify-between pb-3 border-b border-(--border-subtle)">
+      <div className="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-(--border-subtle)">
         <div>
           <h3 className="font-semibold text-sm text-(--text-primary)">
             Day {dayPlan.day}
@@ -57,7 +71,10 @@ export function MealDayCard({ dayPlan, isSelected, onSelect }: MealDayCardProps)
           const meal = dayPlan.meals[slot];
           const Icon = SLOT_ICONS[slot];
           return (
-            <div key={slot} className="flex items-center justify-between text-xs py-1">
+            <div
+              key={slot}
+              className="flex items-center justify-between text-xs py-1"
+            >
               <div className="flex items-center gap-2 truncate">
                 <div className="p-1 rounded bg-(--surface-subtle) text-(--text-muted) shrink-0">
                   <Icon className="w-3 h-3" />

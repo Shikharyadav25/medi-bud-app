@@ -1,9 +1,11 @@
 import io
 from typing import Dict, Any
-from reportlab.lib.pagesizes import letter
+from reportlab.lib.pagesizes import letter, landscape
+from html import escape
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib import colors
+
 
 def generate_meal_plan_pdf(plan_data: Dict[str, Any], user_name: str = "User") -> bytes:
     """
@@ -13,76 +15,72 @@ def generate_meal_plan_pdf(plan_data: Dict[str, Any], user_name: str = "User") -
     buffer = io.BytesIO()
     doc = SimpleDocTemplate(
         buffer,
-        pagesize=letter,
+        pagesize=landscape(letter),
         rightMargin=36,
         leftMargin=36,
         topMargin=36,
-        bottomMargin=36
+        bottomMargin=36,
     )
 
     styles = getSampleStyleSheet()
     title_style = ParagraphStyle(
-        'DocTitle',
-        parent=styles['Heading1'],
-        fontName='Helvetica-Bold',
+        "DocTitle",
+        parent=styles["Heading1"],
+        fontName="Helvetica-Bold",
         fontSize=20,
         leading=24,
-        textColor=colors.HexColor('#0f172a')
+        textColor=colors.HexColor("#0f172a"),
     )
     subtitle_style = ParagraphStyle(
-        'DocSubtitle',
-        parent=styles['Normal'],
-        fontName='Helvetica',
+        "DocSubtitle",
+        parent=styles["Normal"],
+        fontName="Helvetica",
         fontSize=10,
         leading=14,
-        textColor=colors.HexColor('#475569')
-    )
-    section_style = ParagraphStyle(
-        'SectionHeading',
-        parent=styles['Heading2'],
-        fontName='Helvetica-Bold',
-        fontSize=13,
-        leading=16,
-        textColor=colors.HexColor('#0d9488')
+        textColor=colors.HexColor("#475569"),
     )
     cell_style = ParagraphStyle(
-        'TableCell',
-        parent=styles['Normal'],
-        fontName='Helvetica',
+        "TableCell",
+        parent=styles["Normal"],
+        fontName="Helvetica",
         fontSize=8,
         leading=10,
-        textColor=colors.HexColor('#1e293b')
+        textColor=colors.HexColor("#1e293b"),
     )
     cell_bold_style = ParagraphStyle(
-        'TableCellBold',
-        parent=styles['Normal'],
-        fontName='Helvetica-Bold',
+        "TableCellBold",
+        parent=styles["Normal"],
+        fontName="Helvetica-Bold",
         fontSize=8,
         leading=10,
-        textColor=colors.HexColor('#0f172a')
+        textColor=colors.HexColor("#0f172a"),
     )
     disclaimer_style = ParagraphStyle(
-        'DisclaimerText',
-        parent=styles['Italic'],
-        fontName='Helvetica-Oblique',
+        "DisclaimerText",
+        parent=styles["Italic"],
+        fontName="Helvetica-Oblique",
         fontSize=8,
         leading=11,
-        textColor=colors.HexColor('#64748b')
+        textColor=colors.HexColor("#64748b"),
     )
 
     story = []
 
     # Header
     story.append(Paragraph("Medi Bud AI Health Companion", title_style))
-    story.append(Paragraph("Personalized 7-Day Indian Meal Plan & Estimated Nutrition", subtitle_style))
+    story.append(
+        Paragraph(
+            "Personalized 7-Day Indian Meal Plan & Estimated Nutrition", subtitle_style
+        )
+    )
     story.append(Spacer(1, 10))
 
     # Preferences info
     prefs = plan_data.get("preferences_snapshot", {})
     pref_text = (
-        f"<b>Prepared for:</b> {user_name} &nbsp;|&nbsp; "
+        f"<b>Prepared for:</b> {escape(user_name)} &nbsp;|&nbsp; "
         f"<b>Dietary Mode:</b> {'Vegetarian' if prefs.get('is_veg', True) else 'Non-Vegetarian'} &nbsp;|&nbsp; "
-        f"<b>Allergens Excluded:</b> {', '.join(prefs.get('declared_allergens', [])) or 'None declared'}"
+        f"<b>Allergens Excluded:</b> {escape(', '.join(prefs.get('declared_allergens', []))) or 'None declared'}"
     )
     story.append(Paragraph(pref_text, cell_style))
     story.append(Spacer(1, 12))
@@ -95,7 +93,7 @@ def generate_meal_plan_pdf(plan_data: Dict[str, Any], user_name: str = "User") -
             Paragraph("Lunch", cell_bold_style),
             Paragraph("Snack", cell_bold_style),
             Paragraph("Dinner", cell_bold_style),
-            Paragraph("Est. Daily Macros", cell_bold_style)
+            Paragraph("Est. Daily Macros", cell_bold_style),
         ]
     ]
 
@@ -114,27 +112,33 @@ def generate_meal_plan_pdf(plan_data: Dict[str, Any], user_name: str = "User") -
             f"F: {nut.get('fat_g', 0)}g | Fib: {nut.get('fiber_g', 0)}g"
         )
 
-        table_data.append([
-            Paragraph(d_num, cell_bold_style),
-            Paragraph(b_name, cell_style),
-            Paragraph(l_name, cell_style),
-            Paragraph(s_name, cell_style),
-            Paragraph(d_name, cell_style),
-            Paragraph(macro_text, cell_style)
-        ])
+        table_data.append(
+            [
+                Paragraph(d_num, cell_bold_style),
+                Paragraph(escape(b_name), cell_style),
+                Paragraph(escape(l_name), cell_style),
+                Paragraph(escape(s_name), cell_style),
+                Paragraph(escape(d_name), cell_style),
+                Paragraph(macro_text, cell_style),
+            ]
+        )
 
-    table = Table(table_data, colWidths=[45, 100, 110, 95, 110, 80])
-    table.setStyle(TableStyle([
-        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#f0fdfa')),
-        ('TEXTCOLOR', (0, 0), (-1, 0), colors.HexColor('#0d9488')),
-        ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
-        ('VALIGN', (0, 0), (-1, -1), 'TOP'),
-        ('BOTTOMPADDING', (0, 0), (-1, -1), 6),
-        ('TOPPADDING', (0, 0), (-1, -1), 6),
-        ('LEFTPADDING', (0, 0), (-1, -1), 4),
-        ('RIGHTPADDING', (0, 0), (-1, -1), 4),
-        ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#cbd5e1')),
-    ]))
+    table = Table(table_data, colWidths=[35, 110, 155, 100, 155, 90], repeatRows=1)
+    table.setStyle(
+        TableStyle(
+            [
+                ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#f0fdfa")),
+                ("TEXTCOLOR", (0, 0), (-1, 0), colors.HexColor("#0d9488")),
+                ("ALIGN", (0, 0), (-1, -1), "LEFT"),
+                ("VALIGN", (0, 0), (-1, -1), "TOP"),
+                ("BOTTOMPADDING", (0, 0), (-1, -1), 6),
+                ("TOPPADDING", (0, 0), (-1, -1), 6),
+                ("LEFTPADDING", (0, 0), (-1, -1), 4),
+                ("RIGHTPADDING", (0, 0), (-1, -1), 4),
+                ("GRID", (0, 0), (-1, -1), 0.5, colors.HexColor("#cbd5e1")),
+            ]
+        )
+    )
     story.append(table)
     story.append(Spacer(1, 16))
 
@@ -147,6 +151,7 @@ def generate_meal_plan_pdf(plan_data: Dict[str, Any], user_name: str = "User") -
         "Consult a certified clinical nutritionist or physician before undertaking significant dietary changes."
     )
     story.append(Paragraph(disclaimer, disclaimer_style))
+    story.append(Paragraph(escape(plan_data.get("disclaimer", "")), disclaimer_style))
 
     doc.build(story)
     return buffer.getvalue()

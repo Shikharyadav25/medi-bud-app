@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import type { CitationDTO } from '@medi-bud/contracts';
-import { BookOpen, ChevronDown, ChevronUp, FileText } from 'lucide-react';
+import { useState } from "react";
+import type { CitationDTO } from "@medi-bud/contracts";
+import { BookOpen, ChevronDown, ChevronUp, FileText } from "lucide-react";
 
 interface CitationCardProps {
   citation: CitationDTO;
@@ -15,6 +15,7 @@ export function CitationCard({ citation }: CitationCardProps) {
     <div className="rounded-xl border border-(--border-subtle) bg-(--surface-subtle) overflow-hidden text-xs transition-colors">
       <button
         onClick={() => setIsOpen(!isOpen)}
+        aria-expanded={isOpen}
         className="w-full px-3 py-2 flex items-center justify-between text-left hover:bg-slate-100 transition-colors"
       >
         <div className="flex items-center gap-2 truncate">
@@ -38,11 +39,21 @@ export function CitationCard({ citation }: CitationCardProps) {
       {isOpen && (
         <div className="px-3 pb-2.5 pt-1 border-t border-(--border-subtle) space-y-1 bg-white">
           <p className="text-[11px] font-medium text-(--text-muted)">
-            Source Excerpt ({citation.date || 'Active Archive'}):
+            Source Excerpt ({citation.date || "Active Archive"}):
           </p>
           <blockquote className="italic text-[11px] text-(--text-secondary) border-l-2 border-(--primary) pl-2 py-0.5">
             &ldquo;{citation.excerpt}&rdquo;
           </blockquote>
+          {citation.url?.startsWith("https://") && (
+            <a
+              href={citation.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-link underline"
+            >
+              Open source
+            </a>
+          )}
         </div>
       )}
     </div>
