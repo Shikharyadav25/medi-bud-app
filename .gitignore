@@ -63,3 +63,4 @@ __pycache__/
 *.sqlite3-*
 .playwright/
 .demo/
+.vercel

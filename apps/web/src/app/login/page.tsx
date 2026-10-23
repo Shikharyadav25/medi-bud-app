@@ -101,10 +101,10 @@ export default function LoginPage() {
             role="alert"
             className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-xs text-amber-900"
           >
-            Real signup and sign-in need Supabase configuration. This local demo
-            is a separate synthetic account, not a registered user. Configure
-            NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY to enable
-            real accounts.
+            Real signup and sign-in need Supabase configuration. A local demo,
+            when explicitly enabled in development, is not a registered user.
+            Configure NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY
+            to enable real accounts.
           </div>
         )}
         <form onSubmit={handleAuth} className="space-y-4">

@@ -22,7 +22,10 @@ const nextConfig: NextConfig = {
               "default-src 'self'; script-src 'self' 'unsafe-inline'" +
               (process.env.NODE_ENV === "development" ? " 'unsafe-eval'" : "") +
               "; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self' https://*.supabase.co " +
-              (process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000") +
+              (process.env.NEXT_PUBLIC_API_URL ||
+                (process.env.NODE_ENV === "development"
+                  ? "http://127.0.0.1:8000"
+                  : "")) +
               (process.env.NODE_ENV === "development"
                 ? " ws: http://localhost:8000"
                 : "") +
@@ -39,12 +42,19 @@ const nextConfig: NextConfig = {
     "@medi-bud/safety-content",
   ],
   async rewrites() {
-    return [
-      {
-        source: "/api/v1/:path*",
-        destination: "http://127.0.0.1:8000/v1/:path*",
-      },
-    ];
+    const api =
+      process.env.NEXT_PUBLIC_API_URL ||
+      (process.env.NODE_ENV === "development" ? "http://127.0.0.1:8000" : "");
+    return {
+      beforeFiles: api
+        ? [
+            {
+              source: "/api/v1/:path*",
+              destination: `${api.replace(/\/$/, "")}/v1/:path*`,
+            },
+          ]
+        : [],
+    };
   },
 };
 
