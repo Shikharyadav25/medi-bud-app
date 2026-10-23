@@ -29,5 +29,7 @@ This document provides a transparent, academically rigorous assessment of the en
 
 ## 4. Third-Party & Infrastructure Dependencies
 
-- **OpenStreetMap Overpass API**: Geolocation discovery queries the public OSM Overpass API. To protect against public rate limiting, the backend employs a 15-minute in-memory cache and provides curated fallback facilities for major metropolitan areas.
-- **LLM Provider Graceful Degradation**: If an external LLM key (`GEMINI_API_KEY`) is not configured, Medi Bud continues to function seamlessly in **Extractive Grounding Mode**, serving direct quoted excerpts from confirmed lab records and verified health guidelines without hallucination risk.
+- **OpenStreetMap Overpass API**: Discovery requires deliberate location sharing and an external directory response. No fictional fallback facilities are supplied; directory results are not clinically verified.
+- **Provider availability**: Text-based supported lab PDF extraction and extractive chat can run without a Gemini key. Meal photos and scanned/image reports require explicit consent and a configured provider. Unavailability is reported, never replaced with a fabricated clinical result. Extractive grounding reduces but does not eliminate safety risks.
+
+See [production.md](production.md) for the authoritative release gates, including live authentication, native-device behavior, migrations, retention, security and professional clinical review. Historical metrics or successful builds do not establish clinical safety.

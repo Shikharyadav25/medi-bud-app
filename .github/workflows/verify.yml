@@ -33,7 +33,7 @@ jobs:
       - run: pnpm build:mobile
       - run: pnpm --filter @medi-bud/mobile exec expo install --check
       - run: pnpm test:contracts
-      - run: python -m pytest tests/integration -q
+      - run: python -m pytest tests/integration tests/demo -q
       - run: python -m pytest tests/integration -q
         env:
           DATABASE_URL: postgresql://postgres:test_only_password@localhost:5432/medibud_test

@@ -1,6 +1,5 @@
 "use client";
 import { useEffect, useState } from "react";
-import Link from "next/link";
 import { UserRound, Download, Trash2, ShieldCheck } from "lucide-react";
 import { apiClient } from "@/lib/api";
 import { supabase, getCurrentAccessToken } from "@/lib/supabase";
@@ -59,10 +58,7 @@ export default function AccountPage() {
       </p>
       {message && (
         <p role="status" className="notice">
-          {message}{" "}
-          <Link href="/login" className="underline">
-            Sign in
-          </Link>
+          {message}
         </p>
       )}
       <form
