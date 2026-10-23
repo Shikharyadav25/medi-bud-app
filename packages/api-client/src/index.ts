@@ -8,6 +8,8 @@ import type {
   ReportDTO,
   ReportObservationDTO,
   ChatResponseDTO,
+  ChatImageDTO,
+  ChatImageSavedDTO,
   NearbyFacilityDTO,
   MealPlanDTO,
 } from "@medi-bud/contracts";
@@ -280,6 +282,41 @@ export class MediBudClient {
   }
 
   // Indian Food & Meal Planning
+  public async chatImage(
+    file: Blob,
+    filename: string,
+    query: string,
+    options: {
+      consentAI: boolean;
+      allowFallback: boolean;
+      kind: "auto" | "report" | "meal";
+    },
+  ): Promise<ChatImageDTO> {
+    const data = new FormData();
+    data.append("file", file, filename);
+    data.append("query", query);
+    data.append("kind", options.kind);
+    data.append("consent_ai", String(options.consentAI));
+    data.append("allow_fallback", String(options.allowFallback));
+    return this.request(
+      "/v1/chat/images",
+      { method: "POST", body: data },
+      30000,
+    );
+  }
+
+  public async saveChatImage(id: string): Promise<ChatImageSavedDTO> {
+    return this.request(`/v1/chat/images/${encodeURIComponent(id)}/save`, {
+      method: "POST",
+    });
+  }
+
+  public async discardChatImage(id: string): Promise<void> {
+    return this.request(`/v1/chat/images/${encodeURIComponent(id)}`, {
+      method: "DELETE",
+    });
+  }
+
   public async getFoods(): Promise<
     Array<{
       id: string;

@@ -23,6 +23,7 @@ class Settings(BaseSettings):
     GEMINI_MODEL: str = "gemini-2.5-flash"
     GROQ_API_KEY: str = ""
     GROQ_MODEL: str = "openai/gpt-oss-20b"
+    GROQ_VISION_MODEL: str = "qwen/qwen3.8-27b"
     CHAT_PROVIDER: Literal["auto", "gemini", "groq"] = "auto"
     CHAT_FALLBACK_PROVIDER: Literal["", "gemini", "groq"] = "groq"
     ENABLE_DEMO_AUTH: bool = False

@@ -1,4 +1,7 @@
 import uuid
+import asyncio
+import logging
+from contextlib import suppress
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
@@ -11,6 +14,7 @@ from routes.log_routes import log_router
 from routes.reminder_routes import reminder_router
 from routes.report_routes import report_router
 from routes.chat_routes import chat_router
+from routes.chat_image_routes import image_router, purge_expired_drafts
 from routes.diet_routes import diet_router
 from routes.care_routes import care_router
 from routes.symptom_routes import symptom_router
@@ -22,7 +26,25 @@ from starlette.concurrency import run_in_threadpool
 @asynccontextmanager
 async def lifespan(app):
     initialize()
-    yield
+    await run_in_threadpool(purge_expired_drafts)
+
+    async def expire_images():
+        while True:
+            await asyncio.sleep(60)
+            try:
+                await run_in_threadpool(purge_expired_drafts)
+            except Exception:
+                logging.getLogger(__name__).warning(
+                    "Temporary image cleanup failed; retrying on next interval"
+                )
+
+    cleanup = asyncio.create_task(expire_images())
+    try:
+        yield
+    finally:
+        cleanup.cancel()
+        with suppress(asyncio.CancelledError):
+            await cleanup
 
 
 app = FastAPI(
@@ -159,6 +181,7 @@ app.include_router(log_router)
 app.include_router(reminder_router)
 app.include_router(report_router)
 app.include_router(chat_router)
+app.include_router(image_router)
 app.include_router(diet_router)
 app.include_router(care_router)
 app.include_router(symptom_router)

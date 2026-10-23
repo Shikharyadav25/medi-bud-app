@@ -1,4 +1,4 @@
-"""Bounded text-only generation. No keys, prompts or health data are logged."""
+"""Bounded text/vision generation. No keys, prompts or health data are logged."""
 
 import json
 import time
@@ -37,7 +37,7 @@ Use an empty source_ids array for general education. No markdown links or HTML.
 """
 
 
-def _call(provider, prompt):
+def _call(provider, prompt, *, image=None, output_model=ChatOutput, system=SYSTEM):
     if provider not in ("gemini", "groq"):
         raise ProviderError("unconfigured")
     if _cooldowns.get(provider, 0) > time.monotonic():
@@ -51,11 +51,17 @@ def _call(provider, prompt):
                 f"https://generativelanguage.googleapis.com/v1beta/models/{settings.GEMINI_MODEL}:generateContent",
                 headers={"x-goog-api-key": key, "Content-Type": "application/json"},
                 json={
-                    "systemInstruction": {"parts": [{"text": SYSTEM}]},
-                    "contents": [{"role": "user", "parts": [{"text": prompt}]}],
+                    "systemInstruction": {"parts": [{"text": system}]},
+                    "contents": [
+                        {
+                            "role": "user",
+                            "parts": [{"text": prompt}]
+                            + ([{"inline_data": image}] if image else []),
+                        }
+                    ],
                     "generationConfig": {
                         "temperature": 0.2,
-                        "maxOutputTokens": 1400,
+                        "maxOutputTokens": 4096 if image else 1400,
                         "responseMimeType": "application/json",
                     },
                 },
@@ -69,13 +75,33 @@ def _call(provider, prompt):
                     "Content-Type": "application/json",
                 },
                 json={
-                    "model": settings.GROQ_MODEL,
+                    "model": (
+                        settings.GROQ_VISION_MODEL if image else settings.GROQ_MODEL
+                    ),
                     "temperature": 0.2,
-                    "max_completion_tokens": 1800,
+                    "max_completion_tokens": 4096 if image else 1800,
                     "response_format": {"type": "json_object"},
                     "messages": [
-                        {"role": "system", "content": SYSTEM},
-                        {"role": "user", "content": prompt},
+                        {"role": "system", "content": system},
+                        {
+                            "role": "user",
+                            "content": (
+                                [
+                                    {"type": "text", "text": prompt},
+                                    {
+                                        "type": "image_url",
+                                        "image_url": {
+                                            "url": "data:"
+                                            + image["mime_type"]
+                                            + ";base64,"
+                                            + image["data"]
+                                        },
+                                    },
+                                ]
+                                if image
+                                else prompt
+                            ),
+                        },
                     ],
                 },
                 timeout=(3, 9),
@@ -110,7 +136,7 @@ def _call(provider, prompt):
             if choice.get("finish_reason") == "content_filter":
                 raise ProviderError("blocked")
             raw = choice["message"]["content"]
-        return ChatOutput.model_validate(json.loads(raw))
+        return output_model.model_validate(json.loads(raw))
     except requests.RequestException:
         raise ProviderError("unavailable") from None
     except (KeyError, IndexError, ValueError, TypeError):

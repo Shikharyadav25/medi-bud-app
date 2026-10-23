@@ -1,5 +1,7 @@
 # Chat, signup, sample reports and nearby care
 
+For image attachments, review/save behavior and optional browser dictation, see [chat-images-voice.md](chat-images-voice.md).
+
 ## Selectable synthetic report
 
 `.venv/bin/python scripts/demo.py` now seeds one **SYNTHETIC-demo-report.pdf** in the explicit local demo account. Open Health reports and select it. The **Load / select synthetic report** control restores/selects the same sample without duplicate uploads. Extracted hemoglobin 14.2 g/dL, HbA1c 6.2% and LDL 148 mg/dL are invented test values; review/confirm them before account Q&A uses them. No real user account is seeded. The sample endpoint returns 404 outside explicitly enabled development demo authentication.

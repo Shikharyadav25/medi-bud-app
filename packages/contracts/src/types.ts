@@ -208,3 +208,34 @@ export const MealPlanSchema = z.object({
   created_at: z.string().optional(),
 });
 export type MealPlanDTO = z.infer<typeof MealPlanSchema>;
+
+export interface ChatImageDTO {
+  kind: "report" | "meal" | "other" | "unclear";
+  answer: string;
+  tests: Array<{
+    name: string;
+    value: string;
+    unit: string;
+    reference_range: string;
+  }>;
+  food_items: Array<{
+    name: string;
+    quantity: string;
+    calories: number;
+    protein_g: number;
+    carbs_g: number;
+    fat_g: number;
+  }>;
+  limitations: string;
+  provider?: string;
+  draft_id?: string;
+  expires_in_seconds?: number;
+  safety_action?: string;
+}
+
+export interface ChatImageSavedDTO {
+  kind: "report" | "meal";
+  report_id?: string;
+  meal_id?: string;
+  status: string;
+}

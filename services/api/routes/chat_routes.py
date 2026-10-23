@@ -92,6 +92,7 @@ async def chat_capabilities(
         "groq_configured": bool(settings.GROQ_API_KEY),
         "primary": effective_provider(),
         "fallback": settings.CHAT_FALLBACK_PROVIDER,
+        "vision_model": settings.GROQ_VISION_MODEL if effective_provider() == "groq" else settings.GEMINI_MODEL,
         "account_context": "Saved profile, confirmed reports, journal, reminders, logged meals and saved plan. Unsynced device-only data is excluded.",
     }
 

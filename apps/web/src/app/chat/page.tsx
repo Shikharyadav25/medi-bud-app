@@ -3,9 +3,11 @@
 import { useState, useEffect, useRef, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
-import type { ChatResponseDTO } from "@medi-bud/contracts";
+import type { ChatResponseDTO, ChatImageDTO } from "@medi-bud/contracts";
 import { apiClient } from "@/lib/api";
 import { CitationCard } from "@/components/CitationCard";
+import { ChatImageResult } from "@/components/ChatImageResult";
+import { VoiceInput } from "@/components/VoiceInput";
 import {
   Send,
   Sparkles,
@@ -23,6 +25,7 @@ interface ChatMessage {
   text: string;
   timestamp: string;
   responseMeta?: ChatResponseDTO;
+  imageResult?: ChatImageDTO;
 }
 
 const PRESET_QUERIES = [
@@ -39,6 +42,23 @@ function ChatContent() {
   const [inputQuery, setInputQuery] = useState("");
   const [allowAI, setAllowAI] = useState(false);
   const [allowFallback, setAllowFallback] = useState(false);
+  const [image, setImage] = useState<File | null>(null);
+  const [preview, setPreview] = useState("");
+  const [imageConsent, setImageConsent] = useState(false);
+  const [imageKind, setImageKind] = useState<"auto" | "report" | "meal">(
+    "auto",
+  );
+  const [attachmentError, setAttachmentError] = useState("");
+  const imageInput = useRef<HTMLInputElement>(null);
+  useEffect(() => {
+    if (!image) {
+      setPreview("");
+      return;
+    }
+    const url = URL.createObjectURL(image);
+    setPreview(url);
+    return () => URL.revokeObjectURL(url);
+  }, [image]);
   const [contextMode, setContextMode] = useState<
     "auto" | "account" | "general"
   >("auto");
@@ -81,11 +101,19 @@ function ChatContent() {
 
   const handleSendMessage = async (textToSend: string) => {
     if (!textToSend.trim() || loading) return;
+    if (image && !imageConsent) {
+      setAttachmentError(
+        "Please agree to image processing before sending, or remove the image.",
+      );
+      return;
+    }
+    setAttachmentError("");
 
     const userMsg: ChatMessage = {
       id: crypto.randomUUID(),
       sender: "user",
-      text: textToSend.trim(),
+      text:
+        textToSend.trim() + (image ? `\nAttached image: ${image.name}` : ""),
       timestamp: new Date().toLocaleTimeString([], {
         hour: "2-digit",
         minute: "2-digit",
@@ -97,6 +125,32 @@ function ChatContent() {
     setLoading(true);
 
     try {
+      if (image) {
+        const result = await apiClient.chatImage(
+          image,
+          image.name,
+          textToSend.trim(),
+          {
+            consentAI: imageConsent,
+            allowFallback: allowAI && allowFallback,
+            kind: imageKind,
+          },
+        );
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: crypto.randomUUID(),
+            sender: "assistant",
+            text: result.answer,
+            imageResult: result,
+            timestamp: new Date().toLocaleTimeString([], {
+              hour: "2-digit",
+              minute: "2-digit",
+            }),
+          },
+        ]);
+        return;
+      }
       const response = await apiClient.chat({
         query: userMsg.text,
         report_id: reportIdParam,
@@ -116,13 +170,17 @@ function ChatContent() {
         responseMeta: response,
       };
       setMessages((prev) => [...prev, assistantMsg]);
-    } catch {
+    } catch (error) {
+      if (image) setInputQuery(textToSend.trim());
       setMessages((prev) => [
         ...prev,
         {
           id: crypto.randomUUID(),
           sender: "assistant",
-          text: "The health service is unavailable, so I cannot verify an answer. No medical interpretation was generated. Please reconnect and try again.",
+          text:
+            image && error instanceof Error
+              ? error.message
+              : "The health service is unavailable, so I cannot verify an answer. No medical interpretation was generated. Please reconnect and try again.",
           timestamp: new Date().toLocaleTimeString([], {
             hour: "2-digit",
             minute: "2-digit",
@@ -135,7 +193,7 @@ function ChatContent() {
   };
 
   return (
-    <div className="flex flex-col min-h-[650px] h-[calc(100dvh-9rem)] max-w-4xl mx-auto space-y-4">
+    <div className="flex flex-col min-h-[650px] max-w-4xl mx-auto space-y-4">
       <div className="flex items-center justify-between border-b border-(--border-subtle) pb-3">
         <div>
           <h1 className="text-xl font-bold tracking-tight text-(--text-primary) flex items-center gap-2">
@@ -143,10 +201,11 @@ function ChatContent() {
             health questions.
           </h1>
           <p className="text-xs text-(--text-secondary)">
-            Source-based excerpts. Clear limits. A little more understanding.
+            Ask with text, a report image or a meal photo. Clear limits,
+            reviewed context.
           </p>
         </div>
-        {reportIdParam && contextMode !== "general" && (
+        {reportIdParam && contextMode !== "general" && !image && (
           <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-(--primary-surface) text-(--primary) border border-(--primary-light)">
             <FileText className="w-3.5 h-3.5" />
             Report Grounded
@@ -158,7 +217,7 @@ function ChatContent() {
         role="log"
         aria-live="polite"
         aria-label="Conversation"
-        className="flex-1 overflow-y-auto space-y-4 pr-1"
+        className="min-h-[280px] max-h-[60dvh] overflow-y-auto space-y-4 pr-1"
       >
         {messages.map((msg) => (
           <div
@@ -249,6 +308,7 @@ function ChatContent() {
                   </p>
                 </div>
               )}
+              {msg.imageResult && <ChatImageResult result={msg.imageResult} />}
             </div>
 
             {msg.sender === "user" && (
@@ -262,6 +322,121 @@ function ChatContent() {
       </div>
 
       <div className="space-y-2 pt-2 border-t border-(--border-subtle)">
+        <details
+          className="rounded-xl border border-(--border-subtle) p-3 text-xs"
+          open={image ? true : undefined}
+        >
+          <summary className="font-medium cursor-pointer">
+            Attach a report or meal image
+          </summary>
+          <div className="space-y-2 mt-2">
+            <p>
+              JPEG or PNG, up to 10 MB and 16 megapixels. For PDF reports,{" "}
+              <Link href="/reports" className="underline">
+                use Reports
+              </Link>
+              . Remove names or identifiers you do not want shared. Your file is
+              not sent until you press Send.
+            </p>
+            <input
+              ref={imageInput}
+              aria-label="Attach image"
+              type="file"
+              accept="image/jpeg,image/png"
+              disabled={loading}
+              onChange={(event) => {
+                const file = event.target.files?.[0];
+                setImageConsent(false);
+                if (!file) return;
+                if (
+                  !["image/jpeg", "image/png"].includes(file.type) ||
+                  file.size > 10 * 1024 * 1024
+                ) {
+                  setAttachmentError("Choose a JPEG or PNG under 10 MB.");
+                  setImage(null);
+                  event.target.value = "";
+                  return;
+                }
+                setAttachmentError("");
+                setImage(file);
+              }}
+            />
+            {image && (
+              <>
+                <div className="flex gap-3 items-center">
+                  {preview && (
+                    <img
+                      src={preview}
+                      alt="Selected attachment preview — not yet sent"
+                      className="w-16 h-16 rounded-lg object-contain border"
+                    />
+                  )}
+                  <span className="break-all">{image.name}</span>
+                  <button
+                    type="button"
+                    disabled={loading}
+                    onClick={() => {
+                      setImage(null);
+                      setImageConsent(false);
+                      setAttachmentError("");
+                      if (imageInput.current) imageInput.current.value = "";
+                    }}
+                    className="underline shrink-0"
+                  >
+                    Remove image
+                  </button>
+                </div>
+                <label>
+                  Image content{" "}
+                  <select
+                    aria-label="Image content"
+                    value={imageKind}
+                    onChange={(e) =>
+                      setImageKind(e.target.value as typeof imageKind)
+                    }
+                    className="border rounded px-2 py-1"
+                  >
+                    <option value="auto">Auto-detect</option>
+                    <option value="report">Report</option>
+                    <option value="meal">Meal / dish</option>
+                  </select>
+                </label>
+                <label className="flex items-start gap-2">
+                  <input
+                    type="checkbox"
+                    checked={imageConsent}
+                    disabled={loading}
+                    onChange={(e) => setImageConsent(e.target.checked)}
+                  />
+                  I agree to send this image and question to the configured
+                  Gemini/Groq provider. A private draft may be held for one
+                  hour, then removed. Nothing enters saved context until I
+                  choose Save. No other account records are sent with this image
+                  request.
+                </label>
+                <p>
+                  The image stays attached for follow-up questions until you
+                  remove it. Each Send reanalyzes it and counts toward AI
+                  limits. Optional provider fallback uses the separate consent
+                  below.
+                </p>
+              </>
+            )}
+            {attachmentError && (
+              <p role="alert" className="text-red-700">
+                {attachmentError}
+              </p>
+            )}
+          </div>
+        </details>
+        <VoiceInput
+          disabled={loading}
+          onTranscript={(text) =>
+            setInputQuery((current) =>
+              (current ? current + " " + text : text).slice(0, 4000),
+            )
+          }
+        />
         <div className="flex items-center gap-1.5 overflow-x-auto pb-1">
           {PRESET_QUERIES.map((preset) => (
             <button
@@ -279,6 +454,7 @@ function ChatContent() {
             Question context
             <select
               aria-label="Question context"
+              disabled={Boolean(image)}
               className="ml-2 border rounded-lg px-2"
               value={contextMode}
               onChange={(e) =>
@@ -326,14 +502,20 @@ function ChatContent() {
             maxLength={4000}
             value={inputQuery}
             onChange={(e) => setInputQuery(e.target.value)}
-            placeholder="Ask a question about your reports or wellness habits..."
+            placeholder={
+              image
+                ? "Ask a question about this image…"
+                : "Ask about your reports or wellness habits…"
+            }
             disabled={loading}
             className="flex-1 px-4 py-2.5 rounded-xl border border-(--border-subtle) bg-(--surface) text-xs text-(--text-primary) placeholder:text-(--text-muted) focus:outline-hidden focus:border-(--primary)"
           />
           <button
             type="submit"
             aria-label="Send message"
-            disabled={loading || !inputQuery.trim()}
+            disabled={
+              loading || !inputQuery.trim() || Boolean(image && !imageConsent)
+            }
             className="p-2.5 rounded-xl bg-(--primary) text-white hover:bg-(--primary-hover) disabled:opacity-50 transition-colors shadow-sm shrink-0"
           >
             <Send className="w-4 h-4" />
