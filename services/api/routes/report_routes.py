@@ -116,9 +116,11 @@ async def upload_report(
                     "original_label": str(test.get("testName", "Test"))[:120],
                     "canonical_test": str(test.get("testName", "Test"))[:120],
                     "value_text": value,
-                    "numeric_value": float(value)
-                    if re.fullmatch(r"-?\d+(?:\.\d+)?", value)
-                    else None,
+                    "numeric_value": (
+                        float(value)
+                        if re.fullmatch(r"-?\d+(?:\.\d+)?", value)
+                        else None
+                    ),
                     "unit": str(test.get("unit", ""))[:50],
                     "reference_text": str(test.get("referenceRange", ""))[:200],
                     "page": 1,
@@ -175,6 +177,48 @@ async def list_reports(current_user: AuthenticatedUser = Depends(get_current_use
     user_reports = [r for r in _USER_REPORTS.values() if r["user_id"] == user_id]
     user_reports.sort(key=lambda x: x.get("created_at", ""), reverse=True)
     return user_reports
+
+
+@report_router.post("/demo-sample")
+async def use_demo_sample(current_user: AuthenticatedUser = Depends(get_current_user)):
+    if not (
+        settings.ENVIRONMENT == "development"
+        and settings.ENABLE_DEMO_AUTH
+        and current_user.user_id == "00000000-0000-0000-0000-000000000001"
+    ):
+        raise HTTPException(
+            404,
+            detail="Demo sample is available only in the explicit local demo account",
+        )
+    for report in _USER_REPORTS.values():
+        if report.get("user_id") == current_user.user_id and report.get("demo_sample"):
+            return {"report_id": report["id"], "status": report["status"]}
+    from io import BytesIO
+    from reportlab.pdfgen import canvas
+
+    output = BytesIO()
+    pdf = canvas.Canvas(output)
+    for index, line in enumerate(
+        [
+            "SYNTHETIC DEMO ONLY - NOT A REAL PATIENT REPORT",
+            "Demonstration Laboratory - invented values for software testing",
+            "Hemoglobin 14.2 g/dL Reference 13.0 - 17.0",
+            "HbA1c 6.2 % Reference 4.0 - 5.6",
+            "LDL Cholesterol 148 mg/dL Reference 0 - 100",
+            "Review each extracted value before using it in account Q&A.",
+        ]
+    ):
+        pdf.drawString(40, 800 - index * 35, line)
+    pdf.save()
+    output.seek(0)
+    result = await upload_report(
+        file=UploadFile(file=output, filename="SYNTHETIC-demo-report.pdf"),
+        consent_ai=False,
+        current_user=current_user,
+    )
+    report = _USER_REPORTS[result["report_id"]]
+    _USER_REPORTS[result["report_id"]] = {**report, "demo_sample": True}
+    return result
 
 
 @report_router.get("/{report_id}")

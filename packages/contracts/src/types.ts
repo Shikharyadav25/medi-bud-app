@@ -136,6 +136,9 @@ export const CitationSchema = z.object({
 export type CitationDTO = z.infer<typeof CitationSchema>;
 
 export const ChatResponseSchema = z.object({
+  context_scope: z.enum(["account", "general"]).optional(),
+  provider: z.string().nullable().optional(),
+  provider_status: z.string().optional(),
   answer: z.string(),
   intent: z.enum([
     "report_question",

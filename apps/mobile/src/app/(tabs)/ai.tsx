@@ -10,6 +10,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   ActivityIndicator,
+  Switch,
 } from "react-native";
 import { Feather, MaterialCommunityIcons } from "@expo/vector-icons";
 import {
@@ -41,6 +42,8 @@ export default function AIChatScreen() {
   } = useChatStore();
 
   const [inputQuery, setInputQuery] = useState("");
+  const [allowAI, setAllowAI] = useState(false);
+  const [allowFallback, setAllowFallback] = useState(false);
   const scrollViewRef = useRef<ScrollView>(null);
 
   const handleSend = async (queryToSend?: string) => {
@@ -74,6 +77,9 @@ export default function AIChatScreen() {
         waterIntakeMl,
         mealsSummary,
         reports,
+        undefined,
+        allowAI,
+        allowFallback,
       );
 
       addMessage({
@@ -136,6 +142,26 @@ export default function AIChatScreen() {
 
       <View style={styles.disclaimerWrapper}>
         <DisclaimerBadge />
+        <Text>
+          External AI: sends your question and relevant saved account records to
+          the configured Gemini/Groq provider. General answers need a server API
+          key. Device-only unsynced data is not included.
+        </Text>
+        <Switch
+          accessibilityLabel="Allow external AI"
+          value={allowAI}
+          onValueChange={setAllowAI}
+        />
+        <Text>
+          Allow a second configured provider on rate limit or outage (never on a
+          safety refusal).
+        </Text>
+        <Switch
+          accessibilityLabel="Allow fallback AI provider"
+          value={allowFallback}
+          disabled={!allowAI}
+          onValueChange={setAllowFallback}
+        />
       </View>
 
       {/* Messages Scroll Area */}
@@ -154,9 +180,7 @@ export default function AIChatScreen() {
         {isLoading && (
           <View style={styles.loadingRow}>
             <ActivityIndicator size="small" color={COLORS.primaryAccent} />
-            <Text style={styles.loadingText}>
-              Synthesizing clinical facts & context...
-            </Text>
+            <Text style={styles.loadingText}>Preparing your response...</Text>
           </View>
         )}
       </ScrollView>

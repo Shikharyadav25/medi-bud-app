@@ -89,7 +89,7 @@ async def readiness():
         return {
             "ready": True,
             "database_connected": True,
-            "ai_configured": bool(settings.GEMINI_API_KEY),
+            "ai_configured": bool(settings.GEMINI_API_KEY or settings.GROQ_API_KEY),
             "retrieval_mode": "lexical",
         }
     except Exception:

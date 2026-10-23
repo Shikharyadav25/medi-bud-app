@@ -23,23 +23,44 @@ export default function NearbyCarePage() {
   const [locationName, setLocationName] = useState("Choose your location");
   const [error, setError] = useState("");
   const [searched, setSearched] = useState(false);
+  const [searchLatitude, setSearchLatitude] = useState("");
+  const [areaQuery, setAreaQuery] = useState("");
+  const [searchLongitude, setSearchLongitude] = useState("");
+  const [coordinates, setCoordinates] = useState<{
+    lat: number;
+    lon: number;
+  } | null>(null);
 
-  const fetchFacilities = async (latitude: number, longitude: number) => {
+  const fetchFacilities = async (
+    latitude: number,
+    longitude: number,
+    type = selectedType,
+  ) => {
+    setCoordinates({ lat: latitude, lon: longitude });
     setLoading(true);
     setError("");
     setSearched(true);
     try {
-      const data = await apiClient.getNearbyCare(latitude, longitude, 5000);
+      const data = await apiClient.getNearbyCare(
+        latitude,
+        longitude,
+        5000,
+        type,
+      );
       setFacilities(data || []);
     } catch {
       setFacilities([]);
-      setError("Nearby search is currently unavailable. Try again shortly.");
+      setError(
+        "The OpenStreetMap directory could not respond. Retry, or use the external map search below. No sample facilities have been substituted.",
+      );
     } finally {
       setLoading(false);
     }
   };
 
   const handleDetectLocation = () => {
+    setError("");
+    setFacilities([]);
     if (!navigator.geolocation) {
       alert("Geolocation is not supported by your browser.");
       return;
@@ -94,12 +115,132 @@ export default function NearbyCarePage() {
         </button>
       </div>
 
+      <section className="panel space-y-3">
+        <h2 className="font-semibold">Search without GPS</h2>
+        <p className="text-sm">
+          Some browsers cannot provide location. Enter coordinates, or choose
+          the public demonstration area. Search coordinates are sent to the
+          OpenStreetMap directory provider, not saved to your profile.
+        </p>
+        <form
+          className="flex flex-wrap gap-3 items-end"
+          onSubmit={(e) => {
+            e.preventDefault();
+            const lat = Number(searchLatitude),
+              lon = Number(searchLongitude);
+            if (
+              !searchLatitude.trim() ||
+              !searchLongitude.trim() ||
+              !Number.isFinite(lat) ||
+              !Number.isFinite(lon) ||
+              Math.abs(lat) > 90 ||
+              Math.abs(lon) > 180
+            ) {
+              setError("Enter valid latitude and longitude.");
+              return;
+            }
+            setLocationName(
+              `Chosen area (${lat.toFixed(3)}, ${lon.toFixed(3)})`,
+            );
+            void fetchFacilities(lat, lon);
+          }}
+        >
+          <label>
+            Latitude
+            <input
+              aria-label="Search latitude"
+              required
+              type="number"
+              min="-90"
+              max="90"
+              step="any"
+              value={searchLatitude}
+              onChange={(e) => setSearchLatitude(e.target.value)}
+              className="block border rounded-lg px-3 w-36"
+            />
+          </label>
+          <label>
+            Longitude
+            <input
+              aria-label="Search longitude"
+              required
+              type="number"
+              min="-180"
+              max="180"
+              step="any"
+              value={searchLongitude}
+              onChange={(e) => setSearchLongitude(e.target.value)}
+              className="block border rounded-lg px-3 w-36"
+            />
+          </label>
+          <button className="primary-button" disabled={loading}>
+            Search selected area
+          </button>
+          <button
+            type="button"
+            className="secondary-button"
+            disabled={loading}
+            onClick={() => {
+              setLocationName(
+                "Public demo area: central New Delhi (not your location)",
+              );
+              setSearchLatitude("28.6139");
+              setSearchLongitude("77.2090");
+              void fetchFacilities(28.6139, 77.209);
+            }}
+          >
+            Try public demo area
+          </button>
+        </form>
+        {coordinates && (
+          <a
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-link"
+            href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${selectedType === "all" ? "healthcare" : selectedType} near ${coordinates.lat},${coordinates.lon}`)}`}
+          >
+            Open external map search (shares selected coordinates with Google
+            Maps)
+          </a>
+        )}
+        <label className="block text-sm">
+          Or search a city/area on an external map
+          <input
+            aria-label="City or area for external map search"
+            value={areaQuery}
+            maxLength={150}
+            onChange={(e) => setAreaQuery(e.target.value)}
+            placeholder="For example, New Delhi"
+            className="block border rounded-xl px-3 w-full"
+          />
+        </label>
+        {areaQuery.trim() && (
+          <a
+            className="text-link"
+            target="_blank"
+            rel="noopener noreferrer"
+            href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${selectedType === "all" ? "healthcare" : selectedType} in ${areaQuery.trim()}`)}`}
+          >
+            Search this area on Google Maps (shares the entered area with
+            Google)
+          </a>
+        )}
+      </section>
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-1.5 p-1 rounded-xl bg-(--surface) border border-(--border-subtle) text-xs">
           {["all", "hospital", "clinic", "pharmacy"].map((typeKey) => (
             <button
               key={typeKey}
-              onClick={() => setSelectedType(typeKey)}
+              disabled={loading}
+              onClick={() => {
+                setSelectedType(typeKey);
+                if (coordinates)
+                  void fetchFacilities(
+                    coordinates.lat,
+                    coordinates.lon,
+                    typeKey,
+                  );
+              }}
               className={`capitalize px-3 py-1.5 rounded-lg font-medium transition-colors ${
                 selectedType === typeKey
                   ? "bg-(--primary) text-white shadow-xs"
@@ -120,12 +261,17 @@ export default function NearbyCarePage() {
           {error}
         </p>
       )}
-      {!loading && filtered.length === 0 && (
+      {!loading && !error && filtered.length === 0 && (
         <div className="empty-state">
           {searched
             ? "No matching facilities were returned. Try a different category."
             : "Use your location to find care nearby. Your location is shared with the map search provider for this search."}
         </div>
+      )}
+      {loading && (
+        <p role="status">
+          Searching the directory… This may take up to 20 seconds.
+        </p>
       )}
       <p className="text-xs text-(--text-muted)">
         Data © OpenStreetMap contributors · Listings may be incomplete. In an

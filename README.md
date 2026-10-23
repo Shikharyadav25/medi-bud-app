@@ -4,6 +4,8 @@ Production hardening, environment setup, verification limits, data lifecycle and
 
 For the no-key, synthetic-data presentation, follow [the demo guide](docs/demo_guide.md). After installing dependencies and building shared packages, `.venv/bin/python scripts/demo.py` starts an isolated loopback-only demonstration.
 
+For selectable demo reports, context-aware Gemini/Groq chat, real signup/email recovery and nearby-care troubleshooting, see [chat/auth/care setup](docs/chat-auth-care-setup.md).
+
 > **Understand your lab reports, ground your health discussions, and build everyday wellness habits.**  
 > _A demonstrable college engineering prototype monorepo with web, mobile, and shared Python intelligence._
 

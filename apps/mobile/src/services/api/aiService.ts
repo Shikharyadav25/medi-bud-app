@@ -17,6 +17,8 @@ export class AIService {
     recentMealsSummary: string,
     reports: MedicalReport[] = [],
     reportId?: string,
+    allowAI = false,
+    allowFallback = false,
   ): Promise<{
     response: string;
     citations: string[];
@@ -25,7 +27,12 @@ export class AIService {
   }> {
     return apiClient("/api/ai/chat", {
       method: "POST",
-      body: JSON.stringify({ query, report_id: reportId }),
+      body: JSON.stringify({
+        query,
+        report_id: reportId,
+        allow_ai: allowAI,
+        allow_fallback: allowFallback,
+      }),
     });
   }
 

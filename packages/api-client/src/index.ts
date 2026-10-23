@@ -53,6 +53,7 @@ export class MediBudClient {
   private async request<T>(
     endpoint: string,
     options: RequestInit = {},
+    timeoutMs: number = this.timeoutMs,
   ): Promise<T> {
     const url = `${this.baseUrl}${endpoint.startsWith("/") ? endpoint : `/${endpoint}`}`;
     const headers = new Headers(options.headers || {});
@@ -69,7 +70,7 @@ export class MediBudClient {
     }
 
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), this.timeoutMs);
+    const timeout = setTimeout(() => controller.abort(), timeoutMs);
 
     try {
       const response = await fetch(url, {
@@ -153,9 +154,7 @@ export class MediBudClient {
     });
   }
 
-  public async syncMutations(
-    mutations: SyncMutationDTO[],
-  ): Promise<{
+  public async syncMutations(mutations: SyncMutationDTO[]): Promise<{
     results: Array<{
       mutation_id: string;
       status: "applied" | "conflict" | "error";
@@ -249,15 +248,35 @@ export class MediBudClient {
   }
 
   // AI Chat & Symptom Guidance
+  public async useDemoReport(): Promise<{ report_id: string; status: string }> {
+    return this.request("/v1/reports/demo-sample", { method: "POST" });
+  }
+
+  public async getChatCapabilities(): Promise<{
+    gemini_configured: boolean;
+    groq_configured: boolean;
+    primary: string;
+    fallback: string;
+  }> {
+    return this.request("/v1/chat/capabilities");
+  }
+
   public async chat(data: {
+    allow_ai?: boolean;
+    allow_fallback?: boolean;
+    context_mode?: "auto" | "account" | "general";
     query: string;
     report_id?: string;
     conversation_id?: string;
   }): Promise<ChatResponseDTO> {
-    return this.request<ChatResponseDTO>("/v1/chat", {
-      method: "POST",
-      body: JSON.stringify(data),
-    });
+    return this.request<ChatResponseDTO>(
+      "/v1/chat",
+      {
+        method: "POST",
+        body: JSON.stringify(data),
+      },
+      30000,
+    );
   }
 
   // Indian Food & Meal Planning
@@ -301,12 +320,18 @@ export class MediBudClient {
     lat: number,
     lon: number,
     radius = 5000,
+    type = "all",
   ): Promise<NearbyFacilityDTO[]> {
     const params = new URLSearchParams({
       lat: String(lat),
       lon: String(lon),
       radius: String(radius),
+      type,
     });
-    return this.request<NearbyFacilityDTO[]>(`/v1/care?${params.toString()}`);
+    return this.request<NearbyFacilityDTO[]>(
+      `/v1/care?${params.toString()}`,
+      {},
+      25000,
+    );
   }
 }

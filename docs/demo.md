@@ -4,7 +4,7 @@ Use the current [demonstration guide](demo_guide.md) for installation, the synth
 
 | Time     | Show                                                     | Explain                                                                              |
 | -------- | -------------------------------------------------------- | ------------------------------------------------------------------------------------ |
-| 0–1 min  | Homepage, explicit local demo, empty dashboard           | A health journal and educational companion, not a diagnostic service                 |
+| 0–1 min  | Homepage, explicit local demo, demo dashboard           | A health journal and educational companion, not a diagnostic service                 |
 | 1–2 min  | Water/sleep logging and a reminder                       | Real persistence; reminder journal does not imply a scheduled notification           |
 | 2–3 min  | Upload synthetic PDF, inspect and confirm values         | Human review precedes use as confirmed report evidence                               |
 | 3–4 min  | Report question, inspect citation                        | Extractive answers with uncertainty; no “zero hallucination” claim                   |

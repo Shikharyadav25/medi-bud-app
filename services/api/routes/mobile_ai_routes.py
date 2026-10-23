@@ -59,6 +59,9 @@ class MealAnalyzeRequest(BaseModel):
 
 
 class MobileChatRequest(BaseModel):
+    allow_ai: bool = False
+    allow_fallback: bool = False
+    context_mode: str = "auto"
     report_id: Optional[str] = None
     query: str = Field(min_length=1, max_length=4000)
     profile: Dict[str, Any] = Field(default_factory=dict)
@@ -118,21 +121,29 @@ async def mobile_chat(
         report = _USER_REPORTS.get(req.report_id)
         if not report or report["user_id"] != user.user_id:
             raise HTTPException(404, detail="Report not found")
-    observations = [
-        o
-        for rows in _USER_OBSERVATIONS.values()
-        for o in rows
-        if o.get("user_id") == user.user_id and o.get("status") == "confirmed"
-    ]
-    result = orchestrate_chat_query(
-        user.user_id, req.query, [], observations, req.report_id
+    from routes.chat_routes import ChatRequest, chat
+
+    if req.context_mode not in ("auto", "account", "general"):
+        raise HTTPException(422, detail="Invalid context mode")
+    result = await chat(
+        ChatRequest(
+            query=req.query,
+            report_id=req.report_id,
+            allow_ai=req.allow_ai,
+            allow_fallback=req.allow_fallback,
+            context_mode=req.context_mode,
+            conversation_id="mobile",
+        ),
+        user,
     )
     return {
         "response": result["answer"],
         "citations": [c.get("title", "Source") for c in result.get("citations", [])],
-        "action": "EMERGENCY"
-        if result.get("safety_action") == "EMERGENCY_ESCALATION"
-        else "MONITOR",
+        "action": (
+            "EMERGENCY"
+            if result.get("safety_action") == "EMERGENCY_ESCALATION"
+            else "MONITOR"
+        ),
         "disclaimer": result.get("limitations", "Educational guidance only"),
     }
 
@@ -293,11 +304,11 @@ async def mobile_report(
         mime = (
             "application/pdf"
             if raw.startswith(b"%PDF")
-            else "image/png"
-            if raw.startswith(b"\x89PNG")
-            else "image/jpeg"
-            if raw
-            else "text/plain"
+            else (
+                "image/png"
+                if raw.startswith(b"\x89PNG")
+                else "image/jpeg" if raw else "text/plain"
+            )
         )
         record = {
             "id": report_id,

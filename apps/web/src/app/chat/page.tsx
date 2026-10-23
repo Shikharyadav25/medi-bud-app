@@ -37,11 +37,35 @@ function ChatContent() {
   const reportIdParam = searchParams.get("report_id") || undefined;
 
   const [inputQuery, setInputQuery] = useState("");
+  const [allowAI, setAllowAI] = useState(false);
+  const [allowFallback, setAllowFallback] = useState(false);
+  const [contextMode, setContextMode] = useState<
+    "auto" | "account" | "general"
+  >("auto");
+  const [providerNote, setProviderNote] = useState(
+    "Checking AI configuration…",
+  );
+  useEffect(() => {
+    apiClient
+      .getChatCapabilities()
+      .then((capabilities) => {
+        setProviderNote(
+          capabilities.gemini_configured || capabilities.groq_configured
+            ? `Text AI configured: ${capabilities.primary}. Provider availability is checked when you send.`
+            : "General AI is not configured. Add GEMINI_API_KEY or GROQ_API_KEY on the server. Saved app facts still work without a key.",
+        );
+      })
+      .catch(() =>
+        setProviderNote(
+          "Sign in and connect to the API to check AI availability.",
+        ),
+      );
+  }, []);
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
       id: "welcome-1",
       sender: "assistant",
-      text: "Hi, I’m Medi Bud. Explore your confirmed report observations and curated wellness information here. I’ll show available excerpts and say when evidence is missing. For medical decisions, check with a qualified clinician.",
+      text: "Hi, I’m Medi Bud. Ask about your saved profile, confirmed reports, habits, reminders, meals or plan. For general medical education, enable external AI below; it requires a configured provider key. I’ll say when information is missing. This is not diagnosis or treatment.",
       timestamp: new Date().toLocaleTimeString([], {
         hour: "2-digit",
         minute: "2-digit",
@@ -76,6 +100,9 @@ function ChatContent() {
       const response = await apiClient.chat({
         query: userMsg.text,
         report_id: reportIdParam,
+        allow_ai: allowAI,
+        allow_fallback: allowFallback,
+        context_mode: contextMode,
       });
 
       const assistantMsg: ChatMessage = {
@@ -119,7 +146,7 @@ function ChatContent() {
             Source-based excerpts. Clear limits. A little more understanding.
           </p>
         </div>
-        {reportIdParam && (
+        {reportIdParam && contextMode !== "general" && (
           <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-(--primary-surface) text-(--primary) border border-(--primary-light)">
             <FileText className="w-3.5 h-3.5" />
             Report Grounded
@@ -166,12 +193,16 @@ function ChatContent() {
                 <div className="space-y-2 bg-(--surface) p-3.5 rounded-2xl border border-(--border-subtle) text-left shadow-xs">
                   <div className="flex flex-wrap items-center gap-2 text-[10px] font-medium">
                     <span className="px-2 py-0.5 rounded-md bg-slate-100 text-(--text-secondary)">
-                      Source-based response
+                      {msg.responseMeta.provider
+                        ? `AI: ${msg.responseMeta.provider}`
+                        : "Local app/reference response"}
                     </span>
                     <span className="px-2 py-0.5 rounded-md bg-teal-50 text-(--primary)">
                       {msg.responseMeta.mode === "rules"
                         ? "Safety guidance"
-                        : "Evidence excerpts"}
+                        : msg.responseMeta.context_scope === "general"
+                          ? "General education"
+                          : "Your saved app context"}
                     </span>
                   </div>
 
@@ -243,6 +274,45 @@ function ChatContent() {
           ))}
         </div>
 
+        <section className="rounded-xl border border-(--border-subtle) p-3 space-y-2 text-xs">
+          <label className="block">
+            Question context
+            <select
+              aria-label="Question context"
+              className="ml-2 border rounded-lg px-2"
+              value={contextMode}
+              onChange={(e) =>
+                setContextMode(e.target.value as typeof contextMode)
+              }
+            >
+              <option value="auto">Auto-detect</option>
+              <option value="account">My saved app data</option>
+              <option value="general">General medical education</option>
+            </select>
+          </label>
+          <p role="status">{providerNote}</p>
+          <label className="flex gap-2 items-start">
+            <input
+              type="checkbox"
+              checked={allowAI}
+              onChange={(e) => setAllowAI(e.target.checked)}
+            />
+            Allow external AI: send my question and, for account questions,
+            relevant saved health records to the configured Gemini or Groq
+            provider. AI can be wrong; this is not diagnosis or treatment.
+          </label>
+          <label className="flex gap-2 items-start">
+            <input
+              type="checkbox"
+              disabled={!allowAI}
+              checked={allowFallback}
+              onChange={(e) => setAllowFallback(e.target.checked)}
+            />
+            Also allow the configured fallback provider (Gemini/Groq) if the
+            primary is unavailable or rate-limited. No fallback for a safety
+            refusal.
+          </label>
+        </section>
         <form
           onSubmit={(e) => {
             e.preventDefault();

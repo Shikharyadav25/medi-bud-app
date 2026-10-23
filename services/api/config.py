@@ -1,6 +1,6 @@
 import os
 from pydantic_settings import BaseSettings, SettingsConfigDict
-from typing import List, Optional
+from typing import List, Optional, Literal
 
 
 class Settings(BaseSettings):
@@ -21,6 +21,10 @@ class Settings(BaseSettings):
     # Optional Gemini Provider (Graceful degradation when None)
     GEMINI_API_KEY: Optional[str] = os.getenv("GEMINI_API_KEY", None)
     GEMINI_MODEL: str = "gemini-2.5-flash"
+    GROQ_API_KEY: str = ""
+    GROQ_MODEL: str = "openai/gpt-oss-20b"
+    CHAT_PROVIDER: Literal["auto", "gemini", "groq"] = "auto"
+    CHAT_FALLBACK_PROVIDER: Literal["", "gemini", "groq"] = "groq"
     ENABLE_DEMO_AUTH: bool = False
     DATABASE_URL: str = "sqlite:///./medibud.sqlite3"
     DATA_ENCRYPTION_KEY: str = ""

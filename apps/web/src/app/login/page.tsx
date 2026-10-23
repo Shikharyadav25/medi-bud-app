@@ -10,6 +10,9 @@ export default function LoginPage() {
   const [isSignUp, setIsSignUp] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [name, setName] = useState("");
+  const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
@@ -17,13 +20,27 @@ export default function LoginPage() {
     e.preventDefault();
     setLoading(true);
     setErrorMsg(null);
+    setMessage("");
 
     try {
       if (isSignUp) {
-        const { error } = await supabase.auth.signUp({ email, password });
+        if (password !== confirmPassword)
+          throw new Error("Passwords do not match.");
+        const { data, error } = await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            data: { name: name.trim() },
+            emailRedirectTo: window.location.origin + "/auth/callback",
+          },
+        });
         if (error) throw error;
-        alert(
-          "Check your email to confirm your account before signing in, if confirmation is enabled.",
+        if (data.session) {
+          router.push("/dashboard");
+          return;
+        }
+        setMessage(
+          "Check your email to confirm your account, then sign in. If no email arrives, check spam or use Resend confirmation below.",
         );
         setIsSignUp(false);
       } else {
@@ -73,16 +90,38 @@ export default function LoginPage() {
             {errorMsg}
           </div>
         )}
+        {message && (
+          <p role="status" className="notice">
+            {message}
+          </p>
+        )}
 
         {!isSupabaseConfigured && (
           <div
             role="alert"
             className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-xs text-amber-900"
           >
-            Sign-in is temporarily unavailable. Please try again later.
+            Real signup and sign-in need Supabase configuration. This local demo
+            is a separate synthetic account, not a registered user. Configure
+            NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY to enable
+            real accounts.
           </div>
         )}
         <form onSubmit={handleAuth} className="space-y-4">
+          {isSignUp && (
+            <label className="block text-sm" htmlFor="auth-name">
+              Your name
+              <input
+                id="auth-name"
+                autoComplete="name"
+                required
+                maxLength={120}
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className="w-full border rounded-xl px-3"
+              />
+            </label>
+          )}
           <div>
             <label
               htmlFor="auth-email"
@@ -122,6 +161,21 @@ export default function LoginPage() {
             />
           </div>
 
+          {isSignUp && (
+            <label className="block text-sm" htmlFor="auth-confirm-password">
+              Confirm password
+              <input
+                id="auth-confirm-password"
+                type="password"
+                autoComplete="new-password"
+                required
+                minLength={8}
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                className="w-full border rounded-xl px-3"
+              />
+            </label>
+          )}
           <button
             type="submit"
             disabled={loading || !isSupabaseConfigured}
@@ -133,6 +187,70 @@ export default function LoginPage() {
             </span>
           </button>
         </form>
+        {isSupabaseConfigured && (
+          <div className="flex flex-wrap gap-3 text-xs">
+            <a className="text-link" href="/auth/reset">
+              Forgot password?
+            </a>
+            <button
+              type="button"
+              disabled={loading || !email}
+              className="text-link"
+              onClick={async () => {
+                setLoading(true);
+                setErrorMsg(null);
+                try {
+                  const { error } = await supabase.auth.resend({
+                    type: "signup",
+                    email,
+                    options: {
+                      emailRedirectTo:
+                        window.location.origin + "/auth/callback",
+                    },
+                  });
+                  if (error) throw error;
+                  setMessage(
+                    "If this address has a pending signup, a confirmation email will be sent. Check your inbox and spam folder.",
+                  );
+                } catch {
+                  setErrorMsg(
+                    "Confirmation could not be sent. Try again later.",
+                  );
+                } finally {
+                  setLoading(false);
+                }
+              }}
+            >
+              Resend confirmation
+            </button>
+          </div>
+        )}
+        {isSupabaseConfigured &&
+          process.env.NEXT_PUBLIC_GOOGLE_OAUTH_ENABLED === "true" && (
+            <button
+              type="button"
+              disabled={loading}
+              className="secondary-button w-full"
+              onClick={async () => {
+                setLoading(true);
+                setErrorMsg(null);
+                const { error } = await supabase.auth.signInWithOAuth({
+                  provider: "google",
+                  options: {
+                    redirectTo: window.location.origin + "/auth/callback",
+                  },
+                });
+                if (error) {
+                  setErrorMsg(
+                    "Google sign-in could not start. Check provider configuration.",
+                  );
+                  setLoading(false);
+                }
+              }}
+            >
+              Continue with Google
+            </button>
+          )}
 
         {process.env.NODE_ENV !== "production" &&
           process.env.NEXT_PUBLIC_DEMO_MODE === "true" && (

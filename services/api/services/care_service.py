@@ -4,7 +4,6 @@ from typing import Any, Dict, List, Optional
 
 import httpx
 
-
 _CACHE: Dict[str, Dict[str, Any]] = {}
 CACHE_TTL_SECONDS = 900
 OVERPASS_URLS = (
@@ -52,7 +51,14 @@ def _facility_type(tags: Dict[str, str]) -> Optional[str]:
             return "hospital"
         if raw_type == "pharmacy":
             return "pharmacy"
-        if raw_type in {"clinic", "doctor", "doctors", "centre", "center", "health_centre"}:
+        if raw_type in {
+            "clinic",
+            "doctor",
+            "doctors",
+            "centre",
+            "center",
+            "health_centre",
+        }:
             return "clinic"
     return None
 
@@ -120,22 +126,22 @@ async def query_nearby_healthcare(
 
     amenity_pattern = {
         "hospital": "hospital",
-        "clinic": "clinic|doctors",
+        "clinic": "clinic|doctors|doctor",
         "pharmacy": "pharmacy",
-    }.get(facility_type, "hospital|clinic|pharmacy|doctors")
+    }.get(facility_type, "hospital|clinic|pharmacy|doctors|doctor")
 
     query = f"""
-    [out:json][timeout:18];
+    [out:json][timeout:5];
     (
-      node["amenity"~"^({amenity_pattern})$"](around:{radius_meters},{lat},{lon});
-      way["amenity"~"^({amenity_pattern})$"](around:{radius_meters},{lat},{lon});
+      nwr["amenity"~"^({amenity_pattern})$"](around:{radius_meters},{lat},{lon});
+      nwr["healthcare"~"^({amenity_pattern}|centre|center|health_centre)$"](around:{radius_meters},{lat},{lon});
     );
     out center tags 100;
     """
 
     last_error: Optional[Exception] = None
     async with httpx.AsyncClient(
-        timeout=httpx.Timeout(20.0, connect=6.0),
+        timeout=httpx.Timeout(6.0, connect=2.0),
         headers={"Accept": "application/json", "User-Agent": "MediBud/1.0"},
     ) as client:
         for provider_url in OVERPASS_URLS:
@@ -144,7 +150,14 @@ async def query_nearby_healthcare(
                 # while accepting the same bounded Overpass QL query via `data`.
                 response = await client.get(provider_url, params={"data": query})
                 response.raise_for_status()
-                elements = response.json().get("elements", [])
+                payload = response.json()
+                if (
+                    not isinstance(payload, dict)
+                    or payload.get("remark")
+                    or not isinstance(payload.get("elements"), list)
+                ):
+                    raise ValueError("Incomplete directory response")
+                elements = payload["elements"]
                 facilities = []
                 seen_ids = set()
                 for element in elements:
@@ -160,4 +173,6 @@ async def query_nearby_healthcare(
             except (httpx.HTTPError, ValueError, TypeError) as exc:
                 last_error = exc
 
-    raise CareProviderUnavailable("OpenStreetMap nearby search is temporarily unavailable") from last_error
+    raise CareProviderUnavailable(
+        "OpenStreetMap nearby search is temporarily unavailable"
+    ) from last_error

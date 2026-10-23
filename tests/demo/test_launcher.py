@@ -12,6 +12,7 @@ spec.loader.exec_module(demo)
 
 def test_sample_is_explicitly_synthetic_and_parseable(tmp_path):
     from pypdf import PdfReader
+
     path = tmp_path / "sample.pdf"
     demo.write_sample(path)
     text = PdfReader(path).pages[0].extract_text()
@@ -22,10 +23,12 @@ def test_sample_is_explicitly_synthetic_and_parseable(tmp_path):
 
 def test_demo_does_not_inherit_real_keys_or_database(tmp_path, monkeypatch):
     monkeypatch.setenv("GEMINI_API_KEY", "not-a-real-key")
+    monkeypatch.setenv("GROQ_API_KEY", "not-a-real-key")
     monkeypatch.setenv("SUPABASE_SERVICE_ROLE_KEY", "not-a-real-key")
     monkeypatch.setenv("DATABASE_URL", "postgresql://not-real")
     env = demo.demo_environment(tmp_path, 8001)
     assert env["GEMINI_API_KEY"] == ""
+    assert env["GROQ_API_KEY"] == ""
     assert env["SUPABASE_SERVICE_ROLE_KEY"] == ""
     assert env["NEXT_PUBLIC_SUPABASE_ANON_KEY"] == ""
     assert env["DATABASE_URL"] == "sqlite:///" + str(tmp_path / "demo.sqlite3")
@@ -43,3 +46,15 @@ def test_port_check_rejects_a_live_server_but_accepts_shutdown():
         with pytest.raises(OSError):
             demo.check_port(port)
     demo.check_port(port)
+
+
+def test_demo_uses_a_working_node_instead_of_incompatible_binary(monkeypatch):
+    from types import SimpleNamespace
+
+    def probe(command, **kwargs):
+        if command[0] == "/bad/node":
+            raise OSError("Bad CPU type")
+        return SimpleNamespace(stdout="v22.23.1\n")
+
+    monkeypatch.setattr(demo.subprocess, "run", probe)
+    assert demo.supported_node(["/bad/node", "/native/node"]) == "/native/node"

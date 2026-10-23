@@ -24,6 +24,8 @@ export default function ReportsPage() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [demo, setDemo] = useState(false);
+  const [sampleBusy, setSampleBusy] = useState(false);
 
   const fetchReports = async () => {
     setErrorMsg(null);
@@ -51,6 +53,11 @@ export default function ReportsPage() {
   };
 
   useEffect(() => {
+    setDemo(
+      process.env.NODE_ENV !== "production" &&
+        process.env.NEXT_PUBLIC_DEMO_MODE === "true" &&
+        localStorage.getItem("medi_bud_demo_token") === "demo_jwt_token",
+    );
     fetchReports();
   }, []);
 
@@ -158,6 +165,37 @@ export default function ReportsPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="space-y-4 lg:col-span-1">
+          {demo && (
+            <section className="panel space-y-3 border-amber-200">
+              <h2 className="font-semibold">Try a sample report</h2>
+              <p className="text-sm">
+                Clearly labeled synthetic values, not real health data. Load it
+                here, review the extracted results, then ask questions.
+              </p>
+              <button
+                className="primary-button"
+                disabled={sampleBusy}
+                onClick={async () => {
+                  setSampleBusy(true);
+                  try {
+                    const sample = await apiClient.useDemoReport();
+                    await fetchReports();
+                    setSelectedId(sample.report_id);
+                  } catch {
+                    setErrorMsg(
+                      "The sample could not be loaded. Check that the local demo API is running.",
+                    );
+                  } finally {
+                    setSampleBusy(false);
+                  }
+                }}
+              >
+                {sampleBusy
+                  ? "Loading sample…"
+                  : "Load / select synthetic report"}
+              </button>
+            </section>
+          )}
           <ReportUploadZone
             uploadFn={handleUploadFn}
             onUploadSuccess={handleUploadSuccess}
