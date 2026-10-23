@@ -34,6 +34,8 @@ const EMPTY_SCORE: HealthScoreDetails = {
 };
 
 interface HealthState {
+  journalDate: string;
+  refreshJournalDay: () => void;
   vitals: DailyVitals;
   waterIntakeMl: number;
   waterGoalMl: number;
@@ -57,11 +59,15 @@ interface HealthState {
 }
 
 let saveQueue = Promise.resolve();
+let healthLoadVersion = 0;
+let healthOwnerId: string | null = null;
 export const flushHealthWrites = () => saveQueue;
 const saveHealth = (state: HealthState) => {
+  const owner = healthOwnerId;
+  if (!owner) return;
   const snapshot = JSON.stringify({
     ...state,
-    savedDate: new Date().toLocaleDateString("en-CA"),
+    savedDate: state.journalDate,
   });
   const sessionAtWrite = supabase.auth.getSession();
   saveQueue = saveQueue
@@ -69,16 +75,29 @@ const saveHealth = (state: HealthState) => {
       const {
         data: { session },
       } = await sessionAtWrite;
-      if (session)
-        await privateStorage.setItem(
-          "medibud.health." + session.user.id,
-          snapshot,
-        );
+      if (session?.user.id === owner && healthOwnerId === owner)
+        await privateStorage.setItem("medibud.health." + owner, snapshot);
     })
     .catch(() => undefined);
 };
 
 export const useHealthStore = create<HealthState>((set, get) => ({
+  journalDate: new Date().toLocaleDateString("en-CA"),
+  refreshJournalDay: () => {
+    const today = new Date().toLocaleDateString("en-CA");
+    if (get().journalDate === today) return;
+    set({
+      journalDate: today,
+      waterIntakeMl: 0,
+      recentMeals: [],
+      workouts: get().workouts.map((workout) => ({
+        ...workout,
+        completed: false,
+      })),
+      healthScore: { ...EMPTY_SCORE },
+    });
+    saveHealth(get());
+  },
   vitals: { ...EMPTY_VITALS },
   waterIntakeMl: 0,
   waterGoalMl: 2500,
@@ -91,6 +110,7 @@ export const useHealthStore = create<HealthState>((set, get) => ({
   healthScore: { ...EMPTY_SCORE },
 
   addWater: (amountMl) => {
+    get().refreshJournalDay();
     const current = get().waterIntakeMl;
     const newTotal = Math.max(0, current + amountMl);
     set({ waterIntakeMl: newTotal });
@@ -103,6 +123,7 @@ export const useHealthStore = create<HealthState>((set, get) => ({
   },
 
   addMeal: (meal) => {
+    get().refreshJournalDay();
     set({
       recentMeals: [
         { ...meal, timestamp: new Date().toISOString() },
@@ -113,6 +134,7 @@ export const useHealthStore = create<HealthState>((set, get) => ({
   },
 
   toggleWorkout: (id) => {
+    get().refreshJournalDay();
     const updated = get().workouts.map((w) =>
       w.id === id ? { ...w, completed: !w.completed } : w,
     );
@@ -141,7 +163,10 @@ export const useHealthStore = create<HealthState>((set, get) => ({
   },
 
   resetForNewUser: () => {
+    healthLoadVersion += 1;
+    healthOwnerId = null;
     set({
+      journalDate: new Date().toLocaleDateString("en-CA"),
       vitals: { ...EMPTY_VITALS },
       waterIntakeMl: 0,
       waterGoalMl: 2500,
@@ -156,6 +181,7 @@ export const useHealthStore = create<HealthState>((set, get) => ({
   },
 
   loadStoredHealth: async () => {
+    const loadVersion = ++healthLoadVersion;
     try {
       const {
         data: { session },
@@ -163,19 +189,43 @@ export const useHealthStore = create<HealthState>((set, get) => ({
       const stored = session
         ? await privateStorage.getItem("medibud.health." + session.user.id)
         : null;
+      const current = await supabase.auth.getSession();
+      if (
+        loadVersion !== healthLoadVersion ||
+        !session ||
+        current.data.session?.user.id !== session.user.id
+      )
+        return;
+      healthOwnerId = session.user.id;
       if (stored) {
         const parsed = JSON.parse(stored);
         const sameDay =
           parsed.savedDate === new Date().toLocaleDateString("en-CA");
         set({
           ...parsed,
+          journalDate: new Date().toLocaleDateString("en-CA"),
           waterIntakeMl: sameDay ? parsed.waterIntakeMl : 0,
           recentMeals: sameDay ? parsed.recentMeals : [],
+          workouts: sameDay
+            ? parsed.workouts || []
+            : (parsed.workouts || []).map((workout: WorkoutItem) => ({
+                ...workout,
+                completed: false,
+              })),
+          healthScore: sameDay
+            ? parsed.healthScore || { ...EMPTY_SCORE }
+            : { ...EMPTY_SCORE },
         });
       }
       if (session) {
         try {
           const reports = await apiClient<MedicalReport[]>("/api/reports");
+          const active = await supabase.auth.getSession();
+          if (
+            loadVersion !== healthLoadVersion ||
+            active.data.session?.user.id !== session.user.id
+          )
+            return;
           set({ reports });
         } catch {
           /* Preserve this account's encrypted cache when offline. */

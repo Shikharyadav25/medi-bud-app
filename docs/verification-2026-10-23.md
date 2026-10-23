@@ -13,6 +13,7 @@ The previously missing local checkout was restored from GitHub branch `fix/produ
 | Expo SDK compatibility check | Passed after patch alignment |
 | Workspace peer check | Passed |
 | Contract tests | 4 passed |
+| Mobile state ownership / daily rollover regression tests | 6 passed; actual store code with deterministic dependency mocks, not native-device testing |
 | API integration + demo-launcher regressions | 70 passed with SQLite |
 | Python dependency consistency | Passed |
 | Pinned Python dependency security audit | No known vulnerabilities after upgrading certifi, Pillow and pypdf |
@@ -43,9 +44,17 @@ The launcher, `scripts/demo.py`, provides a new encrypted database/key and a lab
 
 The launcher was actually started, interrupted and verified to shut down both owned servers, then restarted with a fresh session. Invalid overlapping ports were rejected before startup. Test-created sample downloads were retained in the normal Downloads folder; they contain synthetic data only.
 
+## Additional mobile privacy fixes
+
+Delayed cache/profile hydration and report responses are discarded after sign-out/reset/account changes. Health snapshots are bound to their originating owner instead of whichever session finishes resolving later. Signed-out profile identity is cleared immediately. Daily journal entries also roll over when resuming the app, while active, or before logging; reports are retained. Six deterministic regression tests exercise these boundaries via `pnpm test:mobile`. Native Keychain/Keystore, permissions and real SDK integration still require device testing.
+
+## Hosted verification
+
+[GitHub Actions run 39959198506](https://github.com/Shikharyadav25/medi-bud-app/actions/runs/39959198506) passed for commit `06d6200`: builds, SDK compatibility, contracts, 70 SQLite/demo tests, the 67-test PostgreSQL integration suite and the separate ownership/RLS migration check. This establishes a fresh CI PostgreSQL result, not a live hosted Supabase migration result. The subsequent mobile-only privacy changes have their own new CI run; check the PR's latest commit status rather than treating the earlier green run as proof of later changes.
+
 ## Still separate / not verified here
 
-- Current PostgreSQL/migration execution: local PostgreSQL binaries are incompatible with this machine's CPU and Docker's daemon is not running. The October 16 local PostgreSQL results are historical, not a fresh result. CI contains separate PostgreSQL and ownership/RLS checks; consult its actual run status.
+- Local PostgreSQL/migration rerun: local binaries are incompatible with this machine's CPU and Docker's daemon is not running. Fresh hosted CI PostgreSQL/ownership checks passed as recorded above, but this is not the actual Supabase staging environment.
 - Live Supabase signup, confirmation/recovery email, refresh, hosted migrations/storage/RLS and administrative identity deletion.
 - Live Gemini key validity, quota, output quality and clinical extraction accuracy.
 - Native iOS/Android builds, device camera/files/location/protected storage/networking and permission behavior.

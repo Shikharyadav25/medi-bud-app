@@ -2,11 +2,10 @@ import React, { useEffect } from "react";
 import { Stack, useRouter, useSegments } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
-import { StyleSheet } from "react-native";
+import { AppState, StyleSheet } from "react-native";
 import { useAuthStore } from "../store/useAuthStore";
-import { useHealthStore } from "../store/useHealthStore";
 import { supabase } from "../services/supabase";
-import { useChatStore } from "../store/useChatStore";
+import { useHealthStore } from "../store/useHealthStore";
 
 export default function RootLayout() {
   const { loadStoredProfile, hasHydrated, isAuthenticated } = useAuthStore();
@@ -22,13 +21,25 @@ export default function RootLayout() {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((event) => {
       if (event === "SIGNED_OUT") {
-        useAuthStore.setState({ isAuthenticated: false });
-        useHealthStore.getState().resetForNewUser();
-        useChatStore.getState().clearMessages();
+        useAuthStore.getState().resetSession();
       }
     });
     return () => subscription.unsubscribe();
   }, []);
+
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    const refresh = () => useHealthStore.getState().refreshJournalDay();
+    refresh();
+    const timer = setInterval(refresh, 60000);
+    const listener = AppState.addEventListener("change", (state) => {
+      if (state === "active") refresh();
+    });
+    return () => {
+      clearInterval(timer);
+      listener.remove();
+    };
+  }, [isAuthenticated]);
 
   useEffect(() => {
     if (hasHydrated && !isAuthenticated && protectedRoute)

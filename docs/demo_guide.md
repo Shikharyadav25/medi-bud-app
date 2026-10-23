@@ -45,4 +45,4 @@ Only demonstrate native camera, protected storage, sharing and permission behavi
 
 ## Before presenting
 
-Run `pnpm build:web`, `pnpm build:mobile`, `pnpm test:contracts`, and `.venv/bin/python -m pytest tests/integration tests/demo -q`. See the dated verification records for checks actually performed and remaining external-service/native/clinical gates. Leave time to run through the demonstration on the presentation machine before the event.
+Run `pnpm build:web`, `pnpm build:mobile`, `pnpm test:contracts`, `pnpm test:mobile`, and `.venv/bin/python -m pytest tests/integration tests/demo -q`. See the dated verification records for checks actually performed and remaining external-service/native/clinical gates. Leave time to run through the demonstration on the presentation machine before the event.
