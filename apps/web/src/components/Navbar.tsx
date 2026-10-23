@@ -33,6 +33,7 @@ export function Navbar() {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [signedIn, setSignedIn] = useState(false);
+  const [demo, setDemo] = useState(false);
   const [online, setOnline] = useState(true);
   const [mobile, setMobile] = useState(false);
   const sidebar = useRef<HTMLElement>(null);
@@ -103,11 +104,17 @@ export function Navbar() {
   }, []);
   useEffect(() => {
     setOpen(false);
+    setDemo(
+      process.env.NODE_ENV !== "production" &&
+        process.env.NEXT_PUBLIC_DEMO_MODE === "true" &&
+        localStorage.getItem("medi_bud_demo_token") === "demo_jwt_token",
+    );
   }, [path]);
   const logout = async () => {
     await supabase.auth.signOut();
     localStorage.removeItem("medi_bud_demo_token");
     localStorage.removeItem("medi_bud_demo_user");
+    setDemo(false);
     await Promise.all([
       offlineDb.pendingMutations.clear(),
       offlineDb.cachedLogs.clear(),
@@ -179,6 +186,15 @@ export function Navbar() {
           ))}
         </nav>
         <div className="sidebar-bottom">
+          {demo && (
+            <p
+              role="status"
+              className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs text-amber-950"
+            >
+              Local demonstration. Use synthetic data only. This is not a real
+              patient account.
+            </p>
+          )}
           <div className="care-note">
             <span className="note-symbol">+</span>
             <p>
@@ -196,11 +212,14 @@ export function Navbar() {
               connection.
             </p>
           )}
-          <Link href={signedIn ? "/account" : "/login"} className="side-link">
+          <Link
+            href={signedIn || demo ? "/account" : "/login"}
+            className="side-link"
+          >
             <UserRound size={19} />
-            {signedIn ? "Your account" : "Sign in"}
+            {signedIn || demo ? "Your account" : "Sign in"}
           </Link>
-          {signedIn && (
+          {(signedIn || demo) && (
             <button className="side-link w-full" onClick={logout}>
               <LogOut size={18} />
               Sign out

@@ -25,6 +25,7 @@ interface AuthState {
   completeOnboarding: () => void;
   authenticate: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
+  resetSession: () => void;
   loadStoredProfile: () => Promise<void>;
 }
 const EMPTY_PROFILE: UserProfile = {
@@ -55,6 +56,7 @@ const EMPTY_PROFILE: UserProfile = {
 };
 
 const profileKey = (id: string) => "medibud.profile." + id;
+let profileLoadVersion = 0;
 export const useAuthStore = create<AuthState>((set, get) => ({
   profile: EMPTY_PROFILE,
   isAuthenticated: false,
@@ -112,7 +114,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   },
   logout: async () => {
     const id = get().profile.id;
-    set({ isAuthenticated: false });
+    get().resetSession();
     await flushHealthWrites();
     await supabase.auth.signOut({ scope: "local" });
     useChatStore.getState().clearMessages();
@@ -121,14 +123,21 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       await privateStorage.removeItem("medibud.health." + id);
       await privateStorage.removeItem("medibud.outbox." + id);
     }
+  },
+  resetSession: () => {
+    profileLoadVersion += 1;
     useHealthStore.getState().resetForNewUser();
+    useChatStore.getState().clearMessages();
     set({
       profile: EMPTY_PROFILE,
       isAuthenticated: false,
       isOnboardingCompleted: false,
+      isLoading: false,
+      hasHydrated: true,
     });
   },
   loadStoredProfile: async () => {
+    const loadVersion = ++profileLoadVersion;
     try {
       // Discard the old unauthenticated, shared device profile.
       await AsyncStorage.multiRemove([
@@ -139,15 +148,23 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       const {
         data: { session },
       } = await supabase.auth.getSession();
+      if (loadVersion !== profileLoadVersion) return;
       if (!session) {
-        set({ profile: EMPTY_PROFILE, isAuthenticated: false });
+        get().resetSession();
         return;
       }
       if (get().profile.id !== session.user.id) {
+        set({ profile: EMPTY_PROFILE, isAuthenticated: false });
         useHealthStore.getState().resetForNewUser();
         useChatStore.getState().clearMessages();
       }
       const saved = await privateStorage.getItem(profileKey(session.user.id));
+      const current = await supabase.auth.getSession();
+      if (
+        loadVersion !== profileLoadVersion ||
+        current.data.session?.user.id !== session.user.id
+      )
+        return;
       const profile = saved
         ? (JSON.parse(saved) as UserProfile)
         : {
@@ -162,7 +179,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       });
       await useHealthStore.getState().loadStoredHealth();
     } finally {
-      set({ isLoading: false, hasHydrated: true });
+      if (loadVersion === profileLoadVersion)
+        set({ isLoading: false, hasHydrated: true });
     }
   },
 }));

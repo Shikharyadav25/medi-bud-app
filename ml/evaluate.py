@@ -3,6 +3,8 @@ import os
 import joblib
 import numpy as np
 
+# Synthetic research benchmark only; not the deployed retrieval pipeline or a
+# clinical safety/abstention evaluation. Production regressions live in tests/.
 # Evaluation harness for:
 # 1. Intent routing: Keyword baseline vs Trained TF-IDF + Logistic Regression
 # 2. Retrieval: 30 annotated answerable queries + 10 unanswerable queries
@@ -130,8 +132,8 @@ def lexical_search(query: str, top_k=5):
     scores.sort(key=lambda x: x[1], reverse=True)
     return [doc_id for doc_id, score in scores[:top_k]]
 
-def rrf_search(query: str, top_k=5):
-    # Combines token scoring with position weighting
+def synthetic_token_search(query: str, top_k=5):
+    # Simple substring scoring, not semantic search or reciprocal rank fusion.
     q_words = [w for w in query.lower().replace("?", "").split() if len(w) > 2]
     scores = {}
     for doc_id, text in CORPUS.items():
@@ -169,7 +171,7 @@ def evaluate_all():
     for item in ANSWERABLE_QUERIES:
         q = item["q"]
         gold_set = set(item["relevant"])
-        retrieved = rrf_search(q, top_k=5)
+        retrieved = synthetic_token_search(q, top_k=5)
         # Check Recall@5
         if any(doc in gold_set for doc in retrieved):
             hits_at_5 += 1
@@ -182,23 +184,8 @@ def evaluate_all():
     recall_at_5 = hits_at_5 / len(ANSWERABLE_QUERIES)
     mrr = rr_sum / len(ANSWERABLE_QUERIES)
 
-    # 3. Unanswerable Queries Handling (Abstention check)
-    unanswerable_handled = 0
-    for q in UNANSWERABLE_QUERIES:
-        retrieved = rrf_search(q, top_k=5)
-        # If retrieved documents do not contain the specific requested test, system abstains
-        q_lower = q.lower()
-        contains_false_fact = False
-        for doc_id in retrieved:
-            text = CORPUS.get(doc_id, "").lower()
-            if "vitamin b12" in text or "ferritin" in text or "tsh" in text or "uric acid" in text:
-                contains_false_fact = True
-        if not contains_false_fact:
-            unanswerable_handled += 1
-
-    unanswerable_pass_rate = unanswerable_handled / len(UNANSWERABLE_QUERIES)
-
     report = {
+        "scope": "Synthetic substring-retrieval benchmark, not deployed API or clinical validation",
         "intent_routing_comparison": {
             "trained_accuracy": round(trained_acc, 4),
             "keyword_baseline_accuracy": round(keyword_acc, 4),
@@ -207,15 +194,15 @@ def evaluate_all():
         },
         "retrieval_evaluation": {
             "answerable_queries_count": len(ANSWERABLE_QUERIES),
-            "recall_at_5": round(recall_at_5, 4),
+            "hit_rate_at_5": round(recall_at_5, 4),
             "target_gate": 0.80,
             "gate_passed": bool(recall_at_5 >= 0.80),
             "mean_reciprocal_rank_mrr": round(mrr, 4)
         },
         "unanswerable_abstention": {
             "unanswerable_queries_count": len(UNANSWERABLE_QUERIES),
-            "abstention_success_rate": round(unanswerable_pass_rate, 4),
-            "false_positives_detected": len(UNANSWERABLE_QUERIES) - unanswerable_handled
+            "status": "not_measured",
+            "reason": "Corpus token absence is not evidence of actual API abstention. Run integration regressions."
         }
     }
 
@@ -224,9 +211,10 @@ def evaluate_all():
 
     print("=================== EVALUATION REPORT ===================")
     print(f"Trained Intent Accuracy: {trained_acc * 100:.1f}% vs Keyword Baseline: {keyword_acc * 100:.1f}%")
-    print(f"Retrieval Recall@5: {recall_at_5:.4f} (Gate >= 0.80: {recall_at_5 >= 0.80})")
+    print("Scope: synthetic research benchmark only, NOT production or clinical validation")
+    print(f"Synthetic retrieval hit rate@5: {recall_at_5:.4f} (Research gate >= 0.80: {recall_at_5 >= 0.80})")
     print(f"Retrieval MRR: {mrr:.4f}")
-    print(f"Unanswerable Query Abstention Rate: {unanswerable_pass_rate * 100:.1f}%")
+    print("Production abstention: NOT MEASURED by this benchmark; run integration regressions")
     print(f"Saved evaluation report to {EVAL_OUT_PATH}")
 
 if __name__ == "__main__":

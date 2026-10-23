@@ -1,4 +1,5 @@
 {
+  "scope": "Synthetic substring-retrieval benchmark, not deployed API or clinical validation",
   "intent_routing_comparison": {
     "trained_accuracy": 1.0,
     "keyword_baseline_accuracy": 1.0,
@@ -7,14 +8,14 @@
   },
   "retrieval_evaluation": {
     "answerable_queries_count": 30,
-    "recall_at_5": 1.0,
+    "hit_rate_at_5": 1.0,
     "target_gate": 0.8,
     "gate_passed": true,
     "mean_reciprocal_rank_mrr": 0.9667
   },
   "unanswerable_abstention": {
     "unanswerable_queries_count": 10,
-    "abstention_success_rate": 1.0,
-    "false_positives_detected": 0
+    "status": "not_measured",
+    "reason": "Corpus token absence is not evidence of actual API abstention. Run integration regressions."
   }
 }

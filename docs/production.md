@@ -1,5 +1,7 @@
 # Deployment and release status
 
+For the latest local checks and demonstration scope, see [verification-2026-10-23.md](verification-2026-10-23.md) and [demo_guide.md](demo_guide.md). Historical verification results are dated and should not be treated as fresh live-provider/native validation.
+
 This branch hardens the prototype and redesigns the web application. Passing builds does not certify clinical safety. Do not launch real clinical decision support until an independent clinical/safety review has approved the report extraction, symptom escalation, source material, nutrition content, and intended use.
 
 ## Configure the three applications

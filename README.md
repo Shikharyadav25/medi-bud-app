@@ -2,8 +2,10 @@
 
 Production hardening, environment setup, verification limits, data lifecycle and remaining release gates are documented in [docs/production.md](docs/production.md). Clinical production use requires independent professional review; a successful build is not clinical validation.
 
+For the no-key, synthetic-data presentation, follow [the demo guide](docs/demo_guide.md). After installing dependencies and building shared packages, `.venv/bin/python scripts/demo.py` starts an isolated loopback-only demonstration.
+
 > **Understand your lab reports, ground your health discussions, and build everyday wellness habits.**  
-> *A demonstrable college engineering prototype monorepo with web, mobile, and shared Python intelligence.*
+> _A demonstrable college engineering prototype monorepo with web, mobile, and shared Python intelligence._
 
 ---
 
@@ -15,7 +17,7 @@ Medi Bud is architected as an integrated monorepo powered by `pnpm` workspaces:
 medi-bud-app/
 ├── apps/
 │   ├── web/                        # Next.js 15 App Router, React 19, Tailwind CSS v4, Dexie.js outbox
-│   └── mobile/                     # React Native Expo 57, Expo Router, expo-sqlite outbox
+│   └── mobile/                     # React Native Expo 57, Expo Router, protected owner-scoped outbox
 ├── services/
 │   └── api/                        # Python 3.13 FastAPI modular monolith & transactional worker
 ├── packages/
@@ -27,9 +29,9 @@ medi-bud-app/
 │   ├── data/                       # 288 labeled utterances across 72 paraphrase clusters
 │   ├── train_intent.py             # Scikit-learn TF-IDF + LogisticRegression pipeline
 │   ├── evaluate.py                 # Retrieval & intent evaluation harness
-│   └── evaluation_report.json      # Macro-F1 (0.9119), Recall@5 (1.0000), 100% abstention
+│   └── evaluation_report.json      # Historical experimental metrics, not clinical validation
 ├── tests/
-│   └── integration/                # 19 Pytest integration tests (security, sync, parsing, diet)
+│   └── integration/                # Security, sync, parsing, diet and privacy regression tests
 └── docs/
     ├── ownership.md                # 6-member domain ownership matrix & viva responsibilities
     ├── architecture.md             # Tiered architecture, security model, and offline sync
@@ -47,42 +49,41 @@ medi-bud-app/
    - Normalizes CBC, Blood Glucose, and Lipid biomarkers.
    - Interactive human-in-the-loop review table to confirm or reject values before AI grounding.
 2. **Cited Health Q&A**:
-   - Grounded extractive answers strictly sourced from verified reports and validated health archives.
+   - Extractive answers from user-confirmed observations and curated educational sources.
    - Interactive citation cards showing Document Title, Date, Page, and Exact Quoted Excerpt.
-   - 100% abstention on unanswerable clinical queries (zero hallucination).
+   - Explicit uncertainty and abstention when evidence is absent; no zero-hallucination guarantee.
 3. **Transparent Habit Tracking & Offline Outbox**:
    - Tracks water, sleep, physical activity, and user-entered reminders.
    - Transparent 4-habit target counter with zero penalties for chronic conditions.
-   - Offline mutation queue via Dexie.js (Web) and SQLite (Mobile) with idempotent server replay.
+   - Owner-scoped replay queues with idempotent server replay; device-only mobile habits/preferences are not full cross-device sync.
 4. **Deterministic 7-Day Indian Meal Planner**:
-   - Calibrated against ICMR-NIN Indian Food Composition Tables (IFCT).
-   - Strict declared allergen exclusion (peanuts, dairy, gluten, soy, mustard) and vegetarian filtering.
+   - Estimated nutrition for general wellness meal ideas; requires dietitian review before clinical use.
+   - Ingredient-based declared allergen and vegetarian filters, not a cross-contact or allergy safety guarantee.
    - One-tap printable PDF generation via ReportLab backend export.
 5. **Red-Flag Symptom Guidance & Emergency Triage**:
    - Deterministic evaluation identifying acute clinical red flags (chest pain, stroke signs, breathing distress).
-   - Direct emergency dialer for verified Indian public hotlines (`112`, `108`, `102`, `1800-116-117`).
+   - Emergency contact links; initial/no-match guidance never rules out an emergency.
 6. **Nearby Care Discovery**:
-   - Proxies OpenStreetMap Overpass API for verified hospitals, clinics, and pharmacies within 5 km.
+   - Queries OpenStreetMap Overpass after deliberate location sharing; listings are not clinically verified.
    - In-memory 15-minute caching and turn-by-turn navigation links.
 
 ## ⚡ Quickstart Execution
 
 ```bash
-# 1. Install dependencies and compile shared packages
-pnpm install
+# Use Node >=22.13, pnpm 12.8.1 and Python 3.13
+pnpm install --frozen-lockfile
+python3.13 -m venv .venv
+.venv/bin/python -m pip install -r services/api/requirements.lock
 pnpm build
 
-# 2. Run the FastAPI Backend (Terminal 1)
-cd services/api && python3 -m uvicorn main:app --port 8000 --reload
+# Launch both services with explicit local demo auth and synthetic data only
+.venv/bin/python scripts/demo.py
 
-# 3. Run the Next.js Web App (Terminal 2)
-pnpm --filter web dev
-
-# 4. Run the Mobile App (Terminal 3)
-pnpm --filter @medi-bud/mobile start
-
-# 5. Run the Integration Verification Suite (19 tests)
-python3 -m pytest tests/integration -v
+# Run verification separately; external/native/clinical checks are separate gates
+.venv/bin/python -m pytest tests/integration tests/demo -q
+pnpm test:contracts
+pnpm build:web
+pnpm build:mobile
 ```
 
 ---
