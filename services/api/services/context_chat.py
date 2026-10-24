@@ -450,7 +450,7 @@ def answer_question(
     except ProviderError as error:
         base["provider_status"] = error.code
         note = {
-            "unconfigured": "External AI is currently unavailable. You can still use your saved app information.",
+            "unconfigured": "External AI is not configured for this service. You can still use your saved app information.",
             "credentials_rejected": "The AI provider could not authenticate the service. Please contact support; retrying your question will not fix this.",
             "permission_denied": "The AI provider denied access to the service. Please contact support.",
             "model_unavailable": "The configured AI model is unavailable. Please contact support.",
