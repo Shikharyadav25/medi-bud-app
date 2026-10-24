@@ -1,4 +1,5 @@
 from typing import Optional
+from datetime import datetime, timezone
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, Field
 from auth import get_current_user, AuthenticatedUser
@@ -56,10 +57,12 @@ async def chat(
         messages[-6:],
     )
 
-    # Record message history
+    # Keep a reloadable account-scoped history with its original timestamp.
+    created_at = datetime.now(timezone.utc).isoformat()
     messages.append(
         {
             "role": "user",
+            "created_at": created_at,
             "text": req.query,
             "mode": result.get("mode"),
             "context_scope": result.get("context_scope"),
@@ -69,6 +72,8 @@ async def chat(
     messages.append(
         {
             "role": "assistant",
+            "created_at": created_at,
+            "response": result,
             "text": result.get("answer"),
             "citations": result.get("citations", []),
             "mode": result.get("mode"),
@@ -108,6 +113,13 @@ async def get_conversation_history(
         if key == user_id or key.startswith(user_id + ":")
         for message in history
     ]
+
+
+@chat_router.get("/conversations/{conv_id}")
+async def get_conversation(
+    conv_id: str, current_user: AuthenticatedUser = Depends(get_current_user)
+):
+    return _USER_CONVERSATIONS.get(current_user.user_id + ":" + conv_id, [])
 
 
 @chat_router.delete("/conversations/{conv_id}")

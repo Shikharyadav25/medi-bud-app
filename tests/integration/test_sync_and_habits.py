@@ -102,3 +102,30 @@ def test_reminder_lifecycle_and_completion(client, user_a, user_b):
     # Delete reminder
     del_res = client.delete(f"/v1/reminders/{rem_id}", headers=user_a["headers"])
     assert del_res.status_code == 200
+
+
+def test_browser_timezone_alias_works_without_system_zoneinfo(client, user_a):
+    import zoneinfo
+
+    original = zoneinfo.TZPATH
+    zoneinfo.reset_tzpath(())
+    zoneinfo.ZoneInfo.clear_cache()
+    try:
+        # Browser Intl on Safari returns the backward-compatible IANA alias.
+        payload = {
+            "kind": "sleep", "value": 7.5, "unit": "hours",
+            "occurred_at": datetime.now(timezone.utc).isoformat(),
+            "timezone": "Asia/Calcutta",
+        }
+        saved = client.post("/v1/logs", headers=user_a["headers"], json=payload)
+        assert saved.status_code == 200
+        assert saved.json()["value"] == 7.5
+        reminder = client.post("/v1/reminders", headers=user_a["headers"], json={
+            "label": "Test reminder", "user_entered_schedule": "09:00",
+            "timezone": "Asia/Calcutta", "enabled": True,
+        })
+        assert reminder.status_code == 200
+        assert client.get("/v1/reminders", headers=user_a["headers"]).status_code == 200
+    finally:
+        zoneinfo.reset_tzpath(original)
+        zoneinfo.ZoneInfo.clear_cache()

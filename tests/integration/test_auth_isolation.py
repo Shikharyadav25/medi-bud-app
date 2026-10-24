@@ -92,3 +92,44 @@ def test_two_account_report_isolation(client, user_a, user_b):
         json={"observations": [{"id": str(uuid.uuid4()), "status": "confirmed"}]},
     )
     assert patch_b.status_code == 404
+
+
+def test_signup_name_initializes_profile_and_preserves_edits(client):
+    import jwt
+    from config import settings
+
+    uid = str(uuid.uuid4())
+    token = create_jwt_token(uid, "signup@example.com")
+    claims = jwt.decode(token, options={"verify_signature": False})
+    claims["user_metadata"] = {"name": "  Shikhar  "}
+    headers = {
+        "Authorization": "Bearer " + jwt.encode(
+            claims, settings.SUPABASE_JWT_SECRET, algorithm="HS256"
+        )
+    }
+    profile = client.get("/v1/me", headers=headers).json()
+    assert profile["name"] == "Shikhar"
+    saved = client.put("/v1/me", headers=headers, json={
+        "name": "Shikhar Yadav", "version": profile["version"]
+    })
+    assert saved.status_code == 200
+    assert client.get("/v1/me", headers=headers).json()["name"] == "Shikhar Yadav"
+
+
+def test_signup_name_backfills_default_profile_only(client):
+    import jwt
+    from config import settings
+
+    uid = str(uuid.uuid4())
+    token = create_jwt_token(uid, "signup@example.com")
+    headers = {"Authorization": "Bearer " + token}
+    before = client.get("/v1/me", headers=headers).json()
+    assert before["name"] == "User"
+    claims = jwt.decode(token, options={"verify_signature": False})
+    claims["user_metadata"] = {"name": "Shikhar"}
+    headers["Authorization"] = "Bearer " + jwt.encode(
+        claims, settings.SUPABASE_JWT_SECRET, algorithm="HS256"
+    )
+    after = client.get("/v1/me", headers=headers).json()
+    assert after["name"] == "Shikhar"
+    assert after["version"] == before["version"] + 1

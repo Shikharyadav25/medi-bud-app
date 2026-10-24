@@ -72,9 +72,14 @@ export function AccountBoundary({ children }: { children: React.ReactNode }) {
       <section className="panel max-w-lg mx-auto space-y-3">
         <h1 className="page-title">Your health space is private.</h1>
         <p>Sign in to view or save your reports, journal and conversations.</p>
-        <Link className="primary-button" href="/login">
-          Sign in or create an account
-        </Link>
+        <div className="flex flex-wrap gap-3">
+          <Link className="primary-button" href="/signup">
+            Create an account
+          </Link>
+          <Link className="secondary-button" href="/login">
+            Sign in
+          </Link>
+        </div>
       </section>
     );
   return <div key={identity.owner}>{children}</div>;

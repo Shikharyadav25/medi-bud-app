@@ -37,7 +37,7 @@ async def get_profile(current_user: AuthenticatedUser = Depends(get_current_user
     if user_id not in _USER_PROFILES:
         _USER_PROFILES[user_id] = {
             "user_id": user_id,
-            "name": "User",
+            "name": current_user.display_name or "User",
             "age": None,
             "height_cm": None,
             "weight_kg": None,
@@ -49,7 +49,12 @@ async def get_profile(current_user: AuthenticatedUser = Depends(get_current_user
             "medications": [],
             "version": 1,
         }
-    return _USER_PROFILES[user_id]
+    profile = _USER_PROFILES[user_id]
+    if profile.get("name") == "User" and current_user.display_name:
+        profile["name"] = current_user.display_name
+        profile["version"] += 1
+        _USER_PROFILES[user_id] = profile
+    return profile
 
 
 @auth_router.put("/me")
@@ -62,7 +67,7 @@ async def update_profile(
         user_id,
         {
             "user_id": user_id,
-            "name": "User",
+            "name": current_user.display_name or "User",
             "age": None,
             "height_cm": None,
             "weight_kg": None,

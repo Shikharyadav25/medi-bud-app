@@ -311,3 +311,20 @@ def test_demo_sample_is_explicit_scoped_and_idempotent(client, user_a, monkeypat
         client.post("/v1/reports/demo-sample", headers=user_a["headers"]).status_code
         == 404
     )
+
+
+def test_saved_text_conversation_reload_and_account_isolation(client, user_a, user_b):
+    response = client.post("/v1/chat", headers=user_a["headers"], json={
+        "query": "What is my name?", "context_mode": "account",
+        "conversation_id": "default", "allow_ai": False,
+    })
+    assert response.status_code == 200
+    history = client.get("/v1/conversations/default", headers=user_a["headers"])
+    assert history.status_code == 200
+    messages = history.json()
+    assert [m["role"] for m in messages] == ["user", "assistant"]
+    assert messages[0]["text"] == "What is my name?"
+    assert messages[1]["response"]["answer"] == response.json()["answer"]
+    assert messages[1]["created_at"]
+    assert client.get("/v1/conversations/default", headers=user_b["headers"]).json() == []
+    assert client.get("/v1/conversations/report:another", headers=user_a["headers"]).json() == []

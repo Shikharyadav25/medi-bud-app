@@ -116,7 +116,17 @@ def _call(provider, prompt, *, image=None, output_model=ChatOutput, system=SYSTE
         if response.status_code >= 500:
             raise ProviderError("unavailable")
         if not response.ok:
-            raise ProviderError("rejected")
+            # Expose only a bounded diagnostic code, never provider messages,
+            # credentials, request contents or raw response bodies.
+            code = {401: "credentials_rejected", 403: "permission_denied", 404: "model_unavailable"}.get(response.status_code, "rejected")
+            if provider == "gemini" and response.status_code == 400:
+                try:
+                    details = response.json().get("error", {}).get("details", [])
+                    if any(isinstance(item, dict) and item.get("reason") == "API_KEY_INVALID" for item in details):
+                        code = "credentials_rejected"
+                except (ValueError, TypeError, AttributeError):
+                    pass
+            raise ProviderError(code)
         body = response.json()
         if provider == "gemini":
             if body.get("promptFeedback", {}).get("blockReason"):

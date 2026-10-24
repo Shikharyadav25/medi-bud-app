@@ -17,3 +17,5 @@ pytest>=8.3.0
 requests>=2.32.0
 psycopg[binary]>=3.2.0
 # Optional semantic retrieval: install sentence-transformers separately and set ENABLE_LOCAL_EMBEDDINGS=true.
+# Slim Linux images omit IANA backward links returned by browser Intl.
+tzdata>=2026.5

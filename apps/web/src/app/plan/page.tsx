@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import type { MealPlanDTO } from "@medi-bud/contracts";
 import { apiClient } from "@/lib/api";
+import { MediBudApiError } from "@medi-bud/api-client";
 import { getCurrentAccessToken } from "@/lib/supabase";
 import { MealDayCard } from "@/components/MealDayCard";
 import {
@@ -41,10 +42,14 @@ export default function MealPlanPage() {
     try {
       const data = await apiClient.getMealPlan();
       setPlan(data);
-    } catch {
-      setErrorMsg(
-        "No saved plan is available. Sign in, choose your preferences below, and generate meal ideas.",
-      );
+    } catch (error) {
+      if (error instanceof MediBudApiError && error.status === 404) {
+        setPlan(null);
+      } else {
+        setErrorMsg(
+          "Your saved plan could not be loaded. Check your connection and try again.",
+        );
+      }
     } finally {
       setLoading(false);
     }
@@ -177,7 +182,11 @@ export default function MealPlanPage() {
             <RefreshCw
               className={`w-3.5 h-3.5 ${loading ? "animate-spin" : ""}`}
             />
-            {loading ? "Regenerating..." : "Regenerate 7-Day Plan"}
+            {loading
+              ? "Preparing your plan…"
+              : plan
+                ? "Regenerate 7-Day Plan"
+                : "Generate 7-Day Plan"}
           </button>
         </div>
 
@@ -216,6 +225,12 @@ export default function MealPlanPage() {
         Catalogue filters cannot guarantee allergy safety. For medical dietary
         needs, work with a qualified dietitian.
       </p>
+      {!plan && !loading && !errorMsg && (
+        <p className="notice" role="status">
+          Your first meal plan starts here. Choose your preferences, then select
+          Generate 7-Day Plan.
+        </p>
+      )}
       {plan && (
         <div className="space-y-6">
           <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">

@@ -263,6 +263,19 @@ export class MediBudClient {
     return this.request("/v1/chat/capabilities");
   }
 
+  public async getConversationHistory(conversationId: string): Promise<
+    Array<{
+      role: "user" | "assistant";
+      text: string;
+      created_at?: string;
+      response?: ChatResponseDTO;
+    }>
+  > {
+    return this.request(
+      `/v1/conversations/${encodeURIComponent(conversationId)}`,
+    );
+  }
+
   public async chat(data: {
     allow_ai?: boolean;
     allow_fallback?: boolean;

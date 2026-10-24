@@ -17,6 +17,7 @@ def jwks_client(url):
 class AuthenticatedUser(BaseModel):
     user_id: str
     email: Optional[str] = None
+    display_name: Optional[str] = None
     role: str = "authenticated"
 
 
@@ -93,8 +94,11 @@ def verify_token(token: str) -> AuthenticatedUser:
                 },
             )
 
+        metadata = payload.get("user_metadata")
+        name = metadata.get("name") if isinstance(metadata, dict) else None
         return AuthenticatedUser(
             user_id=user_id,
+            display_name=name.strip()[:120] if isinstance(name, str) and name.strip() else None,
             email=payload.get("email"),
             role=payload.get("role", "authenticated"),
         )

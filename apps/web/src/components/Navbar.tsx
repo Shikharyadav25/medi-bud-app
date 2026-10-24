@@ -15,6 +15,7 @@ import {
   X,
   LogOut,
   UserRound,
+  UserPlus,
   WifiOff,
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
@@ -149,15 +150,22 @@ export function Navbar() {
           </span>
           Medi Bud<span className="brand-dot">®</span>
         </Link>
-        <button
-          ref={trigger}
-          aria-label={open ? "Close navigation" : "Open navigation"}
-          aria-expanded={open}
-          aria-controls="app-navigation"
-          onClick={() => setOpen(!open)}
-        >
-          {open ? <X /> : <Menu />}
-        </button>
+        <div className="flex items-center gap-3">
+          {!signedIn && !demo && (
+            <Link href="/signup" className="text-link text-sm font-semibold">
+              Sign up
+            </Link>
+          )}
+          <button
+            ref={trigger}
+            aria-label={open ? "Close navigation" : "Open navigation"}
+            aria-expanded={open}
+            aria-controls="app-navigation"
+            onClick={() => setOpen(!open)}
+          >
+            {open ? <X /> : <Menu />}
+          </button>
+        </div>
       </header>
       <aside
         ref={sidebar}
@@ -225,6 +233,14 @@ export function Navbar() {
               <WifiOff size={15} /> You’re offline. Changes may need a
               connection.
             </p>
+          )}
+          {!signedIn && !demo && (
+            <Link
+              href="/signup"
+              className="primary-button justify-center w-full mb-2"
+            >
+              <UserPlus size={18} /> Create an account
+            </Link>
           )}
           <Link
             href={signedIn || demo ? "/account" : "/login"}

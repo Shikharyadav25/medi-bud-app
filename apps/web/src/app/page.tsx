@@ -30,11 +30,11 @@ export default function HomePage() {
             prepared for your next conversation with a doctor.
           </p>
           <div className="hero-actions">
-            <Link href="/dashboard" className="primary-button">
-              Enter your health space <ArrowRight size={18} />
+            <Link href="/signup" className="primary-button">
+              Create your account <ArrowRight size={18} />
             </Link>
-            <Link href="/reports" className="text-link">
-              Explore reports <ArrowUpRight size={17} />
+            <Link href="/login" className="text-link">
+              Sign in <ArrowUpRight size={17} />
             </Link>
           </div>
           <div className="hero-assurance">

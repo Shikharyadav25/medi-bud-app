@@ -449,11 +449,14 @@ def answer_question(
         }
     except ProviderError as error:
         base["provider_status"] = error.code
-        note = (
-            "External AI is not configured. Add a server-side Gemini or Groq key."
-            if error.code == "unconfigured"
-            else "External AI is temporarily unavailable or could not provide a valid answer. Try again later."
-        )
+        note = {
+            "unconfigured": "External AI is currently unavailable. You can still use your saved app information.",
+            "credentials_rejected": "The AI provider could not authenticate the service. Please contact support; retrying your question will not fix this.",
+            "permission_denied": "The AI provider denied access to the service. Please contact support.",
+            "model_unavailable": "The configured AI model is unavailable. Please contact support.",
+            "rate_limited": "The AI provider is at its usage limit. Please try again later.",
+            "blocked": "The AI provider could not answer this request. Try rephrasing your question.",
+        }.get(error.code, "External AI is temporarily unavailable or could not provide a valid answer. Try again later.")
         base["answer"] = (
             note
             + "\n\n"

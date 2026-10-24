@@ -72,7 +72,7 @@ function ChatContent() {
         setProviderNote(
           capabilities.gemini_configured || capabilities.groq_configured
             ? `Text AI configured: ${capabilities.primary}. Provider availability is checked when you send.`
-            : "General AI is not configured. Add GEMINI_API_KEY or GROQ_API_KEY on the server. Saved app facts still work without a key.",
+            : "General AI is currently unavailable. You can still ask about your saved app information.",
         );
       })
       .catch(() =>
@@ -85,13 +85,54 @@ function ChatContent() {
     {
       id: "welcome-1",
       sender: "assistant",
-      text: "Hi, I’m Medi Bud. Ask about your saved profile, confirmed reports, habits, reminders, meals or plan. For general medical education, enable external AI below; it requires a configured provider key. I’ll say when information is missing. This is not diagnosis or treatment.",
+      text: "Hi, I’m Medi Bud. Ask about your saved profile, confirmed reports, habits, reminders, meals or plan. For general medical education, enable external AI below; your question is then sent to our AI provider. I’ll say when information is missing. This is not diagnosis or treatment.",
       timestamp: new Date().toLocaleTimeString([], {
         hour: "2-digit",
         minute: "2-digit",
       }),
     },
   ]);
+  const [historyLoading, setHistoryLoading] = useState(true);
+  const [historyError, setHistoryError] = useState("");
+  const conversationId = reportIdParam ? `report:${reportIdParam}` : "default";
+  useEffect(() => {
+    let cancelled = false;
+    setHistoryLoading(true);
+    setHistoryError("");
+    apiClient
+      .getConversationHistory(conversationId)
+      .then((history) => {
+        if (cancelled) return;
+        setMessages((previous) => [
+          previous[0],
+          ...history.map((message, index) => ({
+            id: `history-${index}`,
+            sender: message.role,
+            text: message.text,
+            timestamp: message.created_at
+              ? new Date(message.created_at).toLocaleTimeString([], {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })
+              : "Saved conversation",
+            responseMeta:
+              message.role === "assistant" ? message.response : undefined,
+          })),
+        ]);
+      })
+      .catch(() => {
+        if (!cancelled)
+          setHistoryError(
+            "Your saved conversation could not be loaded. Refresh to try again.",
+          );
+      })
+      .finally(() => {
+        if (!cancelled) setHistoryLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [conversationId]);
   const [loading, setLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -100,7 +141,7 @@ function ChatContent() {
   }, [messages]);
 
   const handleSendMessage = async (textToSend: string) => {
-    if (!textToSend.trim() || loading) return;
+    if (!textToSend.trim() || loading || historyLoading) return;
     if (image && !imageConsent) {
       setAttachmentError(
         "Please agree to image processing before sending, or remove the image.",
@@ -153,6 +194,7 @@ function ChatContent() {
       }
       const response = await apiClient.chat({
         query: userMsg.text,
+        conversation_id: conversationId,
         report_id: reportIdParam,
         allow_ai: allowAI,
         allow_fallback: allowFallback,
@@ -171,7 +213,7 @@ function ChatContent() {
       };
       setMessages((prev) => [...prev, assistantMsg]);
     } catch (error) {
-      if (image) setInputQuery(textToSend.trim());
+      setInputQuery(textToSend.trim());
       setMessages((prev) => [
         ...prev,
         {
@@ -213,6 +255,16 @@ function ChatContent() {
         )}
       </div>
 
+      {historyLoading && (
+        <p role="status" className="text-sm">
+          Loading your saved conversation…
+        </p>
+      )}
+      {historyError && (
+        <p role="alert" className="notice">
+          {historyError}
+        </p>
+      )}
       <div
         role="log"
         aria-live="polite"
@@ -441,6 +493,7 @@ function ChatContent() {
           {PRESET_QUERIES.map((preset) => (
             <button
               key={preset}
+              disabled={loading || historyLoading}
               onClick={() => handleSendMessage(preset)}
               className="text-[11px] px-2.5 py-1 rounded-full bg-(--surface) border border-(--border-subtle) text-(--text-secondary) hover:border-(--primary) hover:text-(--primary) whitespace-nowrap transition-colors shrink-0"
             >
@@ -514,7 +567,10 @@ function ChatContent() {
             type="submit"
             aria-label="Send message"
             disabled={
-              loading || !inputQuery.trim() || Boolean(image && !imageConsent)
+              loading ||
+              historyLoading ||
+              !inputQuery.trim() ||
+              Boolean(image && !imageConsent)
             }
             className="p-2.5 rounded-xl bg-(--primary) text-white hover:bg-(--primary-hover) disabled:opacity-50 transition-colors shadow-sm shrink-0"
           >
