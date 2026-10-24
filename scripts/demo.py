@@ -65,6 +65,7 @@ def demo_environment(folder, api_port, enable_ai=False):
             "NEXT_PUBLIC_API_URL": f"http://127.0.0.1:{api_port}",
             "NEXT_PUBLIC_SUPABASE_URL": "",
             "NEXT_PUBLIC_SUPABASE_ANON_KEY": "",
+            "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY": "",
             "NEXT_PUBLIC_DEMO_MODE": "true",
             "NEXT_DIST_DIR": ".next-demo",
             "NEXT_TELEMETRY_DISABLED": "1",

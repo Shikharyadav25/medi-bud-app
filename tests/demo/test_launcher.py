@@ -26,11 +26,13 @@ def test_demo_does_not_inherit_real_keys_or_database(tmp_path, monkeypatch):
     monkeypatch.setenv("GROQ_API_KEY", "not-a-real-key")
     monkeypatch.setenv("SUPABASE_SERVICE_ROLE_KEY", "not-a-real-key")
     monkeypatch.setenv("DATABASE_URL", "postgresql://not-real")
+    monkeypatch.setenv("NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY", "sb_publishable_inherited")
     env = demo.demo_environment(tmp_path, 8001)
     assert env["GEMINI_API_KEY"] == ""
     assert env["GROQ_API_KEY"] == ""
     assert env["SUPABASE_SERVICE_ROLE_KEY"] == ""
     assert env["NEXT_PUBLIC_SUPABASE_ANON_KEY"] == ""
+    assert env["NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY"] == ""
     assert env["DATABASE_URL"] == "sqlite:///" + str(tmp_path / "demo.sqlite3")
     assert env["NEXT_PUBLIC_API_URL"] == "http://127.0.0.1:8001"
     assert env["ENABLE_DEMO_AUTH"] == "true"

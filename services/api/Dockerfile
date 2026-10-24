@@ -9,4 +9,4 @@ COPY ml/intent_pipeline.joblib /app/ml/intent_pipeline.joblib
 USER app
 WORKDIR /app/services/api
 EXPOSE 8000
-CMD ["uvicorn","main:app","--host","0.0.0.0","--port","8000","--no-access-log"]
+CMD ["sh","-c","exec uvicorn main:app --host 0.0.0.0 --port \"${PORT:-8000}\" --no-access-log"]

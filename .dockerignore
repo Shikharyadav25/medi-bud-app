@@ -8,3 +8,8 @@
 **/*.sqlite3*
 **/.expo
 artifacts
+.demo
+.vercel
+.pytest_cache
+tests
+docs

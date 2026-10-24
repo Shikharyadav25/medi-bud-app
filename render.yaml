@@ -1,0 +1,39 @@
+# Import as a Render Blueprint. Secrets are entered in Render, never here.
+# Keep the repository root as Docker context (shared data/ml are required).
+services:
+  - type: web
+    name: medi-bud-api
+    runtime: docker
+    plan: free
+    region: singapore
+    branch: main
+    dockerfilePath: ./services/api/Dockerfile
+    dockerContext: .
+    healthCheckPath: /ready
+    envVars:
+      - key: ENVIRONMENT
+        value: production
+      - key: ENABLE_DEMO_AUTH
+        value: "false"
+      - key: ENABLE_LOCAL_EMBEDDINGS
+        value: "false"
+      - key: SUPABASE_URL
+        value: https://pwmqlsayhdgdequhopbn.supabase.co
+      - key: ALLOWED_ORIGINS
+        value: '["https://medi-bud-app.vercel.app"]'
+      - key: DATABASE_URL
+        sync: false
+      - key: DATA_ENCRYPTION_KEY
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: GEMINI_MODEL
+        value: gemini-2.5-flash
+      - key: CHAT_PROVIDER
+        value: auto
+      - key: RATE_LIMIT_PER_MINUTE
+        value: "60"
+      - key: AI_RATE_LIMIT_PER_MINUTE
+        value: "10"
