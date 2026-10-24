@@ -18,6 +18,7 @@ export default function LoginPage() {
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (loading || !isSupabaseConfigured) return;
     setLoading(true);
     setErrorMsg(null);
     setMessage("");
@@ -27,7 +28,7 @@ export default function LoginPage() {
         if (password !== confirmPassword)
           throw new Error("Passwords do not match.");
         const { data, error } = await supabase.auth.signUp({
-          email,
+          email: email.trim(),
           password,
           options: {
             data: { name: name.trim() },
@@ -42,10 +43,12 @@ export default function LoginPage() {
         setMessage(
           "Check your email to confirm your account, then sign in. If no email arrives, check spam or use Resend confirmation below.",
         );
+        setPassword("");
+        setConfirmPassword("");
         setIsSignUp(false);
       } else {
         const { error } = await supabase.auth.signInWithPassword({
-          email,
+          email: email.trim(),
           password,
         });
         if (error) throw error;
@@ -86,7 +89,10 @@ export default function LoginPage() {
         </div>
 
         {errorMsg && (
-          <div className="p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs">
+          <div
+            role="alert"
+            className="p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs"
+          >
             {errorMsg}
           </div>
         )}
@@ -134,6 +140,7 @@ export default function LoginPage() {
               id="auth-email"
               autoComplete="email"
               required
+              maxLength={254}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="user@example.com"
@@ -202,7 +209,7 @@ export default function LoginPage() {
                 try {
                   const { error } = await supabase.auth.resend({
                     type: "signup",
-                    email,
+                    email: email.trim(),
                     options: {
                       emailRedirectTo:
                         window.location.origin + "/auth/callback",
@@ -234,16 +241,21 @@ export default function LoginPage() {
               onClick={async () => {
                 setLoading(true);
                 setErrorMsg(null);
-                const { error } = await supabase.auth.signInWithOAuth({
-                  provider: "google",
-                  options: {
-                    redirectTo: window.location.origin + "/auth/callback",
-                  },
-                });
-                if (error) {
+                try {
+                  const { error } = await supabase.auth.signInWithOAuth({
+                    provider: "google",
+                    options: {
+                      redirectTo: window.location.origin + "/auth/callback",
+                    },
+                  });
+                  if (error) {
+                    throw error;
+                  }
+                } catch {
                   setErrorMsg(
-                    "Google sign-in could not start. Check provider configuration.",
+                    "Google sign-in could not start. Check provider configuration and try again.",
                   );
+                } finally {
                   setLoading(false);
                 }
               }}
@@ -272,7 +284,14 @@ export default function LoginPage() {
         <div className="text-center pt-2">
           <button
             type="button"
-            onClick={() => setIsSignUp(!isSignUp)}
+            disabled={loading}
+            onClick={() => {
+              setIsSignUp(!isSignUp);
+              setErrorMsg(null);
+              setMessage("");
+              setPassword("");
+              setConfirmPassword("");
+            }}
             className="text-xs text-(--text-secondary) hover:text-(--primary) transition-colors cursor-pointer"
           >
             {isSignUp

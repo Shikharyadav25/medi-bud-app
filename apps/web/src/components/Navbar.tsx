@@ -35,6 +35,8 @@ export function Navbar() {
   const [signedIn, setSignedIn] = useState(false);
   const [demo, setDemo] = useState(false);
   const [online, setOnline] = useState(true);
+  const [logoutError, setLogoutError] = useState("");
+  const [loggingOut, setLoggingOut] = useState(false);
   const [mobile, setMobile] = useState(false);
   const sidebar = useRef<HTMLElement>(null);
   const trigger = useRef<HTMLButtonElement>(null);
@@ -86,7 +88,8 @@ export function Navbar() {
   useEffect(() => {
     void supabase.auth
       .getSession()
-      .then(({ data }) => setSignedIn(Boolean(data.session)));
+      .then(({ data }) => setSignedIn(Boolean(data.session)))
+      .catch(() => setSignedIn(false));
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) =>
@@ -111,17 +114,28 @@ export function Navbar() {
     );
   }, [path]);
   const logout = async () => {
-    await supabase.auth.signOut();
-    localStorage.removeItem("medi_bud_demo_token");
-    localStorage.removeItem("medi_bud_demo_user");
-    setDemo(false);
-    await Promise.all([
-      offlineDb.pendingMutations.clear(),
-      offlineDb.cachedLogs.clear(),
-      offlineDb.cachedProfile.clear(),
-    ]);
-    router.push("/login");
-    router.refresh();
+    setLoggingOut(true);
+    setLogoutError("");
+    try {
+      const { error } = await supabase.auth.signOut({ scope: "local" });
+      if (error) throw error;
+      localStorage.removeItem("medi_bud_demo_token");
+      localStorage.removeItem("medi_bud_demo_user");
+      setDemo(false);
+      await Promise.all([
+        offlineDb.pendingMutations.clear(),
+        offlineDb.cachedLogs.clear(),
+        offlineDb.cachedProfile.clear(),
+      ]);
+      router.push("/login");
+      router.refresh();
+    } catch {
+      setLogoutError(
+        "Sign-out could not finish. Reconnect and try again; your session may still be active.",
+      );
+    } finally {
+      setLoggingOut(false);
+    }
   };
   return (
     <>
@@ -220,10 +234,19 @@ export function Navbar() {
             {signedIn || demo ? "Your account" : "Sign in"}
           </Link>
           {(signedIn || demo) && (
-            <button className="side-link w-full" onClick={logout}>
+            <button
+              className="side-link w-full"
+              disabled={loggingOut}
+              onClick={logout}
+            >
               <LogOut size={18} />
-              Sign out
+              {loggingOut ? "Signing out…" : "Sign out"}
             </button>
+          )}
+          {logoutError && (
+            <p role="alert" className="text-xs text-red-700 p-2">
+              {logoutError}
+            </p>
           )}
           <p className="sidebar-caption">
             A thoughtful companion for your health.

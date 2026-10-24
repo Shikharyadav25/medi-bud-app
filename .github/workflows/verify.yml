@@ -34,6 +34,7 @@ jobs:
       - run: pnpm --filter @medi-bud/mobile exec expo install --check
       - run: pnpm test:contracts
       - run: pnpm test:mobile
+      - run: pnpm test:web
       - run: python -m pytest tests/integration tests/demo -q
       - run: python -m pytest tests/integration -q
         env:

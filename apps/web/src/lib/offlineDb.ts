@@ -98,8 +98,7 @@ export async function replayPendingMutations(): Promise<{
     }
 
     return { synced, conflicts, errors };
-  } catch (error) {
-    console.error("Offline sync replay failed:", error);
+  } catch {
     return { synced: 0, conflicts: 0, errors: pending.length };
   }
 }

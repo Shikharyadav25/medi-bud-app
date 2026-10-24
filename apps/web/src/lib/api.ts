@@ -1,9 +1,8 @@
 import { MediBudClient } from "@medi-bud/api-client";
 import { getCurrentAccessToken } from "@/lib/supabase";
+import { publicConfig } from "./publicConfig";
 
-const apiBaseUrl =
-  process.env.NEXT_PUBLIC_API_URL ||
-  (process.env.NODE_ENV === "production" ? "/api" : "http://127.0.0.1:8000");
+export const apiBaseUrl = publicConfig.apiBaseUrl;
 
 export const apiClient = new MediBudClient({
   baseUrl: apiBaseUrl,

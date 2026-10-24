@@ -11,7 +11,9 @@ Project settings:
 - Install/build settings are versioned in `apps/web/vercel.json`; they use the repository's pinned pnpm 12.8.1 and build shared packages before Next.js.
 - Upload exclusions in `.vercelignore` prevent local environment files, Vercel credentials, SQLite databases, demo data, encryption keys and caches from being uploaded by CLI deployments.
 
-This is a **frontend deployment**, not a completed clinical service launch. Supabase exists according to the owner, but its URL/client settings have not been supplied; configuring it was explicitly deferred. The separate FastAPI API is not hosted or connected. Production has no shared demo authentication, no fictional clinical results, no tunnel to a local service, and no visitor-localhost API fallback. Missing-backend requests return a structured 503; pages show a visible frontend-preview/setup notice.
+As of 24 October 2026, the owner has connected Supabase to this repository and Vercel project. The integration supplies the production project URL, legacy anon key and publishable key. The frontend prefers the publishable key. Supabase project `pwmqlsayhdgdequhopbn` returned HTTP 200 from its public authentication settings endpoint: email signup and email confirmation enabled, Google disabled. Following explicit owner approval, Site URL is `https://medi-bud-app.vercel.app`, with exact allowed redirects `/auth/callback` and `/auth/update-password`. No existing additional redirects were present or removed. Email verification was not disabled.
+
+This remains a **frontend + configured authentication deployment**, not a completed clinical service launch. The separate FastAPI API is not hosted or connected. Production has no shared demo authentication, no fictional clinical results, no tunnel to a local service, and no visitor-localhost API fallback (including export/deletion). Missing-backend requests return a structured 503; the setup notice distinguishes missing authentication from missing health services. Private frontend pages require a session and remount on account changes. Configuration guards reject privileged keys in either public-key variable before a production build can proceed. Server database/password/service-role values added by the integration are not referenced by browser code.
 
 ## Connect services later
 
@@ -21,6 +23,7 @@ In Vercel → `medi-bud-app` → Settings → Environment Variables, set for Pro
 NEXT_PUBLIC_API_URL=https://your-deployed-api-origin
 NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your-project-public-client-key
+# Or use the preferred NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY.
 NEXT_PUBLIC_DEMO_MODE=false
 ```
 

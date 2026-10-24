@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import { publicConfig } from "./src/lib/publicConfig";
 
 const nextConfig: NextConfig = {
   distDir: process.env.NEXT_DIST_DIR || ".next",
@@ -21,11 +22,14 @@ const nextConfig: NextConfig = {
             value:
               "default-src 'self'; script-src 'self' 'unsafe-inline'" +
               (process.env.NODE_ENV === "development" ? " 'unsafe-eval'" : "") +
-              "; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self' https://*.supabase.co " +
-              (process.env.NEXT_PUBLIC_API_URL ||
-                (process.env.NODE_ENV === "development"
-                  ? "http://127.0.0.1:8000"
-                  : "")) +
+              "; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self' " +
+              (publicConfig.authConfigured
+                ? publicConfig.supabaseUrl + " "
+                : "") +
+              (publicConfig.apiConfigured ||
+              process.env.NODE_ENV === "development"
+                ? publicConfig.apiBaseUrl
+                : "") +
               (process.env.NODE_ENV === "development"
                 ? " ws: http://localhost:8000"
                 : "") +
@@ -43,8 +47,9 @@ const nextConfig: NextConfig = {
   ],
   async rewrites() {
     const api =
-      process.env.NEXT_PUBLIC_API_URL ||
-      (process.env.NODE_ENV === "development" ? "http://127.0.0.1:8000" : "");
+      publicConfig.apiConfigured || process.env.NODE_ENV === "development"
+        ? publicConfig.apiBaseUrl
+        : "";
     return {
       beforeFiles: api
         ? [

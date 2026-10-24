@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { UserRound, Download, Trash2, ShieldCheck } from "lucide-react";
-import { apiClient } from "@/lib/api";
+import { apiClient, apiBaseUrl } from "@/lib/api";
 import { supabase, getCurrentAccessToken } from "@/lib/supabase";
 import { offlineDb } from "@/lib/offlineDb";
 
@@ -26,11 +26,10 @@ export default function AccountPage() {
     try {
       const token = await getCurrentAccessToken();
       if (!token) throw new Error("Please sign in first.");
-      const response = await fetch(
-        (process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000") +
-          "/v1/me/export",
-        { headers: { Authorization: "Bearer " + token } },
-      );
+      const response = await fetch(apiBaseUrl + "/v1/me/export", {
+        headers: { Authorization: "Bearer " + token },
+        cache: "no-store",
+      });
       if (!response.ok) throw new Error("Your export could not be prepared.");
       const url = URL.createObjectURL(await response.blob());
       const a = document.createElement("a");
@@ -141,14 +140,11 @@ export default function AccountPage() {
             setBusy(true);
             try {
               const token = await getCurrentAccessToken();
-              const res = await fetch(
-                (process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000") +
-                  "/v1/me",
-                {
-                  method: "DELETE",
-                  headers: { Authorization: "Bearer " + token },
-                },
-              );
+              if (!token) throw new Error("Please sign in first.");
+              const res = await fetch(apiBaseUrl + "/v1/me", {
+                method: "DELETE",
+                headers: { Authorization: "Bearer " + token },
+              });
               if (!res.ok) throw new Error();
               const data = await res.json();
               await supabase.auth.signOut({ scope: "local" });

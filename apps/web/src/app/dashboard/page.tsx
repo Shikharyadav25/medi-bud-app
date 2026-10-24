@@ -28,9 +28,11 @@ export default function DashboardPage() {
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [hasData, setHasData] = useState(false);
   const [entry, setEntry] = useState<"sleep" | "activity" | null>(null);
   const [amount, setAmount] = useState("");
   const load = useCallback(async () => {
+    setLoading(true);
     try {
       const [profile, logs, reps, rems] = await Promise.all([
         apiClient.getProfile(),
@@ -57,6 +59,7 @@ export default function DashboardPage() {
       setSleep(todays.find((l) => l.kind === "sleep")?.value ?? null);
       setReports(reps);
       setReminders(rems);
+      setHasData(true);
       setError("");
     } catch {
       setError(
@@ -108,6 +111,29 @@ export default function DashboardPage() {
       setBusy(false);
     }
   };
+  if (!hasData)
+    return (
+      <section className="panel space-y-3">
+        <h1 className="page-title">Your daily overview</h1>
+        {loading ? (
+          <p role="status">Loading your saved health information…</p>
+        ) : (
+          <>
+            <p role="alert">
+              {error ||
+                "Your health service is unavailable. No saved measurements could be loaded."}
+            </p>
+            <button className="primary-button" onClick={() => void load()}>
+              Retry loading
+            </button>
+            <p>
+              No measurements are shown until they can be loaded from your
+              account.
+            </p>
+          </>
+        )}
+      </section>
+    );
   return (
     <div>
       <div className="page-eyebrow">

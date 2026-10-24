@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { Navbar } from "@/components/Navbar";
+import { AccountBoundary } from "@/components/AccountBoundary";
+import { publicConfig } from "@/lib/publicConfig";
 export const metadata: Metadata = {
   title: "Medi Bud — A little clarity for your health",
   description:
@@ -17,20 +19,21 @@ export default function RootLayout({
         <Navbar />
         <main id="main-content" className="app-main">
           {process.env.NODE_ENV === "production" &&
-            (!process.env.NEXT_PUBLIC_API_URL ||
-              !process.env.NEXT_PUBLIC_SUPABASE_URL ||
-              !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) && (
+            (!publicConfig.apiConfigured || !publicConfig.authConfigured) && (
               <aside
                 role="status"
                 className="mb-6 rounded-xl border border-amber-300 bg-amber-50 p-4 text-sm text-amber-950"
               >
-                <strong>Frontend preview — services not connected.</strong>{" "}
-                Account registration, saved health data and live AI are
-                unavailable until the backend and authentication services are
-                configured. Do not enter real health information here yet.
+                <strong>Setup is not complete.</strong>{" "}
+                {!publicConfig.authConfigured &&
+                  "Account registration and sign-in are not configured. "}
+                {!publicConfig.apiConfigured &&
+                  "Health-data storage, report analysis and live AI need the deployed API. "}
+                Do not enter real health information until the services are
+                connected and validated.
               </aside>
             )}
-          {children}
+          <AccountBoundary>{children}</AccountBoundary>
         </main>
         <footer className="app-footer">
           <span>© 2026 Medi Bud · Care, with clarity.</span>
